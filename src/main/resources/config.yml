@@ -1,0 +1,5 @@
+modules:
+  better-vanilla: true
+  fishing: true
+  painting: true
+  economy: true
