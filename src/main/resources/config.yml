@@ -1,5 +1,10 @@
 modules:
-  better-vanilla: true
-  fishing: true
-  painting: true
-  economy: true
+  bettervanilla:
+    enabled: true
+  fishing:
+    enabled: true
+  painting:
+    enabled: true
+    brush-distance: 16
+  economy:
+    enabled: true

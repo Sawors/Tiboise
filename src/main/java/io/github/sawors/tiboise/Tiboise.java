@@ -1,5 +1,6 @@
 package io.github.sawors.tiboise;
 
+import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.logging.Level;
 
 public final class Tiboise extends JavaPlugin {
@@ -43,7 +45,7 @@ public final class Tiboise extends JavaPlugin {
 
         this.saveDefaultConfig();
 
-
+        registerItem(new MagicStick());
 
 
     }
@@ -68,14 +70,32 @@ public final class Tiboise extends JavaPlugin {
         }
     }
 
+    public static @Nullable ConfigurationSection getModuleSection(ConfigModules module){
+        YamlConfiguration configdata = YamlConfiguration.loadConfiguration(configfile);
+        ConfigurationSection sec = configdata.getConfigurationSection("modules");
+        if(sec != null){
+            return sec.getConfigurationSection(module.toString().toLowerCase(Locale.ROOT));
+        }
+
+        return null;
+    }
+
     private static void loadConfigOptions(){
         YamlConfiguration configdata = YamlConfiguration.loadConfiguration(configfile);
         ConfigurationSection modules = configdata.getConfigurationSection("modules");
         if(modules != null){
-            bettervanilla = modules.getBoolean("better-vanilla");
-            fishing = modules.getBoolean("fishing");
-            painting = modules.getBoolean("painting");
-            economy = modules.getBoolean("economy");
+            for(String module : modules.getKeys(false)){
+                ConfigurationSection modsec = modules.getConfigurationSection(module);
+                if(modsec != null){
+                    boolean enabled = modsec.getBoolean("enabled");
+                    switch (modsec.getName()){
+                        case "bettervanilla" -> {bettervanilla = enabled;}
+                        case "paiting" -> {painting = enabled;}
+                        case "economy" -> {economy = enabled;}
+                        case "fishing" -> {fishing = enabled;}
+                    }
+                }
+            }
         }
     }
 
