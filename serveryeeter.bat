@@ -1,5 +1,5 @@
 
-set source=Tiboise
+set source=%1
 rem ends with \IdeaProjects
 set root=C:\Users\ytsaw\IdeaProjects
 

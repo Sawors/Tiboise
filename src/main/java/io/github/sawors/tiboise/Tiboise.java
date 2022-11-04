@@ -2,6 +2,7 @@ package io.github.sawors.tiboise;
 
 import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -46,7 +47,7 @@ public final class Tiboise extends JavaPlugin {
         this.saveDefaultConfig();
 
         registerItem(new MagicStick());
-
+        getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
 
     }
 
