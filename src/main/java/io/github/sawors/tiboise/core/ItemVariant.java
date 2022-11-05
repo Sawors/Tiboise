@@ -1,4 +1,4 @@
-package io.github.sawors.tiboise.items;
+package io.github.sawors.tiboise.core;
 
 public enum ItemVariant {
     //default

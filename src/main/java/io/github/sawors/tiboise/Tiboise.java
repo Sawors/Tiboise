@@ -1,7 +1,7 @@
 package io.github.sawors.tiboise;
 
 import io.github.sawors.tiboise.items.MagicStick;
-import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.core.TiboiseItem;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -21,9 +21,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.sql.Time;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
+import java.util.*;
 import java.util.logging.Level;
 
 public final class Tiboise extends JavaPlugin {
@@ -33,6 +31,7 @@ public final class Tiboise extends JavaPlugin {
     private static HashMap<String, TiboiseItem> itemmap = new HashMap<>();
     private static HashSet<Integer> registeredlisteners = new HashSet<>();
     // modules
+    private static List<String> enabledmodules = new ArrayList<>();
     private static boolean bettervanilla = true;
     private static boolean fishing = true;
     private static boolean painting = true;
@@ -42,13 +41,14 @@ public final class Tiboise extends JavaPlugin {
     public void onEnable() {
         instance = this;
         // Plugin startup logic
-        configfile = new File(getPlugin().getDataFolder()+"config.yml");
+        configfile = new File(getPlugin().getDataFolder()+ File.separator+"config.yml");
 
         this.saveDefaultConfig();
 
         registerItem(new MagicStick());
         getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
 
+        loadConfigOptions();
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class Tiboise extends JavaPlugin {
         YamlConfiguration configdata = YamlConfiguration.loadConfiguration(configfile);
         ConfigurationSection sec = configdata.getConfigurationSection("modules");
         if(sec != null){
-            return sec.getConfigurationSection(module.toString().toLowerCase(Locale.ROOT));
+            return sec.getConfigurationSection(module.getName());
         }
 
         return null;
@@ -95,6 +95,10 @@ public final class Tiboise extends JavaPlugin {
                         case "economy" -> {economy = enabled;}
                         case "fishing" -> {fishing = enabled;}
                     }
+                    if(enabled){
+                        enabledmodules.add(modsec.getName());
+                        Bukkit.getLogger().log(Level.INFO,ChatColor.GOLD+"[TIBOISE] module ["+modsec.getName()+"] enabled !");
+                    }
                 }
             }
         }
@@ -104,13 +108,13 @@ public final class Tiboise extends JavaPlugin {
         logAdmin(null,msg);
     }
     public static void logAdmin(@Nullable Object title, Object msg){
-
+        String pluginname = getPlugin().getName();
         String inter = "";
         if(title != null && title.toString().length() > 0){
             inter = title+" : ";
         }
 
-        String output = "["+ ChatColor.YELLOW+"DEBUG"+ChatColor.WHITE+"-"+ Time.valueOf(LocalTime.now()) + "] "+inter+msg;
+        String output = "["+ ChatColor.YELLOW+pluginname+" DEBUG"+ChatColor.WHITE+"-"+ Time.valueOf(LocalTime.now()) + "] "+inter+msg;
         Bukkit.getLogger().log(Level.INFO, output);
         for(Player p : Bukkit.getOnlinePlayers()){
             if(p.isOp()){

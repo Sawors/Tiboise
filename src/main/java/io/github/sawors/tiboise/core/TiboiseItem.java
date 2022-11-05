@@ -1,4 +1,4 @@
-package io.github.sawors.tiboise.items;
+package io.github.sawors.tiboise.core;
 
 import io.github.sawors.tiboise.Tiboise;
 import net.kyori.adventure.text.Component;
