@@ -35,7 +35,7 @@ modules:
         color: AQUA
         value: 100
       netherite:
-        color: DARK_PURPLE
+        color: 'DARK_PURPLE'
         value: 500
       netherstar:
         color: IRIDESCENT

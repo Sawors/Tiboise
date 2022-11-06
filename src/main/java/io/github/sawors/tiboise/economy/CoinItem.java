@@ -148,7 +148,7 @@ public class CoinItem extends TiboiseItem implements Listener {
 
     private int getRandomIridescentColor(){
         float h = (float) Math.random();
-        float s = (float) (Math.random()*.2f)+.1f;
+        float s = (float) (Math.random()*.15f)+.5f;
         float b = 1;
         return Color.getHSBColor(h,s,b).getRGB();
     }
