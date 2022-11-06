@@ -20,7 +20,7 @@ modules:
     # concerning coin names : they are NOT case-sensitive, therefore Gold == GoLd == GOLD == gold
     coin-values:
       copper:
-        color: WHITE
+        color: '#B87333'
         value: 1
       iron:
         color: WHITE
@@ -29,10 +29,10 @@ modules:
         color: GOLD
         value: 10
       emerald:
-        color: GOLD
+        color: GREEN
         value: 50
       diamond:
-        color: LIGHT_BLUE
+        color: AQUA
         value: 100
       netherite:
         color: DARK_PURPLE

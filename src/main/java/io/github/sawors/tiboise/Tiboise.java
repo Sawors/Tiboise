@@ -1,7 +1,9 @@
 package io.github.sawors.tiboise;
 
-import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.core.TiboiseItem;
+import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.items.GiveItemCommand;
+import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -45,8 +47,12 @@ public final class Tiboise extends JavaPlugin {
 
         this.saveDefaultConfig();
 
-        registerItem(new MagicStick());
         getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
+        Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
+
+        registerItem(new MagicStick());
+        registerItem(new CoinItem());
+
 
         loadConfigOptions();
     }

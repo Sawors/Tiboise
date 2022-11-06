@@ -3,3 +3,6 @@ version: '${project.version}'
 main: io.github.sawors.tiboise.Tiboise
 api-version: 1.19
 authors: [ Sawors ]
+commands:
+  tgive:
+    usage: </command>

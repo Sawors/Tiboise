@@ -21,7 +21,6 @@ import java.util.*;
 
 public class CoinItem extends TiboiseItem implements Listener {
 
-    private int value = 5;
     private static Map<String, Integer> coinvalues = new HashMap<>();
     private static Map<String, String> coincolors = new HashMap<>();
 
@@ -46,11 +45,16 @@ public class CoinItem extends TiboiseItem implements Listener {
     private void setCoinBaseAttributes(){
         setMaterial(Material.GOLD_NUGGET);
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
+        setCoinIdentifier(UUID.randomUUID());
     }
 
-    private void setCoinValue(int value){
-        this.value = value;
-        this.setLore(List.of(Component.text("\n"+ ChatColor.GRAY+"a coin with a value of "+value).asComponent()));
+    public void setCoinValue(int value){
+        this.setLore(List.of(Component.text(""),Component.text(ChatColor.GRAY+"a coin with a value of "+value).asComponent()));
+        addData(getCoinValueKey(), String.valueOf(value));
+    }
+
+    public void setCoinIdentifier(UUID identifier){
+        this.addData(getCoinIdentifierKey(), identifier.toString());
     }
 
     public void setCoinVariant(String variant){
@@ -85,7 +89,6 @@ public class CoinItem extends TiboiseItem implements Listener {
         String name = null;
         int value = 0;
         String color = "WHITE";
-        ChatColor finalcolor = ChatColor.WHITE;
         int rgb = 0x000000;
 
         if(coinvalues.containsKey(formattedvariant)){
@@ -102,11 +105,10 @@ public class CoinItem extends TiboiseItem implements Listener {
             switch(upcolor){
                 case "IRIDESCENT" -> {
                     char[] chars = (name+" Coin").toCharArray();
-                    result = Component.text("");
+                    result = Component.translatable("");
                     for(char c : chars){
-                        Component coloredletter = Component.text(c);
-                        coloredletter.color(TextColor.color(getRandomIridescentColor()));
-                        result = result.append(coloredletter);
+                        Component coloredletter = Component.translatable(String.valueOf(c));
+                        result = result.append(coloredletter.color(TextColor.color(getRandomIridescentColor())));
                     }
 
                     return result;
@@ -114,10 +116,10 @@ public class CoinItem extends TiboiseItem implements Listener {
                 default -> {rgb = translateColorString(upcolor);}
             }
         } else if(color.contains("0x") || color.contains("#")){
-            rgb = Integer.parseInt(color.replaceFirst("#","").replaceFirst("0x",""));
+            rgb =  Integer.parseInt(color.replaceFirst("#","").replaceFirst("0x",""),16);
         }
 
-        result = Component.text(name+" coin").color(TextColor.color(rgb));
+        result = Component.translatable(name+" Coin").color(TextColor.color(rgb));
 
         return result;
     }
@@ -163,7 +165,7 @@ public class CoinItem extends TiboiseItem implements Listener {
             for(String key : values){
                 ConfigurationSection coinsection = valuesection.getConfigurationSection(key);
                 if(coinsection != null){
-                    int val = coinsection.getInt(key);
+                    int val = coinsection.getInt("value");
                     String color = coinsection.getString("color") != null ? coinsection.getString("color") : "WHITE";
 
                     if(val >= 0){
