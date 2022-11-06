@@ -15,6 +15,9 @@ modules:
     # (custom ones) :
     #   IRIDESCENT
     # alternatively you can use RGB hex color codes : 0xFFFFFF or #FFFFFF
+    # default color is WHITE
+    #
+    # concerning coin names : they are NOT case-sensitive, therefore Gold == GoLd == GOLD == gold
     coin-values:
       copper:
         color: WHITE
