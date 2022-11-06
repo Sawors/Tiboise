@@ -83,7 +83,7 @@ public class TiboiseItem {
         this.id = id;
     }
 
-    public void setLore(ArrayList<Component> lore){
+    public void setLore(List<Component> lore){
         this.lore.addAll(lore);
     }
 
