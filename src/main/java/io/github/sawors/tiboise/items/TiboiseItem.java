@@ -30,6 +30,9 @@ public abstract class TiboiseItem {
     boolean unique;
     Material basematerial;
     HashMap<NamespacedKey, String> additionaldata = new HashMap<>();
+    // just added this in case we need to create items with durability
+    // setting this to true will give the item its durability stat back
+    boolean overwriteunbreakable = false;
 
     public TiboiseItem(){
         String classname = this.getClass().getSimpleName();
@@ -103,13 +106,21 @@ public abstract class TiboiseItem {
         tags.add(type.toString().toLowerCase(Locale.ROOT));
     }
 
+    public void overwriteUnbreakbale(boolean overwrite){
+        this.overwriteunbreakable = overwrite;
+    }
+
     public ItemStack get(){
         ItemStack item = new ItemStack(basematerial);
         ItemMeta meta = item.getItemMeta();
 
         meta.displayName(name);
         meta.lore(lore);
-        meta.setUnbreakable(true);
+        // just to permit items with durability
+        if(!overwriteunbreakable){
+            meta.setUnbreakable(true);
+        }
+        // useless in case we decide to overwrite the unbreakable tag
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         meta.getPersistentDataContainer().set(TiboiseItem.getItemIdKey(), PersistentDataType.STRING, id.toLowerCase(Locale.ROOT));
         StringBuilder typeskey = new StringBuilder();
