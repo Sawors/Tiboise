@@ -3,7 +3,7 @@ package io.github.sawors.tiboise.economy;
 import io.github.sawors.tiboise.ConfigModules;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemTag;
-import io.github.sawors.tiboise.core.TiboiseItem;
+import io.github.sawors.tiboise.items.IdentifiedItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +19,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class CoinItem extends TiboiseItem implements Listener {
+public class CoinItem extends IdentifiedItem implements Listener {
 
     private static Map<String, Integer> coinvalues = new HashMap<>();
     private static Map<String, String> coincolors = new HashMap<>();
@@ -45,16 +45,12 @@ public class CoinItem extends TiboiseItem implements Listener {
     private void setCoinBaseAttributes(){
         setMaterial(Material.GOLD_NUGGET);
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
-        setCoinIdentifier(UUID.randomUUID());
+        setIdentifier(UUID.randomUUID());
     }
 
     public void setCoinValue(int value){
         this.setLore(List.of(Component.text(""),Component.text(ChatColor.GRAY+"a coin with a value of "+value).asComponent()));
         addData(getCoinValueKey(), String.valueOf(value));
-    }
-
-    public void setCoinIdentifier(UUID identifier){
-        this.addData(getCoinIdentifierKey(), identifier.toString());
     }
 
     public void setCoinVariant(String variant){
@@ -79,17 +75,13 @@ public class CoinItem extends TiboiseItem implements Listener {
         return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "value");
     }
 
-    public static NamespacedKey getCoinIdentifierKey(){
-        return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "identifier");
-    }
-
     private Component buildCoinName(String variant){
         Component result = Component.text(ChatColor.DARK_GRAY+"Unknown Coin");
         String formattedvariant = variant.toLowerCase(Locale.ROOT);
         String name = null;
         int value = 0;
         String color = "WHITE";
-        int rgb = 0x000000;
+        int rgb = 0xFFFFFF;
 
         if(coinvalues.containsKey(formattedvariant)){
             value = coinvalues.get(formattedvariant);
@@ -100,7 +92,7 @@ public class CoinItem extends TiboiseItem implements Listener {
 
         name = Character.toUpperCase(formattedvariant.charAt(0))+formattedvariant.substring(1);
 
-        if(StringUtils.isAlphanumeric(color)){
+        if(StringUtils.isAlphanumeric(color.replaceAll("_", ""))){
             String upcolor = color.toUpperCase(Locale.ROOT);
             switch(upcolor){
                 case "IRIDESCENT" -> {

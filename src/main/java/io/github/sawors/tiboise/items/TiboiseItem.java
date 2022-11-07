@@ -1,6 +1,8 @@
-package io.github.sawors.tiboise.core;
+package io.github.sawors.tiboise.items;
 
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.core.ItemTag;
+import io.github.sawors.tiboise.core.ItemVariant;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class TiboiseItem {
+public abstract class TiboiseItem {
 
 
 

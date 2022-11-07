@@ -1,5 +1,7 @@
 package io.github.sawors.tiboise.core;
 
+import io.github.sawors.tiboise.items.TiboiseItem;
+
 public enum ItemVariant {
     //default
     DEFAULT,

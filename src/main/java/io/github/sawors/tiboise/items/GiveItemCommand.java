@@ -20,6 +20,7 @@ public class GiveItemCommand implements CommandExecutor {
                         coin.setCoinVariant(variant);
 
                         p.getInventory().addItem(coin.get());
+                        return true;
                     }
                 }
             }

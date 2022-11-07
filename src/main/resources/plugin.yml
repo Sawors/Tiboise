@@ -5,4 +5,8 @@ api-version: 1.19
 authors: [ Sawors ]
 commands:
   tgive:
-    usage: </command>
+    # used to give Tiboise custom items to the player
+    usage: </command> <itemname>
+  tid:
+    # used to give the unique identifier (as UUID) of the item in hand (if it has one)
+    usage: </command> with an item in hand
