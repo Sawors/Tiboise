@@ -6,6 +6,7 @@ import io.github.sawors.tiboise.core.ItemTag;
 import io.github.sawors.tiboise.items.IdentifiedItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -111,7 +112,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
             rgb =  Integer.parseInt(color.replaceFirst("#","").replaceFirst("0x",""),16);
         }
 
-        result = Component.translatable(name+" Coin").color(TextColor.color(rgb));
+        result = Component.text(name+" Coin").color(TextColor.color(rgb)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
 
         return result;
     }
@@ -140,7 +141,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
 
     private int getRandomIridescentColor(){
         float h = (float) Math.random();
-        float s = (float) (Math.random()*.15f)+.5f;
+        float s = (float) (Math.random()*.10f)+.05f;
         float b = 1;
         return Color.getHSBColor(h,s,b).getRGB();
     }

@@ -3,10 +3,13 @@ package io.github.sawors.tiboise;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.items.GiveItemCommand;
+import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -15,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -49,6 +53,8 @@ public final class Tiboise extends JavaPlugin {
         this.saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
+        getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
+        
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
 
@@ -170,4 +176,47 @@ public final class Tiboise extends JavaPlugin {
     }
 
 
+    public static String getComponentContent(Component component){
+        StringBuilder out = new StringBuilder();
+        String in = component.toString();
+        String ref = "no ref";
+        char[] content = in.toCharArray();
+        if(component instanceof TranslatableComponent){
+            ref = "\"translate\":\"";
+        } else if(component instanceof TextComponent){
+            ref = "\"extra\":\"";
+        }
+    
+        int base = in.indexOf(ref);
+        if(base > -1){
+            for(int i = base+ref.length(); i<content.length+4; i++){
+                char c = content[i];
+                if(c != '\"'){
+                    out.append(content[i]);
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        return out.toString();
+    }
+    
+    public static boolean isCraftingInventory(Inventory inv){
+        InventoryType type = inv.getType();
+        return
+                !(type.equals(InventoryType.CHEST)
+                || type.equals(InventoryType.BARREL)
+                        || type.equals(InventoryType.ANVIL)
+                        || type.equals(InventoryType.BEACON)
+                        || type.equals(InventoryType.CREATIVE)
+                        || type.equals(InventoryType.DISPENSER)
+                        || type.equals(InventoryType.DROPPER)
+                        || type.equals(InventoryType.ENCHANTING)
+                        || type.equals(InventoryType.ENDER_CHEST)
+                        || type.equals(InventoryType.HOPPER)
+                        || type.equals(InventoryType.LECTERN)
+                        || type.equals(InventoryType.PLAYER)
+                        || type.equals(InventoryType.SHULKER_BOX));
+    }
 }
