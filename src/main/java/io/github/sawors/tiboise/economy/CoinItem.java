@@ -95,13 +95,28 @@ public class CoinItem extends IdentifiedItem implements Listener {
             switch(upcolor){
                 case "IRIDESCENT" -> {
                     char[] chars = (name+" Coin").toCharArray();
-                    result = Component.translatable("");
-                    for(char c : chars){
-                        Component coloredletter = Component.translatable(String.valueOf(c));
-                        result = result.append(coloredletter.color(TextColor.color(getRandomIridescentColor())));
+                    result = Component.text("");
+                    int mid = ((name+" Coin").replaceAll(" ","").toCharArray().length-1)/2;
+                    float h = 247f/360;
+                    float b = 1;
+                    float sref = .3f;
+                    float s = 0;
+                    for(int i = 0; i<mid;i++){
+                        Tiboise.logAdmin(s);
+                        result = result.append(Component.text(chars[i]).color(TextColor.color(Color.getHSBColor(h,s,b).getRGB())));
+                        s+=sref/(mid);
+                        s = Math.min(s,sref);
+                    }
+                    result = result.append(Component.text(chars[mid]).color(TextColor.color(0xE5D43B)));
+                    Tiboise.logAdmin("mid");
+                    for(int i = mid+1; i<chars.length;i++){
+                        Tiboise.logAdmin(s);
+                        result = result.append(Component.text(chars[i]).color(TextColor.color(Color.getHSBColor(h,s,b).getRGB())));
+                        s -= sref/(mid);
+                        s = Math.max(0,s);
                     }
 
-                    return result;
+                    return result.decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
                 }
                 default -> {rgb = translateColorString(upcolor);}
             }
@@ -136,12 +151,12 @@ public class CoinItem extends IdentifiedItem implements Listener {
         }
     }
 
-    private int getRandomIridescentColor(){
+    /*private int getRandomIridescentColor(){
         float h = (float) Math.random();
-        float s = (float) (Math.random()*.10f)+.05f;
+        float s = (float) (Math.random()*.15f)+.05f;
         float b = 1;
         return Color.getHSBColor(h,s,b).getRGB();
-    }
+    }*/
 
 
     @EventHandler
