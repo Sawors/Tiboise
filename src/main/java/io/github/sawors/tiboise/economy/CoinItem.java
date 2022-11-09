@@ -7,6 +7,7 @@ import io.github.sawors.tiboise.items.IdentifiedItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -46,7 +47,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
     private void setCoinBaseAttributes(){
         setMaterial(Material.GOLD_NUGGET);
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
-        setIdentifier(UUID.randomUUID());
+        setIdentifier(RandomStringUtils.randomNumeric(6));
     }
 
     public void setCoinValue(int value){
@@ -80,13 +81,9 @@ public class CoinItem extends IdentifiedItem implements Listener {
         Component result = Component.text(ChatColor.DARK_GRAY+"Unknown Coin");
         String formattedvariant = variant.toLowerCase(Locale.ROOT);
         String name = null;
-        int value = 0;
         String color = "WHITE";
         int rgb = 0xFFFFFF;
-
-        if(coinvalues.containsKey(formattedvariant)){
-            value = coinvalues.get(formattedvariant);
-        }
+        
         if(coincolors.containsKey(formattedvariant)){
             color = coincolors.get(formattedvariant);
         }

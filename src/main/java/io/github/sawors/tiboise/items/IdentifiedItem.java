@@ -7,40 +7,32 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
-
 public abstract class IdentifiedItem extends TiboiseItem{
 
-    public void setIdentifier(UUID identifier){
-        this.addData(getIdentifierKey(), identifier.toString());
+    public void setIdentifier(String identifier){
+        this.addData(getIdentifierKey(), identifier);
     }
 
-    public static void setItemIdentifier(ItemStack item, UUID identifier){
+    public static void setItemIdentifier(ItemStack item, String identifier){
         if(item == null){
             return;
         }
         ItemMeta meta = item.getItemMeta();
         if(meta != null){
-            meta.getPersistentDataContainer().set(getIdentifierKey(), PersistentDataType.STRING, identifier.toString());
+            meta.getPersistentDataContainer().set(getIdentifierKey(), PersistentDataType.STRING, identifier);
         }
     }
 
-    public static @Nullable UUID getItemIdentifier(ItemStack item){
+    public static @Nullable String getItemIdentifier(ItemStack item){
         if(item == null){
             return null;
         }
         ItemMeta meta = item.getItemMeta();
-        UUID id = null;
         if(meta != null){
-            String identifier = meta.getPersistentDataContainer().get(getIdentifierKey(), PersistentDataType.STRING);
-            if(identifier != null){
-                try{
-                    id = UUID.fromString(identifier);
-                } catch (IllegalArgumentException ignored){}
-            }
+             return meta.getPersistentDataContainer().get(getIdentifierKey(), PersistentDataType.STRING);
         }
 
-        return id;
+        return null;
     }
 
     public static NamespacedKey getIdentifierKey(){
