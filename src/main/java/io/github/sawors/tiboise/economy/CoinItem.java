@@ -13,15 +13,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.server.ServerLoadEvent;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class CoinItem extends IdentifiedItem implements Listener {
+public class CoinItem extends IdentifiedItem {
 
     private static Map<String, Integer> coinvalues = new HashMap<>();
     private static Map<String, String> coincolors = new HashMap<>();
@@ -158,9 +155,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
         return Color.getHSBColor(h,s,b).getRGB();
     }*/
 
-
-    @EventHandler
-    public static void loadCoinValues(ServerLoadEvent event){
+    public static void loadCoinValues(){
         try{
             ConfigurationSection valuesection = Objects.requireNonNull(Tiboise.getModuleSection(ConfigModules.ECONOMY)).getConfigurationSection("coin-values");
             Set<String> values = Objects.requireNonNull(valuesection).getKeys(false);

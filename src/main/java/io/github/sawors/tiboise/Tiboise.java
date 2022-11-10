@@ -2,6 +2,7 @@ package io.github.sawors.tiboise;
 
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.fishing.FishingManager;
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.MagicStick;
@@ -63,6 +64,16 @@ public final class Tiboise extends JavaPlugin {
 
 
         loadConfigOptions();
+
+        if(economy){
+            CoinItem.loadCoinValues();
+        }
+
+        if(fishing){
+            FishingManager.loadFishVariants();
+            FishingManager.loadLegendaryFishVariants();
+            FishingManager.loadWaterZones();
+        }
     }
 
     @Override
