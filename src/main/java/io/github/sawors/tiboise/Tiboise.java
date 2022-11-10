@@ -70,6 +70,8 @@ public final class Tiboise extends JavaPlugin {
         }
 
         if(fishing){
+
+
             FishingManager.loadFishVariants();
             FishingManager.loadLegendaryFishVariants();
             FishingManager.loadWaterZones();
@@ -213,11 +215,11 @@ public final class Tiboise extends JavaPlugin {
         return out.toString();
     }
     
-    public static boolean isCraftingInventory(Inventory inv){
+    public static boolean isCraftingInventory(Inventory inv) {
         InventoryType type = inv.getType();
         return
                 !(type.equals(InventoryType.CHEST)
-                || type.equals(InventoryType.BARREL)
+                        || type.equals(InventoryType.BARREL)
                         || type.equals(InventoryType.ANVIL)
                         || type.equals(InventoryType.BEACON)
                         || type.equals(InventoryType.CREATIVE)

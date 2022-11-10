@@ -1,0 +1,70 @@
+freshwater:
+  [
+    RIVER,
+    FROZEN_RIVER
+  ]
+ocean:
+  [
+    BEACH,
+    COLD_OCEAN,
+    DEEP_COLD_OCEAN,
+    DEEP_FROZEN_OCEAN,
+    DEEP_LUKEWARM_OCEAN,
+    DEEP_OCEAN,
+    FROZEN_OCEAN,
+    LUKEWARM_OCEAN,
+    OCEAN,
+    SNOWY_BEACH,
+    STONY_SHORE,
+    WARM_OCEAN
+  ]
+swamp:
+  [
+    SWAMP,
+    GROVE,
+    MANGROVE_SWAMP
+  ]
+jungle:
+  [
+    BAMBOO_JUNGLE,
+    JUNGLE,
+    SPARSE_JUNGLE
+  ]
+cold:
+  [
+    COLD_OCEAN,
+    DEEP_COLD_OCEAN,
+    FROZEN_OCEAN,
+    FROZEN_PEAKS,
+    FROZEN_RIVER,
+    ICE_SPIKES,
+    JAGGED_PEAKS,
+    OLD_GROWTH_PINE_TAIGA,
+    OLD_GROWTH_SPRUCE_TAIGA,
+    DEEP_FROZEN_OCEAN,
+    SNOWY_BEACH,
+    SNOWY_PLAINS,
+    SNOWY_SLOPES,
+    SNOWY_TAIGA,
+    STONY_PEAKS,
+    STONY_SHORE,
+    TAIGA
+  ]
+hot:
+  [
+    DESERT,
+    ERODED_BADLANDS,
+    LUKEWARM_OCEAN,
+    SAVANNA,
+    SAVANNA_PLATEAU,
+    WARM_OCEAN,
+    WINDSWEPT_SAVANNA
+  ]
+# by default every unknown biome is "pond", the pond category is for every "junk" fish, it is an undefined category
+pond:
+  [
+
+  ]
+
+# How to sort biomes/fishes ? do we create "categories" and ask our users to stick to them / edit them when they
+#  need more categories or do we use, by default biome names in fish spawn conditions + categories allowed ? <

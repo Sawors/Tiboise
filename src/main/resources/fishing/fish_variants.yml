@@ -1,0 +1,12 @@
+cod:
+  # Spawn rarity is spawn "weight", the bigger the number the more this fish will be spawned,
+  # to calculate the chances for a fish to be spawned we add together all the fish rarities for a certain region, the fish
+  # spawn chance is then his rarity divided by the total
+  spawn-rarity: 20
+  # Biomes where this fish can spawn. You can use spawn categories defined in water_types.yml by putting an exclamation mark
+  # before the category name (for instance the category cold will be !cold)
+  spawn: [PLAINS, !ocean]
+  # The maximum weight this fish can be (positive)
+  weight-max: 1.274
+  # The minimum weight this fish can be (positive)
+  weight-min: 0.456
