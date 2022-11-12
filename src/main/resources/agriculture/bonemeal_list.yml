@@ -1,0 +1,14 @@
+mode: blacklist
+crops:
+  [
+    WHEAT,
+    CARROTS,
+    BEETROOTS,
+    POTATOES,
+    GLOW_BERRIES,
+    BAMBOO,
+    MELON_STEM,
+    PUMPKIN_STEM,
+    COCOA,
+    SWEET_BERRY_BUSH
+  ]

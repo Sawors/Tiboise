@@ -1,10 +1,10 @@
 package io.github.sawors.tiboise;
 
+import io.github.sawors.tiboise.agriculture.CropsManager;
 import io.github.sawors.tiboise.core.QOLImprovements;
 import io.github.sawors.tiboise.core.SpawnManager;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.economy.CoinItem;
-import io.github.sawors.tiboise.fishing.FishingManager;
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.MagicStick;
@@ -59,6 +59,7 @@ public final class Tiboise extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
         getServer().getPluginManager().registerEvents(new SpawnManager(),this);
         getServer().getPluginManager().registerEvents(new QOLImprovements(),this);
+        getServer().getPluginManager().registerEvents(new CropsManager(),this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
@@ -74,12 +75,11 @@ public final class Tiboise extends JavaPlugin {
         }
 
         if(fishing){
-
-
-            FishingManager.loadFishVariants();
-            FishingManager.loadLegendaryFishVariants();
-            FishingManager.loadWaterZones();
+//            FishingManager.loadFishVariants();
+//            FishingManager.loadLegendaryFishVariants();
+//            FishingManager.loadWaterZones();
         }
+        CropsManager.loadBonemealList();
     }
 
     @Override
