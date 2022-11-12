@@ -25,7 +25,7 @@ public class CropsManager implements Listener {
         boolean contains = croplist.contains(event.getBlock().getType().toString());
         if ((blacklistmode && contains) || (!blacklistmode && !contains)) {
             event.setCancelled(true);
-            event.getBlock().getWorld().spawnParticle(Particle.SMOKE_NORMAL,event.getBlock().getLocation().add(.5,2/16f,.5),16,.5,1/16f,.5,0);
+            event.getBlock().getWorld().spawnParticle(Particle.SMOKE_NORMAL,event.getBlock().getLocation().add(.5,2/16f,.5),16,.25,1/16f,.25,0);
         }
     }
     
