@@ -4,6 +4,7 @@ import io.github.sawors.tiboise.ConfigModules;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemTag;
 import io.github.sawors.tiboise.items.IdentifiedItem;
+import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -13,15 +14,24 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class CoinItem extends IdentifiedItem {
+public class CoinItem extends IdentifiedItem implements Listener {
 
     private static Map<String, Integer> coinvalues = new HashMap<>();
     private static Map<String, String> coincolors = new HashMap<>();
+    // UUID : Player, UUID : Item (coin)
+    private static Map<UUID, UUID> coinflippers = new HashMap<>();
 
     public CoinItem() {
         super();
@@ -45,6 +55,7 @@ public class CoinItem extends IdentifiedItem {
         setMaterial(Material.GOLD_NUGGET);
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setIdentifier(RandomStringUtils.randomNumeric(6));
+        setId("coin");
     }
 
     public void setCoinValue(int value){
@@ -67,6 +78,7 @@ public class CoinItem extends IdentifiedItem {
         if(name != null && name.length() > 0 && value >= 0){
             setCoinValue(value);
             setDisplayName(buildCoinName(variant));
+            setVariant(variant.toLowerCase(Locale.ROOT));
         }
     }
 
@@ -179,6 +191,35 @@ public class CoinItem extends IdentifiedItem {
             Tiboise.logAdmin("Finished loading coin values");
         } catch (NullPointerException e){
             e.printStackTrace();
+        }
+    }
+    
+    @EventHandler
+    public static void coinFlip(PlayerDropItemEvent event){
+        ItemStack item = event.getItemDrop().getItemStack();
+        Player p = event.getPlayer();
+        if(p.getLocation().getPitch() <= -80 && TiboiseItem.getItemId(item).equals(new CoinItem().getId())){
+            final UUID coinid = event.getItemDrop().getUniqueId();
+            coinflippers.put(p.getUniqueId(), coinid);
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    if(coinflippers.containsKey(p.getUniqueId()) && coinflippers.get(p.getUniqueId()).equals(coinid)){
+                        coinflippers.remove(p.getUniqueId());
+                    }
+                }
+            }.runTaskLater(Tiboise.getPlugin(), 20*5);
+        }
+    }
+    
+    @EventHandler
+    public static void coinFlipPickup(PlayerAttemptPickupItemEvent event){
+        ItemStack item = event.getItem().getItemStack();
+        Player p = event.getPlayer();
+        if(coinflippers.containsKey(p.getUniqueId()) && TiboiseItem.getItemId(item).equals(new CoinItem().getId())){
+            coinflippers.remove(p.getUniqueId());
+            String result = Math.random() >= .5 ? "Pile" : "Face";
+            p.sendMessage(Component.text("Et... C'est "+result+" !").color(TextColor.color(Color.ORANGE.getRGB())).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE));
         }
     }
 }

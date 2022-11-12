@@ -1,5 +1,7 @@
 package io.github.sawors.tiboise;
 
+import io.github.sawors.tiboise.core.QOLImprovements;
+import io.github.sawors.tiboise.core.SpawnManager;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.fishing.FishingManager;
@@ -55,6 +57,8 @@ public final class Tiboise extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
         getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
+        getServer().getPluginManager().registerEvents(new SpawnManager(),this);
+        getServer().getPluginManager().registerEvents(new QOLImprovements(),this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());

@@ -130,6 +130,7 @@ public abstract class TiboiseItem {
         if(typeskey.toString().endsWith(":")){
             typeskey.deleteCharAt(typeskey.lastIndexOf(":"));
         }
+        meta.getPersistentDataContainer().set(TiboiseItem.getItemVariantKey(), PersistentDataType.STRING, variant.toLowerCase(Locale.ROOT));
         meta.getPersistentDataContainer().set(TiboiseItem.getItemTagsKey(), PersistentDataType.STRING, typeskey.toString().toLowerCase(Locale.ROOT));
         for(Map.Entry<NamespacedKey, String> entry : additionaldata.entrySet()){
             meta.getPersistentDataContainer().set(entry.getKey(), PersistentDataType.STRING,entry.getValue());
