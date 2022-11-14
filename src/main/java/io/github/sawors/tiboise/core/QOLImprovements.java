@@ -204,7 +204,12 @@ public class QOLImprovements implements Listener {
     @EventHandler
     public void onXpSpawn(EntityAddToWorldEvent event){
         if(event.getEntity() instanceof ExperienceOrb){
-            event.getEntity().remove();
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    event.getEntity().remove();
+                }
+            }.runTask(Tiboise.getPlugin());
         }
     }
     

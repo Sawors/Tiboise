@@ -44,23 +44,22 @@ public class SpawnManager implements Listener {
         if(event.getEntity() instanceof Monster m && blockedreasons.contains(event.getSpawnReason())){
             EntityType type = m.getType();
             event.setCancelled(true);
-            if(exceptions.contains(type)){
-                switch (type){
-                    case SPIDER -> {
-                        Location spawnloc = m.getLocation();
-                        if(spawnloc.getY()<=32 || spawnloc.getWorld().getBiome(spawnloc).getKey().getKey().toLowerCase(Locale.ROOT).contains("forest")){
-                            event.setCancelled(false);
+                if(exceptions.contains(type) && Math.random() <= .33){
+                    switch (type){
+                        case SPIDER -> {
+                            Location spawnloc = m.getLocation();
+                            if(spawnloc.getY()<=32 || spawnloc.getWorld().getBiome(spawnloc).getKey().getKey().toLowerCase(Locale.ROOT).contains("forest")){
+                                event.setCancelled(false);
+                            }
                         }
-                    }
-                    case WITCH -> {
-                        if(m.getLocation().getWorld().getMoonPhase().equals(MoonPhase.FULL_MOON)){
-                            event.setCancelled(false);
+                        case WITCH -> {
+                            if(m.getLocation().getWorld().getMoonPhase().equals(MoonPhase.FULL_MOON)){
+                                event.setCancelled(false);
+                            }
                         }
+                        default -> {event.setCancelled(false);}
                     }
-                    default -> {event.setCancelled(false);}
                 }
-            }
-            
         }
     }
 }
