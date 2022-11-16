@@ -12,3 +12,5 @@ commands:
     usage: </command> with an item in hand
   ttest:
     usage: </command> value
+softdepend:
+  - voicechat

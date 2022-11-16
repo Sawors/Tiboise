@@ -1,5 +1,7 @@
 package io.github.sawors.tiboise;
 
+import de.maxhenkel.voicechat.api.BukkitVoicechatService;
+import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
 import io.github.sawors.tiboise.core.ItemVariant;
@@ -8,6 +10,8 @@ import io.github.sawors.tiboise.core.SpawnManager;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
+import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.MagicStick;
@@ -52,6 +56,9 @@ public final class Tiboise extends JavaPlugin {
     private static boolean fishing = true;
     private static boolean painting = true;
     private static boolean economy = true;
+    // integrations
+    private static boolean vcenabled = false;
+    private static VoicechatPlugin vcplugin = null;
 
     @Override
     public void onEnable() {
@@ -60,7 +67,15 @@ public final class Tiboise extends JavaPlugin {
         configfile = new File(getPlugin().getDataFolder()+ File.separator+"config.yml");
 
         this.saveDefaultConfig();
-
+        loadConfigOptions();
+        BukkitVoicechatService vcservice = getServer().getServicesManager().load(BukkitVoicechatService.class);
+        vcenabled = vcservice != null;
+        if(vcenabled){
+            vcplugin = new VoiceChatIntegrationPlugin();
+            vcservice.registerPlugin(vcplugin);
+            logAdmin("Simple Voice Chat plugin detected, integration enabled");
+        }
+        
         getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
         getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
         getServer().getPluginManager().registerEvents(new SpawnManager(),this);
@@ -73,12 +88,20 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
 
         registerItem(new MagicStick());
-        registerItem(new CoinItem());
         registerItem(new Hammer());
         registerItem(new Excavator());
+        if(isModuleEnabled(ConfigModules.ECONOMY)){
+            registerItem(new CoinItem());
+        }
+        if(isVoiceChatEnabled()){
+            registerItem(new PortableRadio());
+        }
 
 
-        loadConfigOptions();
+       
+    
+        
+        
 
         if(economy){
             CoinItem.loadCoinValues();
@@ -95,6 +118,9 @@ public final class Tiboise extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        if (vcplugin != null) {
+            getServer().getServicesManager().unregister(vcplugin);
+        }
     }
 
 
@@ -185,7 +211,6 @@ public final class Tiboise extends JavaPlugin {
                         getEventListeners(getRegistrationClass(entry.getKey())).registerAll(entry.getValue());
                     }
                     */
-                    logAdmin("Listener found : "+method.getName());
                     Class<? extends Event> itemclass = method.getParameters()[0].getType().asSubclass(Event.class);
 
                     getServer().getPluginManager().registerEvent(itemclass, listener, method.getAnnotation(EventHandler.class).priority(), EventExecutor.create(method, itemclass),getPlugin());
@@ -265,6 +290,10 @@ public final class Tiboise extends JavaPlugin {
         }
         
         return otp.toString();
+    }
+    
+    public static boolean isVoiceChatEnabled(){
+        return vcenabled;
     }
     
 }
