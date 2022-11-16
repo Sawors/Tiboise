@@ -62,6 +62,10 @@ public class CoinItem extends IdentifiedItem implements Listener {
         this.setLore(List.of(Component.text(""),Component.text(ChatColor.GRAY+"a coin with a value of "+value).asComponent()));
         addData(getCoinValueKey(), String.valueOf(value));
     }
+    
+    public static int getCoinValue(String name){
+        return coinvalues.get(name);
+    }
 
     public void setCoinVariant(String variant){
         int value = -1;
@@ -103,7 +107,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
             String upcolor = color.toUpperCase(Locale.ROOT);
             switch(upcolor){
                 case "IRIDESCENT" -> {
-                    char[] chars = (name+" Coin").toCharArray();
+                    /*char[] chars = (name+" Coin").toCharArray();
                     result = Component.text("");
                     int mid = ((name+" Coin").replaceAll(" ","").toCharArray().length-1)/2;
                     float h = 247f/360;
@@ -111,7 +115,6 @@ public class CoinItem extends IdentifiedItem implements Listener {
                     float sref = .3f;
                     float s = 0;
                     for(int i = 0; i<mid;i++){
-                        Tiboise.logAdmin(s);
                         result = result.append(Component.text(chars[i]).color(TextColor.color(Color.getHSBColor(h,s,b).getRGB())));
                         s+=sref/(mid);
                         s = Math.min(s,sref);
@@ -124,7 +127,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
                         s -= sref/(mid);
                         s = Math.max(0,s);
                     }
-
+*/
                     return result.decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
                 }
                 default -> {rgb = translateColorString(upcolor);}
@@ -221,5 +224,34 @@ public class CoinItem extends IdentifiedItem implements Listener {
             String result = Math.random() >= .5 ? "Pile" : "Face";
             p.sendMessage(Component.text("Et... C'est "+result+" !").color(TextColor.color(Color.ORANGE.getRGB())).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE));
         }
+    }
+    
+    public static List<ItemStack> getCoinsForValue(int value){
+        List<ItemStack> resultarray = new ArrayList<>();
+        int remainder = value;
+        Map<Integer, String> reversecoinvalues = new HashMap<>();
+        coinvalues.forEach((coinname, val) -> {reversecoinvalues.put(val,coinname);});
+        ArrayList<Integer> orderedcoins = new ArrayList<>(reversecoinvalues.keySet());
+        // ASCENDING order
+        if(orderedcoins.size() >= 1){
+            Collections.sort(orderedcoins);
+            int smallestcoin = orderedcoins.get(0);
+            int biggestcoin = orderedcoins.get(orderedcoins.size()-1);
+            int index = orderedcoins.size()-1;
+            while(remainder >= smallestcoin){
+                if(remainder - orderedcoins.get(index) >= 0){
+                    resultarray.add(new CoinItem(reversecoinvalues.get(orderedcoins.get(index))).get());
+                    remainder-=orderedcoins.get(index);
+                } else {
+                    if(index-1 >= 0){
+                        index -= 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return resultarray;
     }
 }

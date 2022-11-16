@@ -10,3 +10,5 @@ commands:
   tid:
     # used to give the unique identifier (as UUID) of the item in hand (if it has one)
     usage: </command> with an item in hand
+  ttest:
+    usage: </command> value

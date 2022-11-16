@@ -1,14 +1,19 @@
 package io.github.sawors.tiboise;
 
+import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
+import io.github.sawors.tiboise.core.ItemVariant;
 import io.github.sawors.tiboise.core.QOLImprovements;
 import io.github.sawors.tiboise.core.SpawnManager;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
+import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.items.tools.Excavator;
+import io.github.sawors.tiboise.items.tools.Hammer;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -23,6 +28,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -60,12 +66,16 @@ public final class Tiboise extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SpawnManager(),this);
         getServer().getPluginManager().registerEvents(new QOLImprovements(),this);
         getServer().getPluginManager().registerEvents(new CropsManager(),this);
+        getServer().getPluginManager().registerEvents(new AnimalsManager(), this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
+        Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
 
         registerItem(new MagicStick());
         registerItem(new CoinItem());
+        registerItem(new Hammer());
+        registerItem(new Excavator());
 
 
         loadConfigOptions();
@@ -156,7 +166,13 @@ public final class Tiboise extends JavaPlugin {
 
     private void registerItem(TiboiseItem item){
         itemmap.put(item.getId(), item);
-
+    
+        Recipe defaultrecipe = item.getRecipe();
+        if(defaultrecipe != null) Bukkit.addRecipe(defaultrecipe);
+        for(ItemVariant var : item.getPossibleVariants()){
+            Recipe variantrecipe = item.getRecipe(var);
+            if(variantrecipe != null) Bukkit.addRecipe(variantrecipe);
+        }
 
         if(item instanceof Listener listener){
             for(Method method : listener.getClass().getMethods()){
@@ -236,4 +252,19 @@ public final class Tiboise extends JavaPlugin {
                         || type.equals(InventoryType.PLAYER)
                         || type.equals(InventoryType.SHULKER_BOX));
     }
+    
+    public static String getUpperCamelCase(String text){
+        StringBuilder otp = new StringBuilder();
+        String[] subs = text.split(" ");
+        for(int i = 0; i<subs.length; i++){
+            String s = subs[i];
+            otp.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1));
+            if(i<subs.length-1){
+                otp.append(" ");
+            }
+        }
+        
+        return otp.toString();
+    }
+    
 }

@@ -44,11 +44,11 @@ public class SpawnManager implements Listener {
         if(event.getEntity() instanceof Monster m && blockedreasons.contains(event.getSpawnReason())){
             EntityType type = m.getType();
             event.setCancelled(true);
-                if(exceptions.contains(type) && Math.random() <= .33){
+                if(exceptions.contains(type) && Math.random() <= .1){
                     switch (type){
                         case SPIDER -> {
                             Location spawnloc = m.getLocation();
-                            if(spawnloc.getY()<=32 || spawnloc.getWorld().getBiome(spawnloc).getKey().getKey().toLowerCase(Locale.ROOT).contains("forest")){
+                            if(spawnloc.getY()<=32 || spawnloc.getWorld().getBiome(spawnloc).getKey().getKey().toLowerCase(Locale.ROOT).contains("forest") && Math.random() < .1){
                                 event.setCancelled(false);
                             }
                         }

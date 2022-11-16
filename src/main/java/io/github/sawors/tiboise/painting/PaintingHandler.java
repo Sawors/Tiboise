@@ -1,24 +1,22 @@
 package io.github.sawors.tiboise.painting;
 
-import io.github.sawors.tiboise.ConfigModules;
 import io.github.sawors.tiboise.Tiboise;
-import org.bukkit.*;
 import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
-import org.bukkit.map.MinecraftFont;
 import org.bukkit.util.BoundingBox;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +33,6 @@ public class PaintingHandler implements Listener {
     
         Entity e = event.getRightClicked();
     
-        Tiboise.logAdmin("interact entity");
         // TOTEST
         //  CHECK if this correctly works for the ray tracing method and the collisions calculator
         //  CHECK if the collision point is correctly defined and if we can spawn particles at it, later we'll have to

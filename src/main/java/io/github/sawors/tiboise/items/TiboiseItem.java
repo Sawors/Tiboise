@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -32,7 +33,7 @@ public abstract class TiboiseItem {
     HashMap<NamespacedKey, String> additionaldata = new HashMap<>();
     // just added this in case we need to create items with durability
     // setting this to true will give the item its durability stat back
-    boolean overwriteunbreakable = false;
+    boolean overwriteunbreakable = true;
 
     public TiboiseItem(){
         String classname = this.getClass().getSimpleName();
@@ -243,6 +244,20 @@ public abstract class TiboiseItem {
         }
 
         return nameformated.toString();
+    }
+    
+    public @Nullable Recipe getRecipe(){
+        return null;
+    }
+    
+    public @Nullable Recipe getRecipe(ItemVariant variant){
+        return null;
+    }
+    
+    public List<ItemVariant> getPossibleVariants(){
+        return List.of(
+                ItemVariant.DEFAULT
+        );
     }
 
 }

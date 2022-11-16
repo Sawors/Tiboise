@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.core;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Tiboise;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -19,16 +20,16 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class QOLImprovements implements Listener {
     
@@ -212,6 +213,10 @@ public class QOLImprovements implements Listener {
             }.runTask(Tiboise.getPlugin());
         }
     }
+    @EventHandler
+    public static void removeXpEarning(PlayerExpChangeEvent event){
+        event.setAmount(0);
+    }
     
     //
     // SUBTLE LEAVE MESSAGES
@@ -237,5 +242,34 @@ public class QOLImprovements implements Listener {
      */
     public static float randomPitchSimple(){
         return (float) ((new Random().nextDouble() * 0.4) + 0.8);
+    }
+    
+    @EventHandler
+    public static void onLoad(PluginEnableEvent event){
+        if(event.getPlugin().equals(Tiboise.getPlugin())){
+            List<Recipe> vanillabonusrecipes = new ArrayList<>();
+            
+            // SADDLES
+            vanillabonusrecipes.add(
+                    new ShapedRecipe(new NamespacedKey(Key.MINECRAFT_NAMESPACE,new ItemStack(Material.SADDLE).getType().toString().toLowerCase(Locale.ROOT)), new ItemStack(Material.SADDLE)).shape(
+                            "LLL",
+                            "SXS"
+                    )
+                    .setIngredient('X', Material.AIR)
+                    .setIngredient('L', Material.LEATHER)
+                    .setIngredient('S', Material.STRING)
+            );
+            // NAME TAGS
+            vanillabonusrecipes.add(
+                    new ShapelessRecipe(new NamespacedKey(Key.MINECRAFT_NAMESPACE,new ItemStack(Material.NAME_TAG).getType().toString().toLowerCase(Locale.ROOT)), new ItemStack(Material.NAME_TAG))
+                    .addIngredient(Material.GOLD_NUGGET)
+                    .addIngredient(Material.PAPER)
+            );
+            
+            
+            for(Recipe r : vanillabonusrecipes){
+                Bukkit.addRecipe(r);
+            }
+        }
     }
 }
