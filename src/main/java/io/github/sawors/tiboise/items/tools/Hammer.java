@@ -58,7 +58,7 @@ public class Hammer extends RadiusBreakingTool implements Listener {
     public static void onPlayerDestroyBlock(BlockBreakEvent event){
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         Block target = event.getBlock();
-        if(target.isValidTool(item) && TiboiseItem.getItemId(item).equals(new Hammer().getId())){
+        if(target.isValidTool(item) && TiboiseItem.getItemId(item).equals(new Hammer().getId()) && !event.getPlayer().isSneaking()){
             radiusBreak(RadiusType.SQUARE,1,event.getBlock(), Objects.requireNonNull(event.getPlayer().getTargetBlockFace(8)),event.getPlayer().getInventory().getItemInMainHand(),durabilitymultiplier);
         }
     }
