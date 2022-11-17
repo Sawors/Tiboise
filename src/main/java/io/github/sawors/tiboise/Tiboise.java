@@ -6,6 +6,7 @@ import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
 import io.github.sawors.tiboise.core.ItemVariant;
 import io.github.sawors.tiboise.core.QOLImprovements;
+import io.github.sawors.tiboise.core.ResourcePackManager;
 import io.github.sawors.tiboise.core.SpawnManager;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.core.commands.TTestCommand;
@@ -82,6 +83,7 @@ public final class Tiboise extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new QOLImprovements(),this);
         getServer().getPluginManager().registerEvents(new CropsManager(),this);
         getServer().getPluginManager().registerEvents(new AnimalsManager(), this);
+        getServer().getPluginManager().registerEvents(new ResourcePackManager(), this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
