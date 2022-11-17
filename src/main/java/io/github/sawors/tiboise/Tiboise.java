@@ -46,7 +46,6 @@ import java.util.*;
 import java.util.logging.Level;
 
 public final class Tiboise extends JavaPlugin {
-
     private static File configfile = null;
     private static JavaPlugin instance = null;
     private static HashMap<String, TiboiseItem> itemmap = new HashMap<>();
