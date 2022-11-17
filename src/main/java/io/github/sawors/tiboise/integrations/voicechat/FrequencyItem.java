@@ -27,7 +27,6 @@ public class FrequencyItem extends TiboiseItem {
         int frequ = 0;
         if(item.hasItemMeta()){
             Integer d = item.getItemMeta().getPersistentDataContainer().get(getFrequencyKey(), PersistentDataType.INTEGER);
-            Tiboise.logAdmin(d);
             if(d != null){
                 frequ = d;
             }

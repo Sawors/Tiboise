@@ -4,6 +4,7 @@ import io.papermc.paper.world.MoonPhase;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
+import org.bukkit.entity.Warden;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -41,6 +42,9 @@ public class SpawnManager implements Listener {
     
     @EventHandler
     public static void preventMobSpawn(CreatureSpawnEvent event){
+        if(event.getEntity() instanceof Warden){
+            return;
+        }
         if(event.getEntity() instanceof Monster m && blockedreasons.contains(event.getSpawnReason())){
             EntityType type = m.getType();
             event.setCancelled(true);

@@ -6,15 +6,16 @@ import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,8 @@ public class PortableRadio extends FrequencyItem implements Listener {
     private Set<UUID> radiocache = new HashSet<>();
     // player UUID lifetime in the radio cache, in seconds
     private static final double cacheduration= 1;
+    private static final int frequmax = 462900;
+    private static final int frequmin = 462000;
     
     public PortableRadio(){
         setMaterial(Material.AMETHYST_SHARD);
@@ -41,11 +44,15 @@ public class PortableRadio extends FrequencyItem implements Listener {
     public static List<Component> getLoreBuild(int frequency){
         return List.of(
                 Component.text(""),
-                Component.text(ChatColor.DARK_GRAY+"Frequency : "+getFrequencyDisplay(frequency)+"Mhz")
+                Component.text(ChatColor.DARK_GRAY+"Frequency : "+getFrequencyDisplay(frequency)+"MHz")
         );
     }
     
     public void copySendPacket(MicrophonePacketEvent event){
+        
+        if(Bukkit.getOnlinePlayers().size() <= 1){
+            return;
+        }
         
         // The connection might be null if the event is caused by other means
         if (event.getSenderConnection() == null) {
@@ -61,17 +68,20 @@ public class PortableRadio extends FrequencyItem implements Listener {
         if(emitter == null){
             return;
         }
-        double frequency = FrequencyItem.getItemFrequency(emitter);
+        int frequency = FrequencyItem.getItemFrequency(emitter);
         
         VoicechatServerApi api = event.getVoicechat();
+        
+        Location emitloc = player.getLocation();
+        int maxdistance = Bukkit.getServer().getViewDistance()*2*16;
     
         //OpusDecoder decoder = api.createDecoder();
         // Iterating over every player on the server
         for (Player onlineplayer : Bukkit.getServer().getOnlinePlayers()) {
             // Don't send the audio to the player that is broadcasting
-            /*if (onlineplayer.getUniqueId().equals(player.getUniqueId())) {
+            if (onlineplayer.getUniqueId().equals(player.getUniqueId())) {
                 continue;
-            }*/
+            }
             ItemStack receiver = TiboiseItem.getItemId(onlineplayer.getInventory().getItemInMainHand()).equals(new PortableRadio().getId()) ? onlineplayer.getInventory().getItemInMainHand() : TiboiseItem.getItemId(onlineplayer.getInventory().getItemInOffHand()).equals(new PortableRadio().getId()) ? onlineplayer.getInventory().getItemInOffHand() : null;
             boolean transmit = false;
             if(radiocache.contains(onlineplayer.getUniqueId())){
@@ -92,6 +102,9 @@ public class PortableRadio extends FrequencyItem implements Listener {
                 }
             }
             if(transmit){
+                if(onlineplayer.getLocation().distance(emitloc) > maxdistance){
+                    continue;
+                }
                 VoicechatConnection connection = api.getConnectionOf(onlineplayer.getUniqueId());
                 // Check if the player is actually connected to the voice chat
                 if (connection == null) {
@@ -111,13 +124,31 @@ public class PortableRadio extends FrequencyItem implements Listener {
     
     @EventHandler
     public static void editFrequencyEvent(PlayerInteractEvent event){
-        ItemStack radio = event.getItem();
+        ItemStack radio = event.getPlayer().getInventory().getItemInMainHand();
         int newfrequency;
-        if(radio != null && TiboiseItem.getItemId(radio).equals(new PortableRadio().getId())){
-            newfrequency = (Math.min(Math.max(462000,FrequencyItem.getItemFrequency(radio)+(event.getAction().isRightClick() ? -10 : 10)),462900));
+        if(TiboiseItem.getItemId(radio).equals(new PortableRadio().getId())){
+            newfrequency = (Math.min(Math.max(frequmin,FrequencyItem.getItemFrequency(radio)+(event.getAction().isLeftClick() ? -10 : 10)),frequmax));
             setItemFrequency(radio, newfrequency);
             radio.lore(getLoreBuild(newfrequency));
-            event.getPlayer().sendActionBar(Component.text("Radio Frequency : "+ChatColor.YELLOW+getFrequencyDisplay(newfrequency)+"Mhz"));
+            event.getPlayer().sendActionBar(Component.text("Radio Frequency : "+ChatColor.YELLOW+getFrequencyDisplay(newfrequency)+"MHz"));
+            
+            event.getPlayer().playSound(event.getPlayer().getLocation(),Sound.BLOCK_NOTE_BLOCK_HAT,.5f,event.getAction().isLeftClick() ? .8f : 1);
         }
+    }
+    
+    @Override
+    public @Nullable Recipe getRecipe() {
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Tiboise.getPlugin(),getId()),new PortableRadio().get());
+        recipe.shape(
+                "XLX",
+                "CAC",
+                "XRX"
+        );
+        recipe.setIngredient('C', Material.COPPER_INGOT);
+        recipe.setIngredient('A', Material.AMETHYST_SHARD);
+        recipe.setIngredient('R', Material.REDSTONE);
+        recipe.setIngredient('L', Material.LIGHTNING_ROD);
+        recipe.setIngredient('X', Material.AIR);
+        return recipe;
     }
 }
