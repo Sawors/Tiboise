@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -20,27 +21,27 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class PortableRadio extends FrequencyItem {
+public class PortableRadio extends FrequencyItem implements Listener {
     
     private Set<UUID> radiocache = new HashSet<>();
     // player UUID lifetime in the radio cache, in seconds
-    private static final double cacheduration= 4;
+    private static final double cacheduration= 1;
     
     public PortableRadio(){
         setMaterial(Material.AMETHYST_SHARD);
-        setFrequency(462.5);
+        setFrequency(462000);
     }
     
     @Override
-    public void setFrequency(double frequency) {
+    public void setFrequency(int frequency) {
         super.setFrequency(frequency);
         setLore(getLoreBuild(frequency));
     }
     
-    public static List<Component> getLoreBuild(double frequency){
+    public static List<Component> getLoreBuild(int frequency){
         return List.of(
                 Component.text(""),
-                Component.text("Frequency : "+getFrequencyDisplay(frequency)+"Mhz")
+                Component.text(ChatColor.DARK_GRAY+"Frequency : "+getFrequencyDisplay(frequency)+"Mhz")
         );
     }
     
@@ -108,13 +109,12 @@ public class PortableRadio extends FrequencyItem {
         //decoder.close();
     }
     
-    
     @EventHandler
-    public static void editFrequency(PlayerInteractEvent event){
+    public static void editFrequencyEvent(PlayerInteractEvent event){
         ItemStack radio = event.getItem();
-        double newfrequency;
+        int newfrequency;
         if(radio != null && TiboiseItem.getItemId(radio).equals(new PortableRadio().getId())){
-            newfrequency = Math.min(Math.max(462.0,FrequencyItem.getItemFrequency(radio) + (event.getAction().isRightClick() ? .1 : -.1)),462.9);
+            newfrequency = (Math.min(Math.max(462000,FrequencyItem.getItemFrequency(radio)+(event.getAction().isRightClick() ? -10 : 10)),462900));
             setItemFrequency(radio, newfrequency);
             radio.lore(getLoreBuild(newfrequency));
             event.getPlayer().sendActionBar(Component.text("Radio Frequency : "+ChatColor.YELLOW+getFrequencyDisplay(newfrequency)+"Mhz"));

@@ -4,27 +4,30 @@ import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 public class FrequencyItem extends TiboiseItem {
-    double frequency = 462.6;
+    // IMPORTANT : Frequencies are multiplied by 1000, so 462.6 is here 462600
+    private int frequency = 462600;
     
     
-    public void setFrequency(double frequency){
+    public void setFrequency(int frequency){
         this.frequency = frequency;
     }
-    public double getFrequency(){
+    public int getFrequency(){
         return frequency;
     }
     
-    public static String getFrequencyDisplay(double frequency){
-        return String.format("%,.1f",frequency);
+    public static String getFrequencyDisplay(int frequency){
+        return String.format("%,.2f",frequency/1000f);
     }
     
-    public static double getItemFrequency(ItemStack item){
-        double frequ = 0;
+    public static int getItemFrequency(ItemStack item){
+        int frequ = 0;
         if(item.hasItemMeta()){
-            Double d = item.getItemMeta().getPersistentDataContainer().get(getFrequencyKey(), PersistentDataType.DOUBLE);
+            Integer d = item.getItemMeta().getPersistentDataContainer().get(getFrequencyKey(), PersistentDataType.INTEGER);
+            Tiboise.logAdmin(d);
             if(d != null){
                 frequ = d;
             }
@@ -32,15 +35,27 @@ public class FrequencyItem extends TiboiseItem {
         return frequ;
     }
     
-    public static void setItemFrequency(ItemStack item, double frequency){
+    public static void setItemFrequency(ItemStack item, int frequency){
         if(item.hasItemMeta()){
-            item.getItemMeta().getPersistentDataContainer().set(getFrequencyKey(), PersistentDataType.DOUBLE,frequency);
+            ItemMeta m  = item.getItemMeta();
+            m.getPersistentDataContainer().set(getFrequencyKey(), PersistentDataType.INTEGER,frequency);
+            item.setItemMeta(m);
         }
     }
     
+    @Override
+    public ItemStack get() {
+        ItemStack i = super.get();
+        ItemMeta m  = i.getItemMeta();
+        m.getPersistentDataContainer().set(getFrequencyKey(), PersistentDataType.INTEGER,getFrequency());
+        i.setItemMeta(m);
+        return i;
+    }
     
     
-    private static NamespacedKey getFrequencyKey(){
+    protected static NamespacedKey getFrequencyKey(){
         return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "radio-frequency");
     }
+    
+    
 }
