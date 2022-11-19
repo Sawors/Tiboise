@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.core;
 
-import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.Main;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -17,11 +17,11 @@ public class ResourcePackManager implements Listener {
     
     @EventHandler
     public static void sendResourcePack(PlayerJoinEvent event){
-        if(!Tiboise.isServerInTestMode()){
+        if(!Main.isServerInTestMode()){
             try(InputStream in = new URL(hashfile).openStream(); Scanner hashread = new Scanner(in)){
                 event.getPlayer().setResourcePack("https://github.com/Sawors/Tiboise/raw/master/src/main/resources/resourcepack/Tiboise-1.19.2.zip",hashread.next(),true);
             }catch (IOException e){
-                Tiboise.logAdmin("Can't pass ResourcePack to players, malformed hash file URL");
+                Main.logAdmin("Can't pass ResourcePack to players, malformed hash file URL");
             }
         }
         

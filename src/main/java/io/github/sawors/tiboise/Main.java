@@ -10,6 +10,7 @@ import io.github.sawors.tiboise.core.ResourcePackManager;
 import io.github.sawors.tiboise.core.SpawnManager;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.core.commands.TTestCommand;
+import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
@@ -41,13 +42,14 @@ import org.bukkit.scoreboard.Team;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Time;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.logging.Level;
 
-public final class Tiboise extends JavaPlugin {
+public final class Main extends JavaPlugin {
     private static File configfile = null;
     private static JavaPlugin instance = null;
     private static HashMap<String, TiboiseItem> itemmap = new HashMap<>();
@@ -63,6 +65,8 @@ public final class Tiboise extends JavaPlugin {
     // integrations
     private static boolean vcenabled = false;
     private static VoicechatPlugin vcplugin = null;
+    // database
+    private static File dbfile;
 
     @Override
     public void onEnable() {
@@ -79,6 +83,17 @@ public final class Tiboise extends JavaPlugin {
             vcservice.registerPlugin(vcplugin);
             logAdmin("Simple Voice Chat plugin detected, integration enabled");
         }
+    
+        dbfile = new File(getPlugin().getDataFolder()+File.separator+"database.db");
+        try{
+            Main.logAdmin("Database located at "+dbfile);
+            dbfile.createNewFile();
+        } catch (
+                IOException e){
+            e.printStackTrace();
+            Main.logAdmin("database creation failed, could not access the file");
+        }
+        DatabaseLink.connectInit();
         
         getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
         getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
@@ -315,6 +330,10 @@ public final class Tiboise extends JavaPlugin {
     
     public static void addPlayerToInvisibleNametagTeam(Player p){
         t.addEntities(p);
+    }
+    
+    public static File getDbFile(){
+        return dbfile;
     }
     
 }

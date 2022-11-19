@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.items.tools;
 
-import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.core.ItemVariant;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
@@ -39,7 +39,7 @@ public class Hammer extends RadiusBreakingTool implements Listener {
     public void setVariant(String variant) {
         super.setVariant(variant);
         String varname = variant.toLowerCase(Locale.ROOT);
-        setDisplayName(Component.text(Tiboise.getUpperCamelCase(Character.toUpperCase(varname.charAt(0))+varname.substring(1)+" "+getId())).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        setDisplayName(Component.text(Main.getUpperCamelCase(Character.toUpperCase(varname.charAt(0))+varname.substring(1)+" "+getId())).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         try{
             switch (ItemVariant.valueOf(variant.toUpperCase(Locale.ROOT))){
                 case STONE -> {setMaterial(Material.STONE_PICKAXE);}
@@ -69,7 +69,7 @@ public class Hammer extends RadiusBreakingTool implements Listener {
             return null;
         }
         
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Tiboise.getPlugin(),variant.toString().toLowerCase(Locale.ROOT)+"_"+getId()),new Hammer(variant).get());
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Main.getPlugin(),variant.toString().toLowerCase(Locale.ROOT)+"_"+getId()),new Hammer(variant).get());
         recipe.shape(
                 "MMM",
                 "MMM",

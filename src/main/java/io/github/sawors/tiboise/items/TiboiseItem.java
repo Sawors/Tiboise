@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.items;
 
-import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.core.ItemTag;
 import io.github.sawors.tiboise.core.ItemVariant;
 import net.kyori.adventure.text.Component;
@@ -170,15 +170,15 @@ public abstract class TiboiseItem {
     }
 
     public static NamespacedKey getItemIdKey(){
-        return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "id");
+        return new NamespacedKey((Main.getPlugin(Main.class)), "id");
     }
 
     public static NamespacedKey getItemTagsKey(){
-        return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "tags");
+        return new NamespacedKey((Main.getPlugin(Main.class)), "tags");
     }
 
     public static NamespacedKey getItemVariantKey(){
-        return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "variant");
+        return new NamespacedKey((Main.getPlugin(Main.class)), "variant");
     }
 
     public static String getItemId(ItemStack item){

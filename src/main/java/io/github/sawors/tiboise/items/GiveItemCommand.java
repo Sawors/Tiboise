@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.items;
 
-import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.Main;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,10 +14,10 @@ public class GiveItemCommand implements CommandExecutor {
             TiboiseItem item = null;
             if(args.length >= 2){
                 String variant = args[1];
-                item = Tiboise.getRegisteredItem(args[0]);
+                item = Main.getRegisteredItem(args[0]);
                 item.setVariant(variant);
             } else {
-                item = Tiboise.getRegisteredItem(args[0]);
+                item = Main.getRegisteredItem(args[0]);
             }
             if(item != null){
                 p.getInventory().addItem(item.get());

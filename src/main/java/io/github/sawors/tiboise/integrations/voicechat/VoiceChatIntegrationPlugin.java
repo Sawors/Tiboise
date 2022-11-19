@@ -4,7 +4,7 @@ import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
-import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.Main;
 
 public class VoiceChatIntegrationPlugin implements VoicechatPlugin {
     
@@ -13,7 +13,7 @@ public class VoiceChatIntegrationPlugin implements VoicechatPlugin {
      */
     @Override
     public String getPluginId() {
-        return Tiboise.getPlugin().getName();
+        return Main.getPlugin().getName();
     }
     
     /**

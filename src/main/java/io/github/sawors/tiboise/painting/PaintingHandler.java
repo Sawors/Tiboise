@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.painting;
 
-import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.Main;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -58,7 +58,7 @@ public class PaintingHandler implements Listener {
         ItemStack mapitem =  frame.getItem();
         MapMeta meta = (MapMeta) mapitem.getItemMeta();
         MapView mapview = meta.getMapView();
-        Tiboise.logAdmin("frame");
+        Main.logAdmin("frame");
         BoundingBox sourcebox = frame.getBoundingBox();
         BoundingBox canvasbox = sourcebox.clone();
     
@@ -96,13 +96,13 @@ public class PaintingHandler implements Listener {
             Location origin = source.getEyeLocation().add(viewline.clone().normalize().multiply(distance-.25));
             double stepvalue = 1/32f;
             Vector stepvector = viewline.clone().normalize().multiply(stepvalue);
-            Tiboise.logAdmin("mapview");
+            Main.logAdmin("mapview");
             for(double i = 0; i<=.5; i+= stepvalue){
                 Location checkloc = origin.add(stepvector);
-                Tiboise.logAdmin("checking "+checkloc.getX()+" "+checkloc.getY()+" "+checkloc.getZ());
+                Main.logAdmin("checking "+checkloc.getX()+" "+checkloc.getY()+" "+checkloc.getZ());
                 if(canvasbox.contains(checkloc.getX(),checkloc.getY(),checkloc.getZ())){
                     collide = checkloc;
-                    Tiboise.logAdmin("collide found (last check)");
+                    Main.logAdmin("collide found (last check)");
                     break;
                 }
             }
