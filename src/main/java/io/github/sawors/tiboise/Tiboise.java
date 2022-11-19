@@ -50,6 +50,7 @@ public final class Tiboise extends JavaPlugin {
     private static JavaPlugin instance = null;
     private static HashMap<String, TiboiseItem> itemmap = new HashMap<>();
     private static HashSet<Integer> registeredlisteners = new HashSet<>();
+    private static boolean testmode = false;
     // modules
     private static List<String> enabledmodules = new ArrayList<>();
     private static boolean bettervanilla = true;
@@ -152,6 +153,7 @@ public final class Tiboise extends JavaPlugin {
     private static void loadConfigOptions(){
         YamlConfiguration configdata = YamlConfiguration.loadConfiguration(configfile);
         ConfigurationSection modules = configdata.getConfigurationSection("modules");
+        testmode = configdata.getBoolean("test-mode");
         if(modules != null){
             for(String module : modules.getKeys(false)){
                 ConfigurationSection modsec = modules.getConfigurationSection(module);
@@ -295,6 +297,10 @@ public final class Tiboise extends JavaPlugin {
     
     public static boolean isVoiceChatEnabled(){
         return vcenabled;
+    }
+    
+    public static boolean isServerInTestMode(){
+        return testmode;
     }
     
 }

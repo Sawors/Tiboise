@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Chain;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -22,12 +23,10 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -236,14 +235,9 @@ public class QOLImprovements implements Listener {
         }
     }
     
-    /**
-     * Used to apply some subtle random pitch variations to a sound
-     * @return      a random pitch between 0.8 and 1.2 (float)
-     */
-    public static float randomPitchSimple(){
-        return (float) ((new Random().nextDouble() * 0.4) + 0.8);
-    }
-    
+    //
+    // MORE VANILLA RECIPE
+    //
     @EventHandler
     public static void onLoad(PluginEnableEvent event){
         if(event.getPlugin().equals(Tiboise.getPlugin())){
@@ -265,11 +259,120 @@ public class QOLImprovements implements Listener {
                     .addIngredient(Material.GOLD_NUGGET)
                     .addIngredient(Material.PAPER)
             );
-            
+            // MAKE GOLD ITEM ENCHANTED BY DEFAULT
+            List<Material> goldtoedit = List.of(Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, Material.GOLDEN_AXE, Material.GOLDEN_SWORD);
+            for (Material mat : goldtoedit){
+                Map<Enchantment, Integer> enchantmap = new HashMap<>();
+                switch (mat){
+                    case GOLDEN_HOE, GOLDEN_PICKAXE, GOLDEN_SHOVEL -> enchantmap.put(Enchantment.SILK_TOUCH,1);
+                    case GOLDEN_SWORD, GOLDEN_AXE -> enchantmap.put(Enchantment.LOOT_BONUS_MOBS,2);
+                }
+                for(Recipe r : Bukkit.getRecipesFor(new ItemStack(mat))){
+                    if(r instanceof ShapedRecipe sr){
+                        ItemStack ref = sr.getResult();
+                        try{
+                            // Adding unsafely here just to allow putting looting on axes
+                            ref.addUnsafeEnchantments(enchantmap);
+                        } catch (IllegalArgumentException e){
+                            Tiboise.logAdmin("ERROR", ref.getType()+" CANNOT HAVE ENCHANTEMENT SPECIFIED");
+                        }
+                        Bukkit.removeRecipe(sr.getKey());
+                        ShapedRecipe ench = new ShapedRecipe(sr.getKey(),ref);
+                        ench.setGroup(sr.getGroup());
+                        ench.shape(sr.getShape());
+                        for(Map.Entry<Character, RecipeChoice> entry : sr.getChoiceMap().entrySet()){
+                            ench.setIngredient(entry.getKey(),entry.getValue());
+                        }
+                        Bukkit.addRecipe(ench);
+                    }
+                }
+            }
             
             for(Recipe r : vanillabonusrecipes){
-                Bukkit.addRecipe(r);
+                try{
+                    Bukkit.addRecipe(r);
+                }catch (IllegalStateException e){
+                    Tiboise.logAdmin("ERROR", "Error in adding recipe for "+r.getResult().getType());
+                }
+            }
+    
+            // CRAFT FOR SPRUCE GLASS DOOR
+            // cast to Keyed, not clean but should not break in future updates
+            for(Recipe r : Bukkit.getRecipesFor(new ItemStack(Material.WARPED_DOOR))){
+                if(r instanceof ShapedRecipe kd){
+                    NamespacedKey key = kd.getKey();
+                    ShapedRecipe doorcraft = new ShapedRecipe(key, new ItemStack(Material.WARPED_DOOR));
+                    doorcraft.shape("WW","WG","WW")
+                            .setIngredient('W',Material.SPRUCE_PLANKS)
+                            .setIngredient('G', Material.GLASS_PANE)
+                            .setGroup(kd.getGroup());
+                    Bukkit.removeRecipe(key);
+                    Bukkit.addRecipe(doorcraft);
+                }
+            }
+            // CRAFT FOR SPRUCE GLASS TRAPDOOR
+            // cast to Keyed, not clean but should not break in future updates
+            for(Recipe r : Bukkit.getRecipesFor(new ItemStack(Material.WARPED_TRAPDOOR))){
+                if(r instanceof ShapedRecipe kd){
+                    NamespacedKey key = kd.getKey();
+                    ShapedRecipe doorcraft = new ShapedRecipe(key, new ItemStack(Material.WARPED_TRAPDOOR));
+                    doorcraft.shape("WGW","WWW")
+                            .setIngredient('W',Material.SPRUCE_PLANKS)
+                            .setIngredient('G', Material.GLASS_PANE)
+                            .setGroup(kd.getGroup());
+                    Bukkit.removeRecipe(key);
+                    Bukkit.addRecipe(doorcraft);
+                }
+            }
+            // CRAFT FOR OAK GLASS DOOR
+            // cast to Keyed, not clean but should not break in future updates
+            for(Recipe r : Bukkit.getRecipesFor(new ItemStack(Material.CRIMSON_DOOR))){
+                if(r instanceof ShapedRecipe kd){
+                    NamespacedKey key = kd.getKey();
+                    ShapedRecipe doorcraft = new ShapedRecipe(key, new ItemStack(Material.CRIMSON_DOOR));
+                    doorcraft.shape("WW","WG","WW")
+                            .setIngredient('W',Material.OAK_PLANKS)
+                            .setIngredient('G', Material.GLASS_PANE)
+                            .setGroup(kd.getGroup());
+                    Bukkit.removeRecipe(key);
+                    Bukkit.addRecipe(doorcraft);
+                }
+            }
+            // CRAFT FOR OAK GLASS TRAPDOOR
+            // cast to Keyed, not clean but should not break in future updates
+            for(Recipe r : Bukkit.getRecipesFor(new ItemStack(Material.CRIMSON_TRAPDOOR))){
+                if(r instanceof ShapedRecipe kd){
+                    NamespacedKey key = kd.getKey();
+                    ShapedRecipe doorcraft = new ShapedRecipe(key, new ItemStack(Material.CRIMSON_TRAPDOOR));
+                    doorcraft.shape("WGW","WWW")
+                            .setIngredient('W',Material.OAK_PLANKS)
+                            .setIngredient('G', Material.GLASS_PANE)
+                            .setGroup(kd.getGroup());
+                    Bukkit.removeRecipe(key);
+                    Bukkit.addRecipe(doorcraft);
+                }
             }
         }
+    }
+    
+    @EventHandler
+    public static void addRecipeOnJoin(PlayerJoinEvent event){
+        Player p = event.getPlayer();
+        for (@NotNull Iterator<Recipe> it = Bukkit.recipeIterator(); it.hasNext(); ) {
+            Recipe r = it.next();
+            if(r instanceof Keyed k && !p.hasDiscoveredRecipe(k.getKey())){
+                p.discoverRecipe(k.getKey());
+            }
+            
+        }
+    }
+    
+    
+    /**
+     * Used to apply some subtle random pitch variations to a sound
+     * @return      a random pitch between 0.8 and 1.2 (float)
+     */
+    public static float randomPitchSimple(){
+        return (float) ((new Random().nextDouble() * 0.4) + 0.8);
     }
 }
