@@ -1,6 +1,6 @@
 name: Tiboise
 version: '${project.version}'
-main: io.github.sawors.tiboise.Tiboise
+main: io.github.sawors.tiboise.Main
 api-version: 1.19
 authors: [ Sawors ]
 commands:
@@ -11,6 +11,11 @@ commands:
     # used to give the unique identifier (as UUID) of the item in hand (if it has one)
     usage: </command> with an item in hand
   ttest:
-    usage: </command> value
+    usage: </command> <action> <target>
+  tiboise:
+    aliases:
+      - tb
+      - t
+    usage: 7
 softdepend:
   - voicechat

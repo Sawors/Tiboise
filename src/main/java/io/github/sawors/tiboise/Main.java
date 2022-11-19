@@ -10,6 +10,7 @@ import io.github.sawors.tiboise.core.ResourcePackManager;
 import io.github.sawors.tiboise.core.SpawnManager;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.core.commands.TTestCommand;
+import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
@@ -95,6 +96,8 @@ public final class Main extends JavaPlugin {
         }
         DatabaseLink.connectInit();
         
+        ResourcePackManager.reloadPackData();
+        
         getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
         getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
         getServer().getPluginManager().registerEvents(new SpawnManager(),this);
@@ -106,6 +109,9 @@ public final class Main extends JavaPlugin {
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
         Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
+        TiboiseMainCommand maincommand = new TiboiseMainCommand();
+        Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setExecutor(maincommand);
+        Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setTabCompleter(maincommand);
 
         registerItem(new MagicStick());
         registerItem(new Hammer());
