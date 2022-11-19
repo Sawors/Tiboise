@@ -356,7 +356,7 @@ public class QOLImprovements implements Listener {
     }
     
     @EventHandler
-    public static void addRecipeOnJoin(PlayerJoinEvent event){
+    public static void onPlayerJoin(PlayerJoinEvent event){
         Player p = event.getPlayer();
         for (@NotNull Iterator<Recipe> it = Bukkit.recipeIterator(); it.hasNext(); ) {
             Recipe r = it.next();
@@ -365,6 +365,9 @@ public class QOLImprovements implements Listener {
             }
             
         }
+        
+        // add the player to the team
+        Tiboise.addPlayerToInvisibleNametagTeam(p);
     }
     
     

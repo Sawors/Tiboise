@@ -36,6 +36,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -51,6 +53,7 @@ public final class Tiboise extends JavaPlugin {
     private static HashMap<String, TiboiseItem> itemmap = new HashMap<>();
     private static HashSet<Integer> registeredlisteners = new HashSet<>();
     private static boolean testmode = false;
+    private static Team t;
     // modules
     private static List<String> enabledmodules = new ArrayList<>();
     private static boolean bettervanilla = true;
@@ -98,8 +101,15 @@ public final class Tiboise extends JavaPlugin {
         if(isVoiceChatEnabled()){
             registerItem(new PortableRadio());
         }
-
-
+    
+        // made so player nametags disappear, TODO add a config option to control this
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        t = scoreboard.getTeam("hide_name");
+        if(t == null){
+            t = scoreboard.registerNewTeam("hide_name");
+            t.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+            t.setCanSeeFriendlyInvisibles(false);
+        }
        
     
         
@@ -301,6 +311,10 @@ public final class Tiboise extends JavaPlugin {
     
     public static boolean isServerInTestMode(){
         return testmode;
+    }
+    
+    public static void addPlayerToInvisibleNametagTeam(Player p){
+        t.addEntities(p);
     }
     
 }
