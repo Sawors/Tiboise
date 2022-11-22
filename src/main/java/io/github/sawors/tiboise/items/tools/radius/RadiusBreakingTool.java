@@ -1,4 +1,4 @@
-package io.github.sawors.tiboise.items.tools;
+package io.github.sawors.tiboise.items.tools.radius;
 
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Location;

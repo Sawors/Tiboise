@@ -1,4 +1,4 @@
-package io.github.sawors.tiboise.items.tools;
+package io.github.sawors.tiboise.items.tools.radius;
 
 import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.core.ItemVariant;
@@ -21,17 +21,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class Excavator extends RadiusBreakingTool implements Listener {
+public class Hammer extends RadiusBreakingTool implements Listener {
     
-    private static final double durabilitymultiplier = 1.75;
+    private static final double durabilitymultiplier = 2;
     
     /**
      * NEVER USE THIS ALONE IF IT IS TO CREATE AN ITEM
      */
-    public Excavator(){
+    public Hammer(){
     }
     
-    public Excavator(ItemVariant variant){
+    public Hammer(ItemVariant variant){
         setVariant(variant.toString());
     }
     
@@ -42,15 +42,15 @@ public class Excavator extends RadiusBreakingTool implements Listener {
         setDisplayName(Component.text(Main.getUpperCamelCase(Character.toUpperCase(varname.charAt(0))+varname.substring(1)+" "+getId())).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         try{
             switch (ItemVariant.valueOf(variant.toUpperCase(Locale.ROOT))){
-                case STONE -> {setMaterial(Material.STONE_SHOVEL);}
-                case WOOD -> {setMaterial(Material.WOODEN_SHOVEL);}
-                case IRON -> {setMaterial(Material.IRON_SHOVEL);}
-                case GOLD -> {setMaterial(Material.GOLDEN_SHOVEL);}
-                case DIAMOND -> {setMaterial(Material.DIAMOND_SHOVEL);}
-                case NETHERITE, STEEL -> {setMaterial(Material.NETHERITE_SHOVEL);}
+                case STONE -> {setMaterial(Material.STONE_PICKAXE);}
+                case WOOD -> {setMaterial(Material.WOODEN_PICKAXE);}
+                case IRON -> {setMaterial(Material.IRON_PICKAXE);}
+                case GOLD -> {setMaterial(Material.GOLDEN_PICKAXE);}
+                case DIAMOND -> {setMaterial(Material.DIAMOND_PICKAXE);}
+                case NETHERITE, STEEL -> {setMaterial(Material.NETHERITE_PICKAXE);}
             }
         } catch (IllegalArgumentException e){
-            setMaterial(Material.WOODEN_SHOVEL);
+            setMaterial(Material.WOODEN_PICKAXE);
         }
     }
     
@@ -58,7 +58,7 @@ public class Excavator extends RadiusBreakingTool implements Listener {
     public static void onPlayerDestroyBlock(BlockBreakEvent event){
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         Block target = event.getBlock();
-        if(target.isValidTool(item) && TiboiseItem.getItemId(item).equals(new Excavator().getId()) && !event.getPlayer().isSneaking()){
+        if(target.isValidTool(item) && TiboiseItem.getItemId(item).equals(new Hammer().getId()) && !event.getPlayer().isSneaking()){
             radiusBreak(RadiusType.SQUARE,1,event.getBlock(), Objects.requireNonNull(event.getPlayer().getTargetBlockFace(8)),event.getPlayer().getInventory().getItemInMainHand(),durabilitymultiplier);
         }
     }
@@ -69,10 +69,10 @@ public class Excavator extends RadiusBreakingTool implements Listener {
             return null;
         }
         
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Main.getPlugin(),variant.toString().toLowerCase(Locale.ROOT)+"_"+getId()),new Excavator(variant).get());
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Main.getPlugin(),variant.toString().toLowerCase(Locale.ROOT)+"_"+getId()),new Hammer(variant).get());
         recipe.shape(
                 "MMM",
-                "MSM",
+                "MMM",
                 "XSX"
         );
         

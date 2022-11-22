@@ -19,8 +19,9 @@ import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.items.TiboiseItem;
-import io.github.sawors.tiboise.items.tools.Excavator;
-import io.github.sawors.tiboise.items.tools.Hammer;
+import io.github.sawors.tiboise.items.tools.radius.Excavator;
+import io.github.sawors.tiboise.items.tools.radius.Hammer;
+import io.github.sawors.tiboise.items.tools.tree.BroadAxe;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -116,6 +117,7 @@ public final class Main extends JavaPlugin {
         registerItem(new MagicStick());
         registerItem(new Hammer());
         registerItem(new Excavator());
+        registerItem(new BroadAxe());
         if(isModuleEnabled(ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
         }
