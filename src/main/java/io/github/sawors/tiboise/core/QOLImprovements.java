@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.core;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -87,7 +88,9 @@ public class QOLImprovements implements Listener {
     public void onPlayerOpenDoor(PlayerInteractEvent event){
         Block b = event.getClickedBlock();
         if(b != null && b.getBlockData() instanceof Door door && event.getAction().isRightClick()){
-            //event.setCancelled(true);
+            if(door.getMaterial().equals(Material.IRON_DOOR)){
+                return;
+            }
             
             
             
@@ -264,12 +267,17 @@ public class QOLImprovements implements Listener {
             for (Material mat : goldtoedit){
                 Map<Enchantment, Integer> enchantmap = new HashMap<>();
                 switch (mat){
-                    case GOLDEN_HOE, GOLDEN_PICKAXE, GOLDEN_SHOVEL -> enchantmap.put(Enchantment.SILK_TOUCH,1);
+                    case GOLDEN_HOE, GOLDEN_SHOVEL -> enchantmap.put(Enchantment.SILK_TOUCH,1);
                     case GOLDEN_SWORD, GOLDEN_AXE -> enchantmap.put(Enchantment.LOOT_BONUS_MOBS,2);
+                    case GOLDEN_PICKAXE -> enchantmap.put(Enchantment.LOOT_BONUS_BLOCKS,2);
                 }
                 for(Recipe r : Bukkit.getRecipesFor(new ItemStack(mat))){
                     if(r instanceof ShapedRecipe sr){
                         ItemStack ref = sr.getResult();
+                        if(TiboiseItem.getItemId(ref).contains("_hammer")){
+                            enchantmap.clear();
+                            enchantmap.put(Enchantment.SILK_TOUCH,1);
+                        }
                         try{
                             // Adding unsafely here just to allow putting looting on axes
                             ref.addUnsafeEnchantments(enchantmap);

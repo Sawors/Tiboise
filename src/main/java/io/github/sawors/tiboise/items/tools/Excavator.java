@@ -99,7 +99,6 @@ public class Excavator extends RadiusBreakingTool implements Listener {
     @Override
     public List<ItemVariant> getPossibleVariants(){
         return List.of(
-                ItemVariant.WOOD,
                 ItemVariant.STONE,
                 ItemVariant.IRON,
                 ItemVariant.GOLD,
