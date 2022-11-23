@@ -39,7 +39,8 @@ public class Excavator extends RadiusBreakingTool implements Listener {
     public void setVariant(String variant) {
         super.setVariant(variant);
         String varname = variant.toLowerCase(Locale.ROOT);
-        setDisplayName(Component.text(Main.getUpperCamelCase(Character.toUpperCase(varname.charAt(0))+varname.substring(1)+" "+getId())).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        String append = variant.equalsIgnoreCase("gold") || variant.equalsIgnoreCase("wood") ? "en" : "";
+        setDisplayName(Component.text(Main.getUpperCamelCase(Character.toUpperCase(varname.charAt(0))+varname.substring(1)+append+" "+getId())).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         try{
             switch (ItemVariant.valueOf(variant.toUpperCase(Locale.ROOT))){
                 case STONE -> {setMaterial(Material.STONE_SHOVEL);}
