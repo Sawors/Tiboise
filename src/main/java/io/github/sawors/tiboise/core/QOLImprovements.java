@@ -5,6 +5,7 @@ import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -222,19 +223,21 @@ public class QOLImprovements implements Listener {
     
     //
     // SUBTLE LEAVE MESSAGES
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGH)
     public void onLeave(PlayerQuitEvent event){
         if(event.quitMessage() != null){
-            event.quitMessage(Component.text(ChatColor.GRAY+"← "+event.getPlayer().getName()));
+            event.quitMessage(Component.text("← ").append(event.getPlayer().displayName()).color(TextColor.color(Color.GRAY.asRGB())));
+            //
+            //
         }
     }
     
     //
     // SUBTLE JOIN MESSAGES
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGH)
     public void onJoin(PlayerJoinEvent event){
         if(event.joinMessage() != null){
-            event.joinMessage(Component.text(ChatColor.GRAY+"→ "+event.getPlayer().getName()));
+            event.joinMessage(Component.text("→ ").append(event.getPlayer().displayName()).color(TextColor.color(Color.GRAY.asRGB())));
         }
     }
     
@@ -275,6 +278,10 @@ public class QOLImprovements implements Listener {
                     if(r instanceof ShapedRecipe sr){
                         ItemStack ref = sr.getResult();
                         if(TiboiseItem.getItemId(ref).contains("_hammer")){
+                            enchantmap.clear();
+                            enchantmap.put(Enchantment.SILK_TOUCH,1);
+                        }
+                        if(TiboiseItem.getItemId(ref).contains("_broadaxe")){
                             enchantmap.clear();
                             enchantmap.put(Enchantment.SILK_TOUCH,1);
                         }
@@ -363,7 +370,7 @@ public class QOLImprovements implements Listener {
         }
     }
     
-    @EventHandler
+    @EventHandler (priority = EventPriority.LOW)
     public static void onPlayerJoin(PlayerJoinEvent event){
         Player p = event.getPlayer();
         for (@NotNull Iterator<Recipe> it = Bukkit.recipeIterator(); it.hasNext(); ) {
@@ -376,6 +383,19 @@ public class QOLImprovements implements Listener {
         
         // add the player to the team
         Main.addPlayerToInvisibleNametagTeam(p);
+        
+        // rename. TODO : merge this with the nickname mechanic
+        String name = null;
+        switch(p.getUniqueId().toString()){
+            case "66e25a14-b468-4cb1-8cde-6cf6054255ba" -> name = "Gros Orteil de Pied";
+            case "30b80f6f-f0dc-4b4a-96b2-c37b28494b1b" -> name = "MOLE1283";
+            case "6864eb4a-91d6-4292-8dfb-f398cbd5dc57" -> name = "Walid Bedouin";
+        }
+        if(name != null){
+            Component compname = Component.text(name);
+            p.displayName(compname);
+            p.playerListName(compname);
+        }
     }
     
     

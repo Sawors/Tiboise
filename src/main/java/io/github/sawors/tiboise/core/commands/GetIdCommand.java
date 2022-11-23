@@ -18,7 +18,7 @@ public class GetIdCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if(sender instanceof Player p){
             ItemStack item = p.getInventory().getItemInMainHand();
-            String itemidentifier = IdentifiedItem.getItemIdentifier(item);
+            String itemidentifier = IdentifiedItem.getItemId(item);
             if(item.getType().equals(Material.STICK)){
                 Entity e = p.getTargetEntity(8);
                 if(e instanceof ArmorStand am){

@@ -13,6 +13,8 @@ import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
+import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
 import io.github.sawors.tiboise.items.GiveItemCommand;
@@ -21,7 +23,7 @@ import io.github.sawors.tiboise.items.MagicStick;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
-import io.github.sawors.tiboise.items.tools.tree.BroadAxe;
+import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -67,6 +69,7 @@ public final class Main extends JavaPlugin {
     // integrations
     private static boolean vcenabled = false;
     private static VoicechatPlugin vcplugin = null;
+    private static boolean usebungee = false;
     // database
     private static File dbfile;
 
@@ -85,6 +88,20 @@ public final class Main extends JavaPlugin {
             vcservice.registerPlugin(vcplugin);
             logAdmin("Simple Voice Chat plugin detected, integration enabled");
         }
+    
+        try{
+            getServer().getMessenger().registerOutgoingPluginChannel(getPlugin(), getBungeeChannel());
+            getServer().getMessenger().registerIncomingPluginChannel(this, getBungeeChannel(), new BungeeListener());
+            usebungee = true;
+        } catch (IllegalArgumentException e){
+            logAdmin("BungeeCord features disables, BungeeCord not found");
+            usebungee = false;
+        }
+    
+        //getServer().getMessenger().registerOutgoingPluginChannel(getPlugin(), getVanillaRebootChannel());
+        //getServer().getMessenger().registerIncomingPluginChannel(this, getVanillaRebootChannel(), new BungeeListener());
+    
+        logAdmin( "BungeeCord features enabled !");
     
         dbfile = new File(getPlugin().getDataFolder()+File.separator+"database.db");
         try{
@@ -110,6 +127,7 @@ public final class Main extends JavaPlugin {
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
         Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
+        Objects.requireNonNull(getServer().getPluginCommand("kidnap")).setExecutor(new KidnapCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setTabCompleter(maincommand);
@@ -117,7 +135,7 @@ public final class Main extends JavaPlugin {
         registerItem(new MagicStick());
         registerItem(new Hammer());
         registerItem(new Excavator());
-        registerItem(new BroadAxe());
+        registerItem(new Broadaxe());
         if(isModuleEnabled(ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
         }
@@ -134,6 +152,7 @@ public final class Main extends JavaPlugin {
             t.setCanSeeFriendlyInvisibles(false);
         }
        
+        
     
         
         
@@ -342,6 +361,18 @@ public final class Main extends JavaPlugin {
     
     public static File getDbFile(){
         return dbfile;
+    }
+    
+    public static String getBungeeChannel(){
+        return "BungeeCord";
+    }
+    
+    public static String getVanillaRebootChannel(){
+        return "VanillaReboot";
+    }
+    
+    public static boolean isBungeeEnabled(){
+        return usebungee;
     }
     
 }

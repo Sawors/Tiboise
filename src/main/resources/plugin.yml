@@ -7,15 +7,36 @@ commands:
   tgive:
     # used to give Tiboise custom items to the player
     usage: </command> <itemname>
+    permission: tiboise.give
   tid:
     # used to give the unique identifier (as UUID) of the item in hand (if it has one)
     usage: </command> with an item in hand
+    permission: tiboise.infos
   ttest:
     usage: </command> <action> <target>
+    permission: tiboise.test
+  kidnap:
+    usage: </command> <player> <server>
+    permission: tiboise.kidnap
   tiboise:
     aliases:
       - tb
       - t
-    usage: 7
+    usage: ûwû
+    permission: tiboise.infos
 softdepend:
   - voicechat
+
+permissions:
+  tiboise.kidnap:
+    description: Allows you to kidnap a user
+    default: op
+  tiboise.give:
+    description: Allows you to give items to yourself
+    default: op
+  tiboise.test:
+    description: Allows you to use the test command
+    default: op
+  tiboise.infos:
+    description: Allows you to get infos
+    default: op
