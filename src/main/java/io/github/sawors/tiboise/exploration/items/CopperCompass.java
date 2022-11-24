@@ -13,7 +13,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.CompassMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -74,5 +78,21 @@ public class CopperCompass extends TiboiseItem implements Listener {
             
             }
         }
+    }
+    
+    @Override
+    public ItemStack get() {
+        ItemStack otp = super.get();
+        ItemMeta meta = otp.getItemMeta().clone();
+        meta.setCustomModelData(1);
+        otp.setItemMeta(meta);
+        return otp;
+    }
+    
+    @Override
+    public @Nullable Recipe getRecipe() {
+        ShapedRecipe recipe = new ShapedRecipe(getItemIdKey(),this.get());
+        recipe.shape("CRC","RBR","CRC").setIngredient('C', Material.COPPER_INGOT).setIngredient('R',Material.REDSTONE).setIngredient('B',new ItemStack(Material.COMPASS));
+        return recipe;
     }
 }
