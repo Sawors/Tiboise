@@ -13,8 +13,10 @@ import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
 import io.github.sawors.tiboise.exploration.PlayerCompassMarker;
 import io.github.sawors.tiboise.exploration.PlayerMarkerCommand;
+import io.github.sawors.tiboise.exploration.items.CopperCompass;
 import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
@@ -126,6 +128,7 @@ public final class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new AnimalsManager(), this);
         getServer().getPluginManager().registerEvents(new ResourcePackManager(), this);
         getServer().getPluginManager().registerEvents(new PlayerCompassMarker(), this);
+        getServer().getPluginManager().registerEvents(new ExplorationGeneralFeatures(), this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
@@ -140,6 +143,7 @@ public final class Main extends JavaPlugin {
         registerItem(new Hammer());
         registerItem(new Excavator());
         registerItem(new Broadaxe());
+        registerItem(new CopperCompass());
         if(isModuleEnabled(ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
         }

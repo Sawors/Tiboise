@@ -1,8 +1,11 @@
 package io.github.sawors.tiboise.exploration;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.sawors.tiboise.Main;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -15,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +26,8 @@ import java.util.*;
 
 public class PlayerCompassMarker implements Listener {
     // management
-    private static Map<UUID, Set<PlayerCompassMarker>> loadedmarkermap = new HashMap<>();
+    private static Map<UUID, Set<PlayerCompassMarker>> loadedMarkersMap = new HashMap<>();
+    private static Map<ItemStack, PlayerCompassMarker> showInventoryLink = new HashMap<>();
     // defaults
     private static final Material DEFAULT_MARKER_MATERIAL = Material.MAP;
     private static final String DEFAULT_MARKER_TYPE = "default";
@@ -131,17 +136,25 @@ public class PlayerCompassMarker implements Listener {
         return z;
     }
     
-    public ItemStack getDisplayItem(){
+    public Location getDestination(){
+        World w = Bukkit.getWorld(getWorld());
+        w = w != null ? w : Bukkit.getWorlds().get(0);
+        return new Location(w,getX(),getY(),getZ());
+    }
+    
+    public ItemStack getDisplayItem(boolean tracking, boolean registerItem){
         ItemStack showitem = new ItemStack(getIconitem());
         ItemMeta meta = showitem.getItemMeta();
         
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text(ChatColor.DARK_GRAY+" x: "+getX()+" "));
-        lore.add(Component.text(ChatColor.DARK_GRAY+" y: "+getY()+" "));
-        lore.add(Component.text(ChatColor.DARK_GRAY+" z: "+getZ()+" "));
+        if(tracking){
+            lore.add(Component.text(ChatColor.GOLD+""+ChatColor.ITALIC+">> Click to track <<"));
+        }
+        lore.add(Component.text(ChatColor.GRAY+" x: "+getX()+" "));
+        lore.add(Component.text(ChatColor.GRAY+" y: "+getY()+" "));
+        lore.add(Component.text(ChatColor.GRAY+" z: "+getZ()+" "));
         lore.add(Component.text(""));
-        lore.add(Component.text(""));
-        lore.add(Component.text(ChatColor.DARK_GRAY+" id: "+getId().toString().substring(0,8)+" "));
+        lore.add(Component.text(ChatColor.DARK_GRAY+"id: "+getId().toString().substring(0,8)+" "));
         
         meta.lore(lore);
         
@@ -151,7 +164,19 @@ public class PlayerCompassMarker implements Listener {
         
         showitem.setItemMeta(meta);
         
+        if(registerItem){
+            showInventoryLink.put(showitem,this);
+        }
+        
         return showitem;
+    }
+    
+    public static boolean isLinked(ItemStack item){
+        return showInventoryLink.containsKey(item);
+    }
+    
+    public static @Nullable PlayerCompassMarker fromDisplay(ItemStack item){
+        return showInventoryLink.get(item);
     }
     
     protected static NamespacedKey getIconTypeKey(){
@@ -184,15 +209,17 @@ public class PlayerCompassMarker implements Listener {
                     name = name != null ? name : "Marker";
                     world = world != null ? world : Bukkit.getWorlds().get(0).getName();
                     icontype = icontype != null ? icontype : DEFAULT_MARKER_TYPE;
-                    
-                    markers.add(new PlayerCompassMarker(name,world,iconitem,icontype,id,x,y,z));
+                    PlayerCompassMarker marker = new PlayerCompassMarker(name,world,iconitem,icontype,id,x,y,z);
+                    markers.add(marker);
                 }
             }
         }
         
-        loadedmarkermap.put(p.getUniqueId(), markers);
+        loadedMarkersMap.put(p.getUniqueId(), markers);
+        
     }
     
+    @CanIgnoreReturnValue
     public static void savePlayerCompassMarkers(@NotNull Player p){
         World w = p.getWorld();
         File storage = new File(w.getWorldFolder()+File.separator+"markers"+File.separator+p.getUniqueId()+".yml");
@@ -202,9 +229,9 @@ public class PlayerCompassMarker implements Listener {
                 storage.createNewFile();
             }
             
-            if(loadedmarkermap.containsKey(p.getUniqueId())){
+            if(loadedMarkersMap.containsKey(p.getUniqueId())){
                 YamlConfiguration markerdata = YamlConfiguration.loadConfiguration(storage);
-                for(PlayerCompassMarker marker : loadedmarkermap.get(p.getUniqueId())){
+                for(PlayerCompassMarker marker : loadedMarkersMap.get(p.getUniqueId())){
                     ConfigurationSection section =  markerdata.createSection(marker.getId().toString());
                     section.set(MarkerDataFields.NAME.toString().toLowerCase(), marker.getName());
                     section.set(MarkerDataFields.WORLD.toString().toLowerCase(), marker.getWorld());
@@ -224,26 +251,33 @@ public class PlayerCompassMarker implements Listener {
     
     
     public static void addMarkerForPlayer(Player p, PlayerCompassMarker marker){
-        if(!loadedmarkermap.containsKey(p.getUniqueId())){
+        if(!loadedMarkersMap.containsKey(p.getUniqueId())){
             loadPlayerCompassMarkers(p);
         }
-        loadedmarkermap.get(p.getUniqueId()).add(marker);
+        loadedMarkersMap.get(p.getUniqueId()).add(marker);
+        
+        // added this to allow for compass tracking, should be removed when I find a way to track without Lodestone being placed at the destination
+        Block edit = marker.getDestination().clone().add(0,(-marker.getDestination().getY())-64,0).getBlock();
+        edit.setType(Material.LODESTONE);
+        // THIS COULD LEAD TO EXPLOITS ! BE CAREFUL
+        edit.getRelative(BlockFace.UP).setType(Material.BEDROCK);
     }
     
     public static void removeMarkerForPlayer(Player p, UUID markerId){
-        if(!loadedmarkermap.containsKey(p.getUniqueId())){
+        if(!loadedMarkersMap.containsKey(p.getUniqueId())){
             loadPlayerCompassMarkers(p);
         }
-        Set<PlayerCompassMarker> pmarkers = loadedmarkermap.get(p.getUniqueId());
+        Set<PlayerCompassMarker> pmarkers = loadedMarkersMap.get(p.getUniqueId());
         for(PlayerCompassMarker marker : pmarkers){
             if(marker.getId().equals(markerId)){
                 pmarkers.remove(marker);
+                marker.getDestination().clone().add(0,(-marker.getDestination().getY())-64,0).getBlock().setType(Material.BEDROCK);
             }
         }
     }
     
     public static @NotNull Set<PlayerCompassMarker> getPlayerMarkers(Player player){
-        return loadedmarkermap.get(player.getUniqueId()) != null ? loadedmarkermap.get(player.getUniqueId()) : new HashSet<>();
+        return loadedMarkersMap.get(player.getUniqueId()) != null ? loadedMarkersMap.get(player.getUniqueId()) : new HashSet<>();
     }
     
     @EventHandler
@@ -255,6 +289,8 @@ public class PlayerCompassMarker implements Listener {
     @EventHandler
     public static void savePlayerMarkerOnLeave(PlayerQuitEvent event){
         savePlayerCompassMarkers(event.getPlayer());
+        // unload offline players
+        loadedMarkersMap.remove(event.getPlayer().getUniqueId());
     }
     @EventHandler
     public static void loadPlayerMarkerOnJoin(PlayerJoinEvent event){
