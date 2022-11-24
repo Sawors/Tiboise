@@ -23,7 +23,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,31 +37,7 @@ import java.util.*;
 
 public class QOLImprovements implements Listener {
     
-    //
-    //  COMPASS NORTH
-    @EventHandler
-    public void setCompassNorth(PlayerChangedWorldEvent event){
-        new BukkitRunnable(){
-            @Override
-            public void run() {
-                Player p = event.getPlayer();
-                p.setCompassTarget(new Location(p.getWorld(), 0,0,-1000000));
-                p.updateInventory();
-            }
-        }.runTask(Main.getPlugin());
-        
-    }
-    @EventHandler
-    public void setCompassNorth(PlayerJoinEvent event){
-        new BukkitRunnable(){
-            @Override
-            public void run() {
-                Player p = event.getPlayer();
-                p.setCompassTarget(new Location(p.getWorld(), 0,0,-1000000));
-                p.updateInventory();
-            }
-        }.runTask(Main.getPlugin());
-    }
+    
     //
     //  DISABLE RESPAWN ANCHORS
     @EventHandler(priority = EventPriority.LOW)

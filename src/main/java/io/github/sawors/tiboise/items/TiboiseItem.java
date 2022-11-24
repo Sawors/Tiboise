@@ -170,15 +170,15 @@ public abstract class TiboiseItem {
     }
 
     public static NamespacedKey getItemIdKey(){
-        return new NamespacedKey((Main.getPlugin(Main.class)), "id");
+        return new NamespacedKey(Main.getPlugin(), "id");
     }
 
     public static NamespacedKey getItemTagsKey(){
-        return new NamespacedKey((Main.getPlugin(Main.class)), "tags");
+        return new NamespacedKey(Main.getPlugin(), "tags");
     }
 
     public static NamespacedKey getItemVariantKey(){
-        return new NamespacedKey((Main.getPlugin(Main.class)), "variant");
+        return new NamespacedKey(Main.getPlugin(), "variant");
     }
 
     public static String getItemId(ItemStack item){

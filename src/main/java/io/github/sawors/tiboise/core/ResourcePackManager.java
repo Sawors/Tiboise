@@ -25,7 +25,7 @@ public class ResourcePackManager implements Listener {
                 public void run() {
                     event.getPlayer().setResourcePack(src,packhash,true);
                 }
-            }.runTaskLater(Main.getPlugin(),20);
+            }.runTaskLater(Main.getPlugin(),60);
         }
     }
     
