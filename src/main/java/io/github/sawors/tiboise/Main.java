@@ -13,6 +13,7 @@ import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.exploration.PlayerCompassMarker;
 import io.github.sawors.tiboise.exploration.PlayerMarkerCommand;
 import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
@@ -124,6 +125,7 @@ public final class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CropsManager(),this);
         getServer().getPluginManager().registerEvents(new AnimalsManager(), this);
         getServer().getPluginManager().registerEvents(new ResourcePackManager(), this);
+        getServer().getPluginManager().registerEvents(new PlayerCompassMarker(), this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());

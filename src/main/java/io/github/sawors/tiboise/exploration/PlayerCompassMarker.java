@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.exploration;
 
 import io.github.sawors.tiboise.Main;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -10,6 +11,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldSaveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -23,14 +27,14 @@ public class PlayerCompassMarker implements Listener {
     private static final Material DEFAULT_MARKER_MATERIAL = Material.MAP;
     private static final String DEFAULT_MARKER_TYPE = "default";
     // unique marker
-    private String name;
-    private String world;
-    private Material iconitem;
-    private String icontype;
-    private UUID id;
-    private int x;
-    private int y;
-    private int z;
+    private final String name;
+    private final String world;
+    private final Material iconitem;
+    private final String icontype;
+    private final UUID id;
+    private final int x;
+    private final int y;
+    private final int z;
     
     private enum MarkerDataFields {
         NAME, WORLD, ICON_ITEM, ICON_TYPE, ID, X, Y, Z
@@ -44,7 +48,7 @@ public class PlayerCompassMarker implements Listener {
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
         this.y = location.getBlockY();
-        this.x = location.getBlockZ();
+        this.z = location.getBlockZ();
         
     }
     
@@ -56,7 +60,7 @@ public class PlayerCompassMarker implements Listener {
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
         this.y = location.getBlockY();
-        this.x = location.getBlockZ();
+        this.z = location.getBlockZ();
     }
     
     public PlayerCompassMarker(@NotNull String name, @NotNull Location location, @NotNull Material icon, @NotNull String icontype){
@@ -67,7 +71,7 @@ public class PlayerCompassMarker implements Listener {
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
         this.y = location.getBlockY();
-        this.x = location.getBlockZ();
+        this.z = location.getBlockZ();
     }
     
     protected PlayerCompassMarker(@NotNull String name, @NotNull String world, @NotNull Material iconitem, @NotNull String icontype, @NotNull UUID id, int x, int y, int z){
@@ -78,7 +82,21 @@ public class PlayerCompassMarker implements Listener {
         this.id = id;
         this.x = x;
         this.y = y;
-        this.x = z;
+        this.z = z;
+    }
+    
+    /**
+     * SHOULD ONLY BE USED TO REGISTER THE LISTENER IN THE MAIN METHOD !!
+     */
+    public PlayerCompassMarker(){
+        this.name = "Marker";
+        this.world = "world";
+        this.iconitem = DEFAULT_MARKER_MATERIAL;
+        this.icontype = DEFAULT_MARKER_TYPE;
+        this.id = UUID.randomUUID();
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
     }
     
     public String getName() {
@@ -111,6 +129,29 @@ public class PlayerCompassMarker implements Listener {
     
     public int getZ() {
         return z;
+    }
+    
+    public ItemStack getDisplayItem(){
+        ItemStack showitem = new ItemStack(getIconitem());
+        ItemMeta meta = showitem.getItemMeta();
+        
+        List<Component> lore = new ArrayList<>();
+        lore.add(Component.text(ChatColor.DARK_GRAY+" x: "+getX()+" "));
+        lore.add(Component.text(ChatColor.DARK_GRAY+" y: "+getY()+" "));
+        lore.add(Component.text(ChatColor.DARK_GRAY+" z: "+getZ()+" "));
+        lore.add(Component.text(""));
+        lore.add(Component.text(""));
+        lore.add(Component.text(ChatColor.DARK_GRAY+" id: "+getId().toString().substring(0,8)+" "));
+        
+        meta.lore(lore);
+        
+        meta.displayName(Component.text(ChatColor.RED+getName()));
+        
+        meta.getPersistentDataContainer().set(PlayerCompassMarker.getIconTypeKey(), PersistentDataType.STRING,getIcontype());
+        
+        showitem.setItemMeta(meta);
+        
+        return showitem;
     }
     
     protected static NamespacedKey getIconTypeKey(){
@@ -156,7 +197,10 @@ public class PlayerCompassMarker implements Listener {
         World w = p.getWorld();
         File storage = new File(w.getWorldFolder()+File.separator+"markers"+File.separator+p.getUniqueId()+".yml");
         try{
-            storage.createNewFile();
+            if(!storage.exists()){
+                new File(storage.getParent()).mkdirs();
+                storage.createNewFile();
+            }
             
             if(loadedmarkermap.containsKey(p.getUniqueId())){
                 YamlConfiguration markerdata = YamlConfiguration.loadConfiguration(storage);
@@ -164,12 +208,14 @@ public class PlayerCompassMarker implements Listener {
                     ConfigurationSection section =  markerdata.createSection(marker.getId().toString());
                     section.set(MarkerDataFields.NAME.toString().toLowerCase(), marker.getName());
                     section.set(MarkerDataFields.WORLD.toString().toLowerCase(), marker.getWorld());
-                    section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), marker.getIconitem());
+                    section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), marker.getIconitem().toString());
                     section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIcontype());
                     section.set(MarkerDataFields.X.toString().toLowerCase(), marker.getX());
                     section.set(MarkerDataFields.Y.toString().toLowerCase(), marker.getY());
                     section.set(MarkerDataFields.Z.toString().toLowerCase(), marker.getZ());
                 }
+                
+                markerdata.save(storage);
             }
         }catch (IOException e){
             e.printStackTrace();
@@ -194,6 +240,10 @@ public class PlayerCompassMarker implements Listener {
                 pmarkers.remove(marker);
             }
         }
+    }
+    
+    public static @NotNull Set<PlayerCompassMarker> getPlayerMarkers(Player player){
+        return loadedmarkermap.get(player.getUniqueId()) != null ? loadedmarkermap.get(player.getUniqueId()) : new HashSet<>();
     }
     
     @EventHandler
