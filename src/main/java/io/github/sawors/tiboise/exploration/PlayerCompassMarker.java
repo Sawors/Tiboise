@@ -5,13 +5,18 @@ import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.WorldSaveEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class PlayerCompassMarker {
+public class PlayerCompassMarker implements Listener {
     // management
     private static Map<UUID, Set<PlayerCompassMarker>> loadedmarkermap = new HashMap<>();
     // defaults
@@ -150,7 +155,6 @@ public class PlayerCompassMarker {
     public static void savePlayerCompassMarkers(@NotNull Player p){
         World w = p.getWorld();
         File storage = new File(w.getWorldFolder()+File.separator+"markers"+File.separator+p.getUniqueId()+".yml");
-        Set<PlayerCompassMarker> markers = new HashSet<>();
         try{
             storage.createNewFile();
             
@@ -170,17 +174,41 @@ public class PlayerCompassMarker {
         }catch (IOException e){
             e.printStackTrace();
         }
-        
-        loadedmarkermap.put(p.getUniqueId(), markers);
     }
     
     
     public static void addMarkerForPlayer(Player p, PlayerCompassMarker marker){
-    
+        if(!loadedmarkermap.containsKey(p.getUniqueId())){
+            loadPlayerCompassMarkers(p);
+        }
+        loadedmarkermap.get(p.getUniqueId()).add(marker);
     }
     
     public static void removeMarkerForPlayer(Player p, UUID markerId){
+        if(!loadedmarkermap.containsKey(p.getUniqueId())){
+            loadPlayerCompassMarkers(p);
+        }
+        Set<PlayerCompassMarker> pmarkers = loadedmarkermap.get(p.getUniqueId());
+        for(PlayerCompassMarker marker : pmarkers){
+            if(marker.getId().equals(markerId)){
+                pmarkers.remove(marker);
+            }
+        }
+    }
     
+    @EventHandler
+    public static void savePlayerMarkerOnWorldSave(WorldSaveEvent event){
+        for(Player p : Bukkit.getOnlinePlayers()){
+            savePlayerCompassMarkers(p);
+        }
+    }
+    @EventHandler
+    public static void savePlayerMarkerOnLeave(PlayerQuitEvent event){
+        savePlayerCompassMarkers(event.getPlayer());
+    }
+    @EventHandler
+    public static void loadPlayerMarkerOnJoin(PlayerJoinEvent event){
+        loadPlayerCompassMarkers(event.getPlayer());
     }
     
     

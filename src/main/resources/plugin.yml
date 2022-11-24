@@ -18,6 +18,8 @@ commands:
   kidnap:
     usage: </command> <player> <server>
     permission: tiboise.kidnap
+  marker:
+    usage: /marker [name]
   tiboise:
     aliases:
       - tb

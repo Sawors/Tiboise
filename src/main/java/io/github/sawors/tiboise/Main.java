@@ -13,6 +13,7 @@ import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.exploration.PlayerMarkerCommand;
 import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
@@ -128,6 +129,7 @@ public final class Main extends JavaPlugin {
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
         Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
         Objects.requireNonNull(getServer().getPluginCommand("kidnap")).setExecutor(new KidnapCommand());
+        Objects.requireNonNull(getServer().getPluginCommand("marker")).setExecutor(new PlayerMarkerCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setTabCompleter(maincommand);
