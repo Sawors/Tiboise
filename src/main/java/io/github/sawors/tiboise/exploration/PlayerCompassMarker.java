@@ -29,13 +29,12 @@ public class PlayerCompassMarker implements Listener {
     private static Map<UUID, Set<PlayerCompassMarker>> loadedMarkersMap = new HashMap<>();
     private static Map<ItemStack, PlayerCompassMarker> showInventoryLink = new HashMap<>();
     // defaults
-    private static final Material DEFAULT_MARKER_MATERIAL = Material.MAP;
-    private static final String DEFAULT_MARKER_TYPE = "default";
+    public static final Material DEFAULT_MARKER_MATERIAL = Material.GLOBE_BANNER_PATTERN;
     // unique marker
     private final String name;
     private final String world;
     private final Material iconitem;
-    private final String icontype;
+    private final MarkerVisualIcons icontype;
     private final UUID id;
     private final int x;
     private final int y;
@@ -44,12 +43,30 @@ public class PlayerCompassMarker implements Listener {
     private enum MarkerDataFields {
         NAME, WORLD, ICON_ITEM, ICON_TYPE, ID, X, Y, Z
     }
+
+    public enum MarkerVisualIcons {
+        DEFAULT, RESOURCE, HOME, CROSS, STRUCTURE, RESOURCE_ALT, CROSS_ALT, DEATH;
+        public int getCustomModelValue(){
+            return switch(this){
+                // Arbitrary values, just to make it simple for players to change the model in a meaningful way
+                // (no need to use hash here, there is not enough entries)
+                case DEFAULT -> 1;
+                case RESOURCE -> 2;
+                case HOME -> 3;
+                case CROSS -> 4;
+                case STRUCTURE -> 5;
+                case RESOURCE_ALT -> 6;
+                case CROSS_ALT -> 7;
+                default -> 0;
+            };
+        }
+    }
     
     public PlayerCompassMarker(@NotNull String name, @NotNull Location location){
         this.name = name;
         this.world = location.getWorld().getName();
         this.iconitem = DEFAULT_MARKER_MATERIAL;
-        this.icontype = DEFAULT_MARKER_TYPE;
+        this.icontype = MarkerVisualIcons.DEFAULT;
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
         this.y = location.getBlockY();
@@ -57,33 +74,22 @@ public class PlayerCompassMarker implements Listener {
         
     }
     
-    public PlayerCompassMarker(@NotNull String name, @NotNull Location location, @NotNull Material icon){
+    public PlayerCompassMarker(@NotNull String name, @NotNull Location location, MarkerVisualIcons icon){
         this.name = name;
         this.world = location.getWorld().getName();
-        this.iconitem = icon;
-        this.icontype = DEFAULT_MARKER_TYPE;
+        this.iconitem = DEFAULT_MARKER_MATERIAL;
+        this.icontype = icon;
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
         this.y = location.getBlockY();
         this.z = location.getBlockZ();
     }
     
-    public PlayerCompassMarker(@NotNull String name, @NotNull Location location, @NotNull Material icon, @NotNull String icontype){
-        this.name = name;
-        this.world = location.getWorld().getName();
-        this.iconitem = icon;
-        this.icontype = icontype;
-        this.id = UUID.randomUUID();
-        this.x = location.getBlockX();
-        this.y = location.getBlockY();
-        this.z = location.getBlockZ();
-    }
-    
-    protected PlayerCompassMarker(@NotNull String name, @NotNull String world, @NotNull Material iconitem, @NotNull String icontype, @NotNull UUID id, int x, int y, int z){
+    protected PlayerCompassMarker(@NotNull String name, @NotNull String world, MarkerVisualIcons icon, @NotNull UUID id, int x, int y, int z){
         this.name = name;
         this.world = world;
-        this.iconitem = iconitem;
-        this.icontype = icontype;
+        this.iconitem = DEFAULT_MARKER_MATERIAL;
+        this.icontype = icon;
         this.id = id;
         this.x = x;
         this.y = y;
@@ -97,7 +103,7 @@ public class PlayerCompassMarker implements Listener {
         this.name = "Marker";
         this.world = "world";
         this.iconitem = DEFAULT_MARKER_MATERIAL;
-        this.icontype = DEFAULT_MARKER_TYPE;
+        this.icontype = MarkerVisualIcons.DEFAULT;
         this.id = UUID.randomUUID();
         this.x = 0;
         this.y = 0;
@@ -112,11 +118,7 @@ public class PlayerCompassMarker implements Listener {
         return world;
     }
     
-    public Material getIconitem() {
-        return iconitem;
-    }
-    
-    public String getIcontype() {
+    public MarkerVisualIcons getIconType() {
         return icontype;
     }
     
@@ -136,19 +138,20 @@ public class PlayerCompassMarker implements Listener {
         return z;
     }
     
-    public Location getDestination(){
+    public @NotNull Location getDestination(){
         World w = Bukkit.getWorld(getWorld());
         w = w != null ? w : Bukkit.getWorlds().get(0);
         return new Location(w,getX(),getY(),getZ());
     }
     
     public ItemStack getDisplayItem(boolean tracking, boolean registerItem){
-        ItemStack showitem = new ItemStack(getIconitem());
+        ItemStack showitem = new ItemStack(DEFAULT_MARKER_MATERIAL);
         ItemMeta meta = showitem.getItemMeta();
         
         List<Component> lore = new ArrayList<>();
         if(tracking){
-            lore.add(Component.text(ChatColor.GOLD+""+ChatColor.ITALIC+">> Click to track <<"));
+            lore.add(Component.text(ChatColor.GOLD+""+ChatColor.ITALIC+">> Left Click to track <<"));
+            lore.add(Component.text(ChatColor.GREEN+""+ChatColor.ITALIC+">> Right Click to edit <<"));
         }
         lore.add(Component.text(ChatColor.GRAY+" x: "+getX()+" "));
         lore.add(Component.text(ChatColor.GRAY+" y: "+getY()+" "));
@@ -159,8 +162,11 @@ public class PlayerCompassMarker implements Listener {
         meta.lore(lore);
         
         meta.displayName(Component.text(ChatColor.RED+getName()));
-        
-        meta.getPersistentDataContainer().set(PlayerCompassMarker.getIconTypeKey(), PersistentDataType.STRING,getIcontype());
+
+        // Should not be used in the future, only for indicative purposes
+        meta.getPersistentDataContainer().set(PlayerCompassMarker.getIconTypeKey(), PersistentDataType.STRING, getIconType().toString().toLowerCase(Locale.ROOT));
+
+        meta.setCustomModelData(getIconType().getCustomModelValue());
         
         showitem.setItemMeta(meta);
         
@@ -179,7 +185,7 @@ public class PlayerCompassMarker implements Listener {
         return showInventoryLink.get(item);
     }
     
-    protected static NamespacedKey getIconTypeKey(){
+    public static NamespacedKey getIconTypeKey(){
         return new NamespacedKey(Main.getPlugin(), "icon");
     }
     
@@ -194,11 +200,11 @@ public class PlayerCompassMarker implements Listener {
                 if(markerdata != null){
                     String name = markerdata.getString(MarkerDataFields.NAME.toString().toLowerCase());
                     String world = markerdata.getString(MarkerDataFields.WORLD.toString().toLowerCase());
-                    Material iconitem = DEFAULT_MARKER_MATERIAL;
+                    MarkerVisualIcons icontype = MarkerVisualIcons.DEFAULT;
                     try{
-                        iconitem = Material.valueOf(markerdata.getString(MarkerDataFields.ICON_ITEM.toString().toLowerCase()));
-                    } catch (IllegalArgumentException | NullPointerException ignored){}
-                    String icontype = markerdata.getString(MarkerDataFields.ICON_TYPE.toString().toLowerCase());
+                        icontype = MarkerVisualIcons.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString()));
+                    } catch (IllegalArgumentException ignored){}
+
                     UUID id = UUID.randomUUID();
                     try{
                         id = UUID.fromString(key);
@@ -208,8 +214,7 @@ public class PlayerCompassMarker implements Listener {
                     int z = markerdata.getInt(MarkerDataFields.Z.toString().toLowerCase());
                     name = name != null ? name : "Marker";
                     world = world != null ? world : Bukkit.getWorlds().get(0).getName();
-                    icontype = icontype != null ? icontype : DEFAULT_MARKER_TYPE;
-                    PlayerCompassMarker marker = new PlayerCompassMarker(name,world,iconitem,icontype,id,x,y,z);
+                    PlayerCompassMarker marker = new PlayerCompassMarker(name,world,icontype,id,x,y,z);
                     markers.add(marker);
                 }
             }
@@ -235,8 +240,8 @@ public class PlayerCompassMarker implements Listener {
                     ConfigurationSection section =  markerdata.createSection(marker.getId().toString());
                     section.set(MarkerDataFields.NAME.toString().toLowerCase(), marker.getName());
                     section.set(MarkerDataFields.WORLD.toString().toLowerCase(), marker.getWorld());
-                    section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), marker.getIconitem().toString());
-                    section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIcontype());
+                    section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), DEFAULT_MARKER_MATERIAL.toString());
+                    section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIconType());
                     section.set(MarkerDataFields.X.toString().toLowerCase(), marker.getX());
                     section.set(MarkerDataFields.Y.toString().toLowerCase(), marker.getY());
                     section.set(MarkerDataFields.Z.toString().toLowerCase(), marker.getZ());
@@ -254,7 +259,10 @@ public class PlayerCompassMarker implements Listener {
         if(!loadedMarkersMap.containsKey(p.getUniqueId())){
             loadPlayerCompassMarkers(p);
         }
-        loadedMarkersMap.get(p.getUniqueId()).add(marker);
+        Set<PlayerCompassMarker> markers = loadedMarkersMap.get(p.getUniqueId());
+        // adding a marker with an already existing ID will overwrite its predecessor
+        markers.removeIf(m -> m.getId().equals(marker.getId()));
+        markers.add(marker);
         
         // added this to allow for compass tracking, should be removed when I find a way to track without Lodestone being placed at the destination
         Block edit = marker.getDestination().clone().add(0,(-marker.getDestination().getY())-64,0).getBlock();

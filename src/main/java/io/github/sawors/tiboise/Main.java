@@ -340,7 +340,12 @@ public final class Main extends JavaPlugin {
                         || type.equals(InventoryType.PLAYER)
                         || type.equals(InventoryType.SHULKER_BOX));
     }
-    
+
+    /**
+     *
+     * @param text The text to get the UpperCamelCase form from. Use spaces to determine word separation.
+     * @return The text with the first letter of each word capitalized. For instance : "never dig straight down" returns "Never Dig Straight Down"
+     */
     public static String getUpperCamelCase(String text){
         StringBuilder otp = new StringBuilder();
         String[] subs = text.split(" ");
