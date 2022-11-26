@@ -1,11 +1,13 @@
 package io.github.sawors.tiboise.exploration.items;
 
-import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.exploration.PlayerCompassMarker;
 import io.github.sawors.tiboise.gui.GUIDisplayItem;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -14,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -23,10 +26,8 @@ import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.Duration;
+import java.util.*;
 
 public class CopperCompass extends TiboiseItem implements Listener {
     
@@ -60,41 +61,44 @@ public class CopperCompass extends TiboiseItem implements Listener {
             showPlayerMarkerListInventory(p);
         }
     }
+    @EventHandler
+    public static void cleanMapsOnPlayerCloseInventory(InventoryCloseEvent event){
+        inventoryLink.remove(event.getInventory());
+        inventoryTypeLink.remove(event.getInventory());
+    }
 
     public static void showPlayerMarkerListInventory(Player p){
         Inventory showInv = Bukkit.createInventory(p,9*MARKER_INVENTORY_ROW_AMOUNT, Component.text(ChatColor.DARK_GRAY+MARKER_INVENTORY_NAME));
-        List<PlayerCompassMarker> markers = List.copyOf(PlayerCompassMarker.getPlayerMarkers(p));
-
+        List<PlayerCompassMarker> markers = new ArrayList<>(PlayerCompassMarker.getPlayerMarkers(p));
+        markers.sort(Comparator.comparing(PlayerCompassMarker::getCreationDate));
         Location lastDeath = p.getLastDeathLocation();
-        // TOTEST
         if(lastDeath != null){
             PlayerCompassMarker deathMarker = new PlayerCompassMarker("Last Death", lastDeath, PlayerCompassMarker.MarkerVisualIcon.DEATH);
-            showInv.setItem(4, deathMarker.getDisplayItem(true,true,p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm && deathMarker.getDestination().equals(cm.getLodestone())));
+            showInv.setItem(getSlotForRow(1,5), deathMarker.getDisplayItem(true,true,p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm && deathMarker.getDestination().equals(cm.getLodestone())));
         }
-
-        if(markers != null){
-            int slot = 9;
-            for (PlayerCompassMarker mk : markers) {
-                int rowPosition = (slot % 9) + 1;
-                if (rowPosition == 1) {
-                    slot++;
-                } else if (rowPosition == 9) {
-                    slot += 2;
-                }
-                ItemStack display = mk.getDisplayItem(true, true,p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm && mk.getDestination().equals(cm.getLodestone()));
-                showInv.setItem(slot, display);
+    
+        int slot = 9;
+        for (PlayerCompassMarker mk : markers) {
+            int rowPosition = (slot % 9) + 1;
+            if (rowPosition == 1) {
                 slot++;
-                if (slot >= (9*(MARKER_INVENTORY_ROW_AMOUNT-1)) - 1) {
-                    break;
-                }
+            } else if (rowPosition == 9) {
+                slot += 2;
             }
-            // TOTEST
-            ItemStack addMarkerButton = new GUIDisplayItem(MarkerOptionsButton.ADD_NEW.toString(),Material.RED_BANNER)
-                    .setName(Component.text(ChatColor.GOLD + "Add a new Marker").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
-                    .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click to add a new Marker at your position <<")))
-                    .get();
-            showInv.setItem((9*(MARKER_INVENTORY_ROW_AMOUNT-1))+4, addMarkerButton);
+            ItemStack display = mk.getDisplayItem(true, true,p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm && mk.getDestination().equals(cm.getLodestone()));
+            showInv.setItem(slot, display);
+            slot++;
+            if (slot >= (9*(MARKER_INVENTORY_ROW_AMOUNT-1)) - 1) {
+                break;
+            }
         }
+        // TOTEST
+        ItemStack addMarkerButton = new GUIDisplayItem(MarkerOptionsButton.ADD_NEW.toString(),Material.RED_BANNER)
+                .setName(Component.text(ChatColor.GOLD + "Add a new Marker").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
+                .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click to add a new Marker at your position <<")))
+                .get();
+        showInv.setItem(getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,5), addMarkerButton);
+        
         registerMarkerInventory(showInv, null,MarkerInventoryType.LIST_DISPLAY);
         p.closeInventory();
         p.openInventory(showInv);
@@ -122,6 +126,8 @@ public class CopperCompass extends TiboiseItem implements Listener {
                                 cm.setLodestone(marker.getDestination());
                                 compassitem.setItemMeta(cm);
                                 p.closeInventory();
+                                p.showTitle(Title.title(Component.text(""), Component.text(ChatColor.RED+"Tracking "+ChatColor.BOLD+marker.getName()), Title.Times.times(Duration.ofMillis(100),Duration.ofMillis(2500),Duration.ofMillis(500))));
+                                p.sendActionBar(Component.text(ChatColor.GOLD+""+(int)(p.getLocation().distance(marker.getDestination()))+" blocks away"));
                             }
                         } else {
                             showPlayerMarkerOptionsInventory(p, marker);
@@ -146,7 +152,12 @@ public class CopperCompass extends TiboiseItem implements Listener {
                         switch(role)
                         {
                             case RENAME -> {
-
+                                TextComponent msg = Component
+                                        .text(ChatColor.GOLD+""+ChatColor.UNDERLINE+">> Click here to rename your Marker <<")
+                                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND,"/marker rename "+marker.getId().toString().substring(0,7)+" "));
+                                p.sendMessage(msg);
+                                p.closeInventory();
+                                
                             }
                             case DELETE -> {
                                 if(marker.getDestination().equals(cm.getLodestone())){
@@ -167,6 +178,15 @@ public class CopperCompass extends TiboiseItem implements Listener {
                 }
                 case ICONS -> {
                     String displayRaw = GUIDisplayItem.getDisplayItemType(clicked);
+                    if(displayRaw != null && displayRaw.equalsIgnoreCase(MarkerOptionsButton.BACK.toString())){
+                        PlayerCompassMarker marker = inventoryLink.get(inv);
+                        if(marker != null){
+                            showPlayerMarkerOptionsInventory(p,marker);
+                        } else {
+                            showPlayerMarkerListInventory(p);
+                        }
+                        return;
+                    }
                     if(displayRaw != null && displayRaw.split("\\+").length >= 2){
                         String[] splitted = displayRaw.split("\\+");
                         String type = splitted[0];
@@ -196,8 +216,9 @@ public class CopperCompass extends TiboiseItem implements Listener {
         int slot = 18;
         for(PlayerCompassMarker.MarkerVisualIcon icon : PlayerCompassMarker.MarkerVisualIcon.values()){
             ItemStack iconDisplay = new GUIDisplayItem(MarkerOptionsButton.SET_ICON+"+"+icon.toString(),PlayerCompassMarker.DEFAULT_MARKER_MATERIAL)
-                    .setName(Component.text(ChatColor.WHITE+Main.getUpperCamelCase(icon.toString().replaceAll("_"," "))).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
+                    .setName(Component.text(ChatColor.GOLD+icon.getDisplayName()).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
                     .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click here to select this icon for your marker <<")))
+                    .setIcon(icon.toString().toLowerCase(Locale.ROOT))
                     .get();
             
             int rowPosition = (slot % 9) + 1;

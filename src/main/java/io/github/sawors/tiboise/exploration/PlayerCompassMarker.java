@@ -1,8 +1,8 @@
 package io.github.sawors.tiboise.exploration;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.exploration.items.CopperCompass;
+import io.github.sawors.tiboise.gui.GUIDisplayItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -23,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class PlayerCompassMarker implements Listener {
@@ -31,6 +34,7 @@ public class PlayerCompassMarker implements Listener {
     private static Map<ItemStack, PlayerCompassMarker> showInventoryLink = new HashMap<>();
     // defaults
     public static final Material DEFAULT_MARKER_MATERIAL = Material.GLOBE_BANNER_PATTERN;
+    public static final DateTimeFormatter DEFAULT_DATETIME_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
     // unique marker
     private String name;
     private final String world;
@@ -40,12 +44,14 @@ public class PlayerCompassMarker implements Listener {
     private final int y;
     private final int z;
     
+    private final LocalDateTime creationDate;
+    
     private enum MarkerDataFields {
-        NAME, WORLD, ICON_ITEM, ICON_TYPE, ID, X, Y, Z
+        NAME, WORLD, ICON_ITEM, ICON_TYPE, ID, X, Y, Z, CREATION_DATE
     }
 
     public enum MarkerVisualIcon {
-        DEFAULT, RESOURCE, HOME, CROSS, STRUCTURE, RESOURCE_ALT, CROSS_ALT, DEATH;
+        DEFAULT, RESOURCE, HOME, CROSS, STRUCTURE, RESOURCE_ALT, DEATH;
         public int getCustomModelValue(){
             return switch(this){
                 // Arbitrary values, just to make it simple for players to change the model in a meaningful way
@@ -56,8 +62,7 @@ public class PlayerCompassMarker implements Listener {
                 case CROSS -> 4;
                 case STRUCTURE -> 5;
                 case RESOURCE_ALT -> 6;
-                case CROSS_ALT -> 7;
-                case DEATH -> 8;
+                case DEATH -> 7;
             };
         }
         
@@ -65,14 +70,13 @@ public class PlayerCompassMarker implements Listener {
             return switch(this){
                 // Arbitrary values, just to make it simple for players to change the model in a meaningful way
                 // (no need to use hash here, there is not enough entries)
-                case DEFAULT -> "Default Marker";
+                case DEFAULT -> "Cross Marker";
                 case RESOURCE -> "Resource Marker";
                 case HOME -> "Home Marker";
-                case CROSS -> "Cross Marker";
+                case CROSS -> "Cross 2 Marker";
                 case STRUCTURE -> "Structure Marker";
                 case RESOURCE_ALT -> "Resource 2 Marker";
-                case CROSS_ALT -> "Cross 2 Marker";
-                case DEATH -> "Last Death Marker";
+                case DEATH -> "Skull Marker";
             };
         }
     }
@@ -85,7 +89,7 @@ public class PlayerCompassMarker implements Listener {
         this.x = location.getBlockX();
         this.y = location.getBlockY();
         this.z = location.getBlockZ();
-        
+        this.creationDate = LocalDateTime.now();
     }
     
     public PlayerCompassMarker(@NotNull String name, @NotNull Location location, MarkerVisualIcon icon){
@@ -96,9 +100,10 @@ public class PlayerCompassMarker implements Listener {
         this.x = location.getBlockX();
         this.y = location.getBlockY();
         this.z = location.getBlockZ();
+        this.creationDate = LocalDateTime.now();
     }
     
-    protected PlayerCompassMarker(@NotNull String name, @NotNull String world, MarkerVisualIcon icon, @NotNull UUID id, int x, int y, int z){
+    protected PlayerCompassMarker(@NotNull String name, @NotNull String world, MarkerVisualIcon icon, @NotNull UUID id, int x, int y, int z, LocalDateTime creationDate){
         this.name = name;
         this.world = world;
         this.icontype = icon;
@@ -106,6 +111,7 @@ public class PlayerCompassMarker implements Listener {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.creationDate = creationDate;
     }
     
     /**
@@ -119,6 +125,7 @@ public class PlayerCompassMarker implements Listener {
         this.x = 0;
         this.y = 0;
         this.z = 0;
+        this.creationDate = LocalDateTime.now();
     }
     
     public String getName() {
@@ -129,7 +136,7 @@ public class PlayerCompassMarker implements Listener {
         return world;
     }
     
-    public MarkerVisualIcon getIconType() {
+    public MarkerVisualIcon getIcon() {
         return icontype;
     }
     
@@ -147,6 +154,10 @@ public class PlayerCompassMarker implements Listener {
     
     public int getZ() {
         return z;
+    }
+    
+    public LocalDateTime getCreationDate() {
+        return creationDate;
     }
     
     public void setName(String name){
@@ -186,9 +197,9 @@ public class PlayerCompassMarker implements Listener {
         meta.displayName(Component.text(ChatColor.RED+getName()));
 
         // Should not be used in the future, only for indicative purposes
-        meta.getPersistentDataContainer().set(PlayerCompassMarker.getIconTypeKey(), PersistentDataType.STRING, getIconType().toString().toLowerCase(Locale.ROOT));
+        meta.getPersistentDataContainer().set(GUIDisplayItem.getIconKey(), PersistentDataType.STRING, getIcon().toString().toLowerCase(Locale.ROOT));
 
-        meta.setCustomModelData(getIconType().getCustomModelValue());
+        meta.setCustomModelData(getIcon().getCustomModelValue());
         
         showitem.setItemMeta(meta);
         
@@ -210,10 +221,6 @@ public class PlayerCompassMarker implements Listener {
     
     public static @Nullable PlayerCompassMarker fromDisplay(ItemStack item){
         return showInventoryLink.get(item);
-    }
-    
-    public static NamespacedKey getIconTypeKey(){
-        return new NamespacedKey(Main.getPlugin(), "icon");
     }
     
     public static void loadPlayerCompassMarkers(@NotNull Player p){
@@ -239,9 +246,11 @@ public class PlayerCompassMarker implements Listener {
                     int x = markerdata.getInt(MarkerDataFields.X.toString().toLowerCase());
                     int y = markerdata.getInt(MarkerDataFields.Y.toString().toLowerCase());
                     int z = markerdata.getInt(MarkerDataFields.Z.toString().toLowerCase());
+                    LocalDateTime creation = markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase()) != null ? LocalDateTime.parse(Objects.requireNonNull(markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase())),DEFAULT_DATETIME_FORMAT) : LocalDateTime.now();
                     name = name != null ? name : "Marker";
                     world = world != null ? world : Bukkit.getWorlds().get(0).getName();
-                    PlayerCompassMarker marker = new PlayerCompassMarker(name,world,icontype,id,x,y,z);
+                    
+                    PlayerCompassMarker marker = new PlayerCompassMarker(name,world,icontype,id,x,y,z,creation);
                     markers.add(marker);
                 }
             }
@@ -267,10 +276,11 @@ public class PlayerCompassMarker implements Listener {
                     section.set(MarkerDataFields.NAME.toString().toLowerCase(), marker.getName());
                     section.set(MarkerDataFields.WORLD.toString().toLowerCase(), marker.getWorld());
                     section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), DEFAULT_MARKER_MATERIAL.toString());
-                    section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIconType().toString());
+                    section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIcon().toString());
                     section.set(MarkerDataFields.X.toString().toLowerCase(), marker.getX());
                     section.set(MarkerDataFields.Y.toString().toLowerCase(), marker.getY());
                     section.set(MarkerDataFields.Z.toString().toLowerCase(), marker.getZ());
+                    section.set(MarkerDataFields.CREATION_DATE.toString().toLowerCase(Locale.ROOT),marker.getCreationDate().format(DEFAULT_DATETIME_FORMAT));
                 }
                 markerdata.save(storage);
             }
@@ -305,18 +315,7 @@ public class PlayerCompassMarker implements Listener {
             loadPlayerCompassMarkers(p);
         }
         Set<PlayerCompassMarker> pmarkers = loadedMarkersMap.get(p.getUniqueId());
-        pmarkers.forEach(m -> {
-            if(m.getId().equals(markerId)){
-                Main.logAdmin("contains before");
-            }
-        });
         pmarkers.removeIf(m -> m.getId().equals(markerId));
-        pmarkers.forEach(m -> {
-            if(m.getId().equals(markerId)){
-                Main.logAdmin("contains after");
-            }
-        });
-        
     }
     
     public static @NotNull Set<PlayerCompassMarker> getPlayerMarkers(Player player){
@@ -334,6 +333,12 @@ public class PlayerCompassMarker implements Listener {
         savePlayerCompassMarkers(event.getPlayer());
         // unload offline players
         loadedMarkersMap.remove(event.getPlayer().getUniqueId());
+    }
+    @EventHandler
+    public static void saveOnServerShutdown(PluginDisableEvent event){
+        for(Player p : Bukkit.getOnlinePlayers()){
+            savePlayerCompassMarkers(p);
+        }
     }
     @EventHandler
     public static void loadPlayerMarkerOnJoin(PlayerJoinEvent event){

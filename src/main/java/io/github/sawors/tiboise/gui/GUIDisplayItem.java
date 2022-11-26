@@ -26,6 +26,7 @@ public class GUIDisplayItem {
     private Component name;
     private List<Component> lore = new ArrayList<>();
     private boolean glint = false;
+    private String icon = "";
     private final String uniqueDisplayItemId = RandomStringUtils.randomAlphanumeric(8);
     
     public GUIDisplayItem(String name, Material displayMaterial){
@@ -48,6 +49,7 @@ public class GUIDisplayItem {
         meat.getPersistentDataContainer().set(getDisplayIdKey(), PersistentDataType.STRING, uniqueDisplayItemId);
         meat.getPersistentDataContainer().set(TiboiseItem.getItemIdKey(), PersistentDataType.STRING, TiboiseItem.formatTextToId(TIBOISE_ITEM_ID));
         meat.getPersistentDataContainer().set(getDisplayTypeKey(), PersistentDataType.STRING, type.toUpperCase(Locale.ROOT));
+        meat.getPersistentDataContainer().set(getIconKey(),PersistentDataType.STRING,getIcon());
         item.setItemMeta(meat);
         
         return item;
@@ -86,5 +88,17 @@ public class GUIDisplayItem {
     }
     protected static NamespacedKey getDisplayIdKey(){
         return new NamespacedKey(Main.getPlugin(),"display_id");
+    }
+    public static NamespacedKey getIconKey(){
+        return new NamespacedKey(Main.getPlugin(), "display_icon");
+    }
+    
+    public String getIcon() {
+        return icon;
+    }
+    
+    public GUIDisplayItem setIcon(String icon) {
+        this.icon = icon;
+        return this;
     }
 }

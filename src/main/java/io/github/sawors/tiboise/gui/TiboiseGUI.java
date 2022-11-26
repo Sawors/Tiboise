@@ -7,4 +7,9 @@ public abstract class TiboiseGUI {
     
     public static Map<String, String> linkmap = new HashMap<>();
     
+    public enum SortingType{
+        ALPHABETICAL, DATE, VALUE
+    }
+    
+    
 }

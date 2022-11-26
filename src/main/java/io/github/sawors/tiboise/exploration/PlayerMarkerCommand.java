@@ -44,6 +44,28 @@ public class PlayerMarkerCommand implements CommandExecutor {
                         }
                         p.sendMessage(msg);
                     }
+                    case "rename" -> {
+                        Set<PlayerCompassMarker> markers = PlayerCompassMarker.getPlayerMarkers(p);
+                        if(args.length >= 2){
+                            if(args.length < 3){
+                                p.sendMessage(Component.text(ChatColor.RED+"Please input a name for your marker !"));
+                                return true;
+                            } else {
+                                String idstr = args[1];
+                                StringBuilder namestr = new StringBuilder();
+                                for(int i = 2; i<args.length; i++){
+                                    namestr.append(args[i]).append(" ");
+                                }
+                                for(PlayerCompassMarker mk : markers){
+                                    if(mk.getId().toString().startsWith(idstr)){
+                                        p.sendMessage(Component.text(ChatColor.YELLOW+"Marker "+ChatColor.GOLD+mk.getName()+ChatColor.YELLOW+" renamed to "+ChatColor.GOLD+namestr+"!"));
+                                        mk.setName(namestr.toString());
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             } else {
                 final int rows = 6;

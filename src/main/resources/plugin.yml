@@ -28,6 +28,8 @@ commands:
     permission: tiboise.infos
 softdepend:
   - voicechat
+depend:
+  - ProtocolLib
 
 permissions:
   tiboise.kidnap:

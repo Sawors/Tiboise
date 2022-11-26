@@ -1,5 +1,7 @@
 package io.github.sawors.tiboise;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import de.maxhenkel.voicechat.api.BukkitVoicechatService;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import io.github.sawors.tiboise.agriculture.AnimalsManager;
@@ -30,7 +32,6 @@ import io.github.sawors.tiboise.items.tools.radius.Hammer;
 import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -74,6 +75,7 @@ public final class Main extends JavaPlugin {
     private static boolean vcenabled = false;
     private static VoicechatPlugin vcplugin = null;
     private static boolean usebungee = false;
+    private static ProtocolManager protocolManager;
     // database
     private static File dbfile;
 
@@ -102,6 +104,8 @@ public final class Main extends JavaPlugin {
             usebungee = false;
         }
     
+        protocolManager = ProtocolLibrary.getProtocolManager();
+        
         //getServer().getMessenger().registerOutgoingPluginChannel(getPlugin(), getVanillaRebootChannel());
         //getServer().getMessenger().registerIncomingPluginChannel(this, getVanillaRebootChannel(), new BungeeListener());
     
@@ -209,6 +213,10 @@ public final class Main extends JavaPlugin {
 
         return null;
     }
+    
+    public static ProtocolManager getProtocolManager(){
+        return protocolManager;
+    }
 
     private static void loadConfigOptions(){
         YamlConfiguration configdata = YamlConfiguration.loadConfiguration(configfile);
@@ -300,12 +308,10 @@ public final class Main extends JavaPlugin {
     public static String getComponentContent(Component component){
         StringBuilder out = new StringBuilder();
         String in = component.toString();
-        String ref = "no ref";
+        String ref = "content=\"";
         char[] content = in.toCharArray();
         if(component instanceof TranslatableComponent){
-            ref = "\"translate\":\"";
-        } else if(component instanceof TextComponent){
-            ref = "\"extra\":\"";
+            ref = "translate=\"";
         }
     
         int base = in.indexOf(ref);
@@ -316,6 +322,22 @@ public final class Main extends JavaPlugin {
                     out.append(content[i]);
                 } else {
                     break;
+                }
+            }
+        }
+        
+        if(out.length() <= 0){
+            out = new StringBuilder();
+            ref = "extra=\"";
+            base = in.indexOf(ref);
+            if(base > -1){
+                for(int i = base+ref.length(); i<content.length+4; i++){
+                    char c = content[i];
+                    if(c != '\"'){
+                        out.append(content[i]);
+                    } else {
+                        break;
+                    }
                 }
             }
         }
