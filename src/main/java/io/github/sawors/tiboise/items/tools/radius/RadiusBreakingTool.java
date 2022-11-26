@@ -4,9 +4,11 @@ import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -16,8 +18,10 @@ public abstract class RadiusBreakingTool extends TiboiseItem {
     
     // TODO :
     //  Add a correct 3D rotation to this method, currently it works but only out of pure luck
-    
     protected static void radiusBreak(RadiusType type, int radius, Block origin, BlockFace minedface, ItemStack tool, double durabilitymultiplier){
+        radiusBreak(type,radius,origin,minedface,tool,durabilitymultiplier,null);
+    }
+    protected static void radiusBreak(RadiusType type, int radius, Block origin, BlockFace minedface, ItemStack tool, double durabilitymultiplier, @Nullable Player breaker){
         Location center = origin.getLocation().add(.5,.5,.5);
         Vector direction = minedface.getDirection().multiply(-1);
         ArrayList<Vector> vectors = new ArrayList<>();
@@ -59,9 +63,8 @@ public abstract class RadiusBreakingTool extends TiboiseItem {
             
         }
         
-        if(tool.getItemMeta() instanceof Damageable d && !d.isUnbreakable()){
-            d.setDamage(d.getDamage()+(int)(damage/durabilitymultiplier));
-            tool.setItemMeta(d);
+        if(tool.getItemMeta() instanceof Damageable d && !d.isUnbreakable() && breaker != null){
+            tool.damage((int)(damage/durabilitymultiplier),breaker);
         }
         
         /*for(Vector v : vectors2){

@@ -23,6 +23,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -356,6 +357,16 @@ public class QOLImprovements implements Listener {
                 }
             }
         }
+    }
+    
+    //
+    // SET GAMERULES
+    @EventHandler
+    public static void onWorldLoad(WorldLoadEvent event){
+        World w = event.getWorld();
+        w.setGameRule(GameRule.DO_INSOMNIA, false);
+        w.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        w.setGameRule(GameRule.NATURAL_REGENERATION, false);
     }
     
     @EventHandler (priority = EventPriority.LOW)

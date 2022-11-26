@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -59,11 +60,13 @@ public class Broadaxe extends TiboiseItem implements Listener {
                 case "iron" -> reach = 16;
                 case "diamond", "steel", "netherite" -> reach = 32;
             }
-            cutTreeFromBlock(event.getBlock(),CuttingMode.VERTICAL,tool, reach);
+            cutTreeFromBlock(event.getBlock(),CuttingMode.VERTICAL,tool, reach, event.getPlayer());
         }
     }
-    
     private static void cutTreeFromBlock(Block origin, CuttingMode mode, ItemStack tool, int limit){
+        cutTreeFromBlock( origin, mode, tool, limit, null);
+    }
+    private static void cutTreeFromBlock(Block origin, CuttingMode mode, ItemStack tool, int limit, @Nullable Player cutter){
         List<Block> cutlist = new ArrayList<>();
         switch(mode) {
             case EXTENDED -> cutlist = new VeinMinerUtility(origin).setLimit(limit).getVein(filter);
@@ -71,14 +74,8 @@ public class Broadaxe extends TiboiseItem implements Listener {
             case VERTICAL_DOUBLE -> cutlist = new VeinMinerUtility(origin).setLimit(limit).getVerticalVein(true,filter);
         }
         boolean animlocal = !(mode == CuttingMode.VERTICAL_DOUBLE || mode == CuttingMode.VERTICAL) && animate;
-        if(doitemdamage && tool.getItemMeta() instanceof Damageable d && !d.isUnbreakable()){
-            int damage = d.getDamage()+(int)(cutlist.size()*damagemodifier);
-            if(damage > 0){
-                d.setDamage(damage);
-                tool.setItemMeta(d);
-            } else {
-                return;
-            }
+        if(doitemdamage && tool.getItemMeta() instanceof Damageable d && !d.isUnbreakable() && cutter != null){
+            tool.damage((int)(cutlist.size()*damagemodifier),cutter);
         }
         if(animlocal){
             final List<Block> f_cutlist = cutlist;
