@@ -2,18 +2,19 @@ package io.github.sawors.tiboise.exploration;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.exploration.items.CopperCompass;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldSaveEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -33,7 +34,6 @@ public class PlayerCompassMarker implements Listener {
     // unique marker
     private final String name;
     private final String world;
-    private final Material iconitem;
     private final MarkerVisualIcons icontype;
     private final UUID id;
     private final int x;
@@ -65,7 +65,6 @@ public class PlayerCompassMarker implements Listener {
     public PlayerCompassMarker(@NotNull String name, @NotNull Location location){
         this.name = name;
         this.world = location.getWorld().getName();
-        this.iconitem = DEFAULT_MARKER_MATERIAL;
         this.icontype = MarkerVisualIcons.DEFAULT;
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
@@ -77,7 +76,6 @@ public class PlayerCompassMarker implements Listener {
     public PlayerCompassMarker(@NotNull String name, @NotNull Location location, MarkerVisualIcons icon){
         this.name = name;
         this.world = location.getWorld().getName();
-        this.iconitem = DEFAULT_MARKER_MATERIAL;
         this.icontype = icon;
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
@@ -88,7 +86,6 @@ public class PlayerCompassMarker implements Listener {
     protected PlayerCompassMarker(@NotNull String name, @NotNull String world, MarkerVisualIcons icon, @NotNull UUID id, int x, int y, int z){
         this.name = name;
         this.world = world;
-        this.iconitem = DEFAULT_MARKER_MATERIAL;
         this.icontype = icon;
         this.id = id;
         this.x = x;
@@ -102,7 +99,6 @@ public class PlayerCompassMarker implements Listener {
     public PlayerCompassMarker(){
         this.name = "Marker";
         this.world = "world";
-        this.iconitem = DEFAULT_MARKER_MATERIAL;
         this.icontype = MarkerVisualIcons.DEFAULT;
         this.id = UUID.randomUUID();
         this.x = 0;
@@ -145,6 +141,9 @@ public class PlayerCompassMarker implements Listener {
     }
     
     public ItemStack getDisplayItem(boolean tracking, boolean registerItem){
+        return getDisplayItem(tracking,registerItem,false);
+    }
+    public ItemStack getDisplayItem(boolean tracking, boolean registerItem, boolean glint){
         ItemStack showitem = new ItemStack(DEFAULT_MARKER_MATERIAL);
         ItemMeta meta = showitem.getItemMeta();
         
@@ -169,6 +168,11 @@ public class PlayerCompassMarker implements Listener {
         meta.setCustomModelData(getIconType().getCustomModelValue());
         
         showitem.setItemMeta(meta);
+        
+        if(glint){
+            showitem.editMeta(m -> m.addItemFlags(ItemFlag.HIDE_ENCHANTS));
+            showitem.addUnsafeEnchantment(Enchantment.DURABILITY,1);
+        }
         
         if(registerItem){
             showInventoryLink.put(showitem,this);
@@ -202,7 +206,7 @@ public class PlayerCompassMarker implements Listener {
                     String world = markerdata.getString(MarkerDataFields.WORLD.toString().toLowerCase());
                     MarkerVisualIcons icontype = MarkerVisualIcons.DEFAULT;
                     try{
-                        icontype = MarkerVisualIcons.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString()));
+                        icontype = MarkerVisualIcons.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString().toLowerCase()));
                     } catch (IllegalArgumentException ignored){}
 
                     UUID id = UUID.randomUUID();
@@ -233,20 +237,18 @@ public class PlayerCompassMarker implements Listener {
                 new File(storage.getParent()).mkdirs();
                 storage.createNewFile();
             }
-            
             if(loadedMarkersMap.containsKey(p.getUniqueId())){
-                YamlConfiguration markerdata = YamlConfiguration.loadConfiguration(storage);
+                YamlConfiguration markerdata = new YamlConfiguration();
                 for(PlayerCompassMarker marker : loadedMarkersMap.get(p.getUniqueId())){
                     ConfigurationSection section =  markerdata.createSection(marker.getId().toString());
                     section.set(MarkerDataFields.NAME.toString().toLowerCase(), marker.getName());
                     section.set(MarkerDataFields.WORLD.toString().toLowerCase(), marker.getWorld());
                     section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), DEFAULT_MARKER_MATERIAL.toString());
-                    section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIconType());
+                    section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIconType().toString());
                     section.set(MarkerDataFields.X.toString().toLowerCase(), marker.getX());
                     section.set(MarkerDataFields.Y.toString().toLowerCase(), marker.getY());
                     section.set(MarkerDataFields.Z.toString().toLowerCase(), marker.getZ());
                 }
-                
                 markerdata.save(storage);
             }
         }catch (IOException e){
@@ -260,15 +262,19 @@ public class PlayerCompassMarker implements Listener {
             loadPlayerCompassMarkers(p);
         }
         Set<PlayerCompassMarker> markers = loadedMarkersMap.get(p.getUniqueId());
+        if(markers.size() >= (CopperCompass.MARKER_INVENTORY_ROW_AMOUNT-2)*(9-2)) {
+            p.sendMessage(Component.text(ChatColor.RED+"All your marker slots are already full !"));
+            return;
+        }
         // adding a marker with an already existing ID will overwrite its predecessor
         markers.removeIf(m -> m.getId().equals(marker.getId()));
         markers.add(marker);
         
         // added this to allow for compass tracking, should be removed when I find a way to track without Lodestone being placed at the destination
-        Block edit = marker.getDestination().clone().add(0,(-marker.getDestination().getY())-64,0).getBlock();
-        edit.setType(Material.LODESTONE);
+        //Block edit = marker.getDestination().clone().add(0,(-marker.getDestination().getY())-64,0).getBlock();
+        //edit.setType(Material.LODESTONE);
         // THIS COULD LEAD TO EXPLOITS ! BE CAREFUL
-        edit.getRelative(BlockFace.UP).setType(Material.BEDROCK);
+        //edit.getRelative(BlockFace.UP).setType(Material.BEDROCK);
     }
     
     public static void removeMarkerForPlayer(Player p, UUID markerId){
@@ -276,12 +282,18 @@ public class PlayerCompassMarker implements Listener {
             loadPlayerCompassMarkers(p);
         }
         Set<PlayerCompassMarker> pmarkers = loadedMarkersMap.get(p.getUniqueId());
-        for(PlayerCompassMarker marker : pmarkers){
-            if(marker.getId().equals(markerId)){
-                pmarkers.remove(marker);
-                marker.getDestination().clone().add(0,(-marker.getDestination().getY())-64,0).getBlock().setType(Material.BEDROCK);
+        pmarkers.forEach(m -> {
+            if(m.getId().equals(markerId)){
+                Main.logAdmin("contains before");
             }
-        }
+        });
+        pmarkers.removeIf(m -> m.getId().equals(markerId));
+        pmarkers.forEach(m -> {
+            if(m.getId().equals(markerId)){
+                Main.logAdmin("contains after");
+            }
+        });
+        
     }
     
     public static @NotNull Set<PlayerCompassMarker> getPlayerMarkers(Player player){
