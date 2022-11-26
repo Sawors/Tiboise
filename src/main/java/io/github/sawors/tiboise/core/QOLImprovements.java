@@ -21,10 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -193,9 +190,23 @@ public class QOLImprovements implements Listener {
             }.runTask(Main.getPlugin());
         }
     }
+    
+    //
+    //  REMOVE XP EARNING
     @EventHandler
     public static void removeXpEarning(PlayerExpChangeEvent event){
         event.setAmount(0);
+        event.getPlayer().setLevel(0);
+    }
+    @EventHandler
+    public static void removeAdvancementXp(PlayerAdvancementDoneEvent event){
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                event.getPlayer().setLevel(0);
+                event.getPlayer().setExp(0);
+            }
+        }.runTaskLater(Main.getPlugin(),1);
     }
     
     //
