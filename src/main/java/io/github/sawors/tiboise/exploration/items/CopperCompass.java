@@ -21,19 +21,24 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class CopperCompass extends TiboiseItem implements Listener {
     
     public final static String MARKER_INVENTORY_NAME = "Markers";
     public final static int MARKER_INVENTORY_ROW_AMOUNT = 6;
     // TODO : move this to the future DisplayItem class
-    private static Map<Integer, MarkerOptionsButton> buttonLink = new HashMap<>();
     private static Map<Inventory, PlayerCompassMarker> inventoryLink = new HashMap<>();
     private static Map<Inventory, MarkerInventoryType> inventoryTypeLink = new HashMap<>();
+    
+    private static GUIDisplayItem backButtonFactory = new GUIDisplayItem(MarkerOptionsButton.BACK.toString(),Material.INK_SAC)
+            .setName(Component.text(ChatColor.GOLD + "← Go Back").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
+            .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click go back to the previous menu <<")));
 
 
     private enum MarkerInventoryType{
@@ -63,7 +68,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
         Location lastDeath = p.getLastDeathLocation();
         // TOTEST
         if(lastDeath != null){
-            PlayerCompassMarker deathMarker = new PlayerCompassMarker("Last Death", lastDeath, PlayerCompassMarker.MarkerVisualIcons.DEATH);
+            PlayerCompassMarker deathMarker = new PlayerCompassMarker("Last Death", lastDeath, PlayerCompassMarker.MarkerVisualIcon.DEATH);
             showInv.setItem(4, deathMarker.getDisplayItem(true,true,p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm && deathMarker.getDestination().equals(cm.getLodestone())));
         }
 
@@ -161,26 +166,40 @@ public class CopperCompass extends TiboiseItem implements Listener {
                     }
                 }
                 case ICONS -> {
-
+                    String displayRaw = GUIDisplayItem.getDisplayItemType(clicked);
+                    if(displayRaw != null && displayRaw.split("\\+").length >= 2){
+                        String[] splitted = displayRaw.split("\\+");
+                        String type = splitted[0];
+                        String iconname = splitted[1];
+                        if(type != null && type.equalsIgnoreCase(MarkerOptionsButton.SET_ICON.toString()) && iconname != null){
+                            PlayerCompassMarker.MarkerVisualIcon icon = null;
+                            try{
+                                icon = PlayerCompassMarker.MarkerVisualIcon.valueOf(iconname);
+                            } catch (IllegalArgumentException ignored){}
+                            PlayerCompassMarker marker = inventoryLink.get(inv);
+                            if(marker != null){
+                                // normally this should properly edit the marker without having to redo it
+                                marker.setIcon(icon);
+                                showPlayerMarkerListInventory(p);
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
     public static void showPlayerIconListInventory(Player p, PlayerCompassMarker marker){
-        Inventory iconList = Bukkit.createInventory(p,9*MARKER_INVENTORY_ROW_AMOUNT, Component.text(ChatColor.DARK_GRAY+"Edit Marker Icon"));
+        Inventory iconListGui = Bukkit.createInventory(p,9*MARKER_INVENTORY_ROW_AMOUNT, Component.text(ChatColor.DARK_GRAY+"Edit Marker Icon"));
         ItemStack usedIcon = marker.getDisplayItem(false,false);
-        iconList.setItem(13, usedIcon);
+        iconListGui.setItem(13, usedIcon);
         int slot = 18;
-        for(PlayerCompassMarker.MarkerVisualIcons icon : PlayerCompassMarker.MarkerVisualIcons.values()){
-            ItemStack iconDisplay = new ItemStack(PlayerCompassMarker.DEFAULT_MARKER_MATERIAL);
-            iconDisplay.editMeta(m -> {
-                String name = icon.toString();
-                name = Main.getUpperCamelCase(name.replaceAll("_"," "));
-                m.displayName(Component.text(ChatColor.WHITE+name).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
-                m.getPersistentDataContainer().set(PlayerCompassMarker.getIconTypeKey(), PersistentDataType.STRING, icon.toString().toLowerCase(Locale.ROOT));
-                m.setCustomModelData(icon.getCustomModelValue());
-            });
+        for(PlayerCompassMarker.MarkerVisualIcon icon : PlayerCompassMarker.MarkerVisualIcon.values()){
+            ItemStack iconDisplay = new GUIDisplayItem(MarkerOptionsButton.SET_ICON+"+"+icon.toString(),PlayerCompassMarker.DEFAULT_MARKER_MATERIAL)
+                    .setName(Component.text(ChatColor.WHITE+Main.getUpperCamelCase(icon.toString().replaceAll("_"," "))).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
+                    .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click here to select this icon for your marker <<")))
+                    .get();
+            
             int rowPosition = (slot % 9) + 1;
             if (rowPosition == 1) {
                 slot++;
@@ -188,7 +207,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
                 slot += 2;
             }
 
-            iconList.setItem(slot, iconDisplay);
+            iconListGui.setItem(slot, iconDisplay);
 
             slot++;
             if (slot >= (9 * (MARKER_INVENTORY_ROW_AMOUNT - 1)) - 1) {
@@ -196,9 +215,11 @@ public class CopperCompass extends TiboiseItem implements Listener {
             }
         }
     
-        registerMarkerInventory(iconList,marker,MarkerInventoryType.ICONS);
+        iconListGui.setItem(getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,1), backButtonFactory.get());
+    
+        registerMarkerInventory(iconListGui,marker,MarkerInventoryType.ICONS);
         p.closeInventory();
-        p.openInventory(iconList);
+        p.openInventory(iconListGui);
     }
 
     // TODO : methods to set and retrieve icon data for icon selection buttons
@@ -220,8 +241,8 @@ public class CopperCompass extends TiboiseItem implements Listener {
     }
 
     private static void showPlayerMarkerOptionsInventory(Player p, PlayerCompassMarker marker){
-        Inventory options = Bukkit.createInventory(p,2*9,Component.text(ChatColor.DARK_GRAY+"Modifying Marker : "+marker.getName()));
-        options.setItem(4,marker.getDisplayItem(false,false));
+        Inventory optionsgui = Bukkit.createInventory(p,2*9,Component.text(ChatColor.DARK_GRAY+"Modifying Marker : "+marker.getName()));
+        optionsgui.setItem(4,marker.getDisplayItem(false,false));
         
         ItemStack renameButton = new GUIDisplayItem(MarkerOptionsButton.RENAME.toString(),Material.NAME_TAG)
                 .setName(Component.text(ChatColor.GOLD + "Rename Marker").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
@@ -235,15 +256,12 @@ public class CopperCompass extends TiboiseItem implements Listener {
                 .setName(Component.text(ChatColor.GOLD + "Delete Marker").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
                 .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click to delete the marker <<")))
                 .get();
-        ItemStack backButton = new GUIDisplayItem(MarkerOptionsButton.BACK.toString(),Material.INK_SAC)
-                .setName(Component.text(ChatColor.GOLD + "← Go Back").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
-                .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click go back to the previous menu <<")))
-                .get();
+        ItemStack backButton = backButtonFactory.get();
 
-        options.setItem(9, backButton);
-        options.setItem(12, renameButton);
-        options.setItem(13, iconButton);
-        options.setItem(14, deleteButton);
+        optionsgui.setItem(9, backButton);
+        optionsgui.setItem(12, renameButton);
+        optionsgui.setItem(13, iconButton);
+        optionsgui.setItem(14, deleteButton);
         // 00 01 02 03 04 05 06 07 08
         // 09 10 11 12 13 14 15 16 17
 
@@ -255,9 +273,9 @@ public class CopperCompass extends TiboiseItem implements Listener {
         //  Map<String, Inventory> where String is a custom identifier provided by the registerer and Inventory is the
         //  inventory to be tracked itself.
 
-        registerMarkerInventory(options,marker,MarkerInventoryType.OPTIONS);
+        registerMarkerInventory(optionsgui,marker,MarkerInventoryType.OPTIONS);
         p.closeInventory();
-        p.openInventory(options);
+        p.openInventory(optionsgui);
     }
 
     public static void registerMarkerInventory(Inventory inv, PlayerCompassMarker marker, MarkerInventoryType inventoryType){
@@ -269,5 +287,15 @@ public class CopperCompass extends TiboiseItem implements Listener {
     }
     public static @Nullable MarkerInventoryType getInventoryType(Inventory inv){
         return inventoryTypeLink.get(inv);
+    }
+    
+    /**
+     *
+     * @param row The row of which you want to get the place (starting from 1)
+     * @param place The slot to get the value (starting from 1, left)
+     * @return The absolute value of the slot (used in Bukkit Inventories to refer to inventory slots)
+     */
+    private static int getSlotForRow(int row, int place){
+        return (9*(row-1))-1+place;
     }
 }

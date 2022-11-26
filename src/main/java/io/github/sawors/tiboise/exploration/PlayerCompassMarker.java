@@ -32,9 +32,9 @@ public class PlayerCompassMarker implements Listener {
     // defaults
     public static final Material DEFAULT_MARKER_MATERIAL = Material.GLOBE_BANNER_PATTERN;
     // unique marker
-    private final String name;
+    private String name;
     private final String world;
-    private final MarkerVisualIcons icontype;
+    private MarkerVisualIcon icontype;
     private final UUID id;
     private final int x;
     private final int y;
@@ -44,7 +44,7 @@ public class PlayerCompassMarker implements Listener {
         NAME, WORLD, ICON_ITEM, ICON_TYPE, ID, X, Y, Z
     }
 
-    public enum MarkerVisualIcons {
+    public enum MarkerVisualIcon {
         DEFAULT, RESOURCE, HOME, CROSS, STRUCTURE, RESOURCE_ALT, CROSS_ALT, DEATH;
         public int getCustomModelValue(){
             return switch(this){
@@ -57,7 +57,22 @@ public class PlayerCompassMarker implements Listener {
                 case STRUCTURE -> 5;
                 case RESOURCE_ALT -> 6;
                 case CROSS_ALT -> 7;
-                default -> 0;
+                case DEATH -> 8;
+            };
+        }
+        
+        public String getDisplayName(){
+            return switch(this){
+                // Arbitrary values, just to make it simple for players to change the model in a meaningful way
+                // (no need to use hash here, there is not enough entries)
+                case DEFAULT -> "Default Marker";
+                case RESOURCE -> "Resource Marker";
+                case HOME -> "Home Marker";
+                case CROSS -> "Cross Marker";
+                case STRUCTURE -> "Structure Marker";
+                case RESOURCE_ALT -> "Resource 2 Marker";
+                case CROSS_ALT -> "Cross 2 Marker";
+                case DEATH -> "Last Death Marker";
             };
         }
     }
@@ -65,7 +80,7 @@ public class PlayerCompassMarker implements Listener {
     public PlayerCompassMarker(@NotNull String name, @NotNull Location location){
         this.name = name;
         this.world = location.getWorld().getName();
-        this.icontype = MarkerVisualIcons.DEFAULT;
+        this.icontype = MarkerVisualIcon.DEFAULT;
         this.id = UUID.randomUUID();
         this.x = location.getBlockX();
         this.y = location.getBlockY();
@@ -73,7 +88,7 @@ public class PlayerCompassMarker implements Listener {
         
     }
     
-    public PlayerCompassMarker(@NotNull String name, @NotNull Location location, MarkerVisualIcons icon){
+    public PlayerCompassMarker(@NotNull String name, @NotNull Location location, MarkerVisualIcon icon){
         this.name = name;
         this.world = location.getWorld().getName();
         this.icontype = icon;
@@ -83,7 +98,7 @@ public class PlayerCompassMarker implements Listener {
         this.z = location.getBlockZ();
     }
     
-    protected PlayerCompassMarker(@NotNull String name, @NotNull String world, MarkerVisualIcons icon, @NotNull UUID id, int x, int y, int z){
+    protected PlayerCompassMarker(@NotNull String name, @NotNull String world, MarkerVisualIcon icon, @NotNull UUID id, int x, int y, int z){
         this.name = name;
         this.world = world;
         this.icontype = icon;
@@ -99,7 +114,7 @@ public class PlayerCompassMarker implements Listener {
     public PlayerCompassMarker(){
         this.name = "Marker";
         this.world = "world";
-        this.icontype = MarkerVisualIcons.DEFAULT;
+        this.icontype = MarkerVisualIcon.DEFAULT;
         this.id = UUID.randomUUID();
         this.x = 0;
         this.y = 0;
@@ -114,7 +129,7 @@ public class PlayerCompassMarker implements Listener {
         return world;
     }
     
-    public MarkerVisualIcons getIconType() {
+    public MarkerVisualIcon getIconType() {
         return icontype;
     }
     
@@ -132,6 +147,14 @@ public class PlayerCompassMarker implements Listener {
     
     public int getZ() {
         return z;
+    }
+    
+    public void setName(String name){
+        this.name = name;
+    }
+    
+    public void setIcon(MarkerVisualIcon icon){
+        this.icontype = icon;
     }
     
     public @NotNull Location getDestination(){
@@ -204,9 +227,9 @@ public class PlayerCompassMarker implements Listener {
                 if(markerdata != null){
                     String name = markerdata.getString(MarkerDataFields.NAME.toString().toLowerCase());
                     String world = markerdata.getString(MarkerDataFields.WORLD.toString().toLowerCase());
-                    MarkerVisualIcons icontype = MarkerVisualIcons.DEFAULT;
+                    MarkerVisualIcon icontype = MarkerVisualIcon.DEFAULT;
                     try{
-                        icontype = MarkerVisualIcons.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString().toLowerCase()));
+                        icontype = MarkerVisualIcon.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString().toLowerCase()));
                     } catch (IllegalArgumentException ignored){}
 
                     UUID id = UUID.randomUUID();
