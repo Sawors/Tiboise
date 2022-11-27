@@ -4,7 +4,6 @@ import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.items.TiboiseItem;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
@@ -240,7 +239,7 @@ public class QOLImprovements implements Listener {
             
             // SADDLES
             vanillabonusrecipes.add(
-                    new ShapedRecipe(new NamespacedKey(Key.MINECRAFT_NAMESPACE,new ItemStack(Material.SADDLE).getType().toString().toLowerCase(Locale.ROOT)), new ItemStack(Material.SADDLE)).shape(
+                    new ShapedRecipe(Material.SADDLE.getKey(), new ItemStack(Material.SADDLE)).shape(
                             "LLL",
                             "SXS"
                     )
@@ -250,9 +249,22 @@ public class QOLImprovements implements Listener {
             );
             // NAME TAGS
             vanillabonusrecipes.add(
-                    new ShapelessRecipe(new NamespacedKey(Key.MINECRAFT_NAMESPACE,new ItemStack(Material.NAME_TAG).getType().toString().toLowerCase(Locale.ROOT)), new ItemStack(Material.NAME_TAG))
+                    new ShapelessRecipe(Material.NAME_TAG.getKey(), new ItemStack(Material.NAME_TAG))
                     .addIngredient(Material.GOLD_NUGGET)
                     .addIngredient(Material.PAPER)
+            );
+            // GLOWSTONE DUST
+            vanillabonusrecipes.add(
+                    new ShapelessRecipe(Material.GLOWSTONE_DUST.getKey(), new ItemStack(Material.GLOWSTONE_DUST).asQuantity(4))
+                            .addIngredient(4, Material.FLINT)
+                            .addIngredient(Material.GLOW_BERRIES)
+            );
+            // SHROOMLIGHT
+            vanillabonusrecipes.add(
+                    new ShapedRecipe(Material.SHROOMLIGHT.getKey(), new ItemStack(Material.NAME_TAG))
+                            .shape("LLL","LGL","LLL")
+                            .setIngredient('L', new RecipeChoice.MaterialChoice(Tag.LEAVES))
+                            .setIngredient('G',Material.GLOWSTONE)
             );
             // MAKE GOLD ITEM ENCHANTED BY DEFAULT
             List<Material> goldtoedit = List.of(Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, Material.GOLDEN_AXE, Material.GOLDEN_SWORD);
