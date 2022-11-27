@@ -262,9 +262,10 @@ public class QOLImprovements implements Listener {
             // SHROOMLIGHT
             vanillabonusrecipes.add(
                     new ShapedRecipe(Material.SHROOMLIGHT.getKey(), new ItemStack(Material.NAME_TAG))
-                            .shape("LLL","LGL","LLL")
+                            .shape("XLX","LGL","XLX")
                             .setIngredient('L', new RecipeChoice.MaterialChoice(Tag.LEAVES))
-                            .setIngredient('G',Material.GLOWSTONE)
+                            .setIngredient('G',Material.GLOW_BERRIES)
+                            .setIngredient('X',Material.AIR)
             );
             // MAKE GOLD ITEM ENCHANTED BY DEFAULT
             List<Material> goldtoedit = List.of(Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, Material.GOLDEN_AXE, Material.GOLDEN_SWORD);
