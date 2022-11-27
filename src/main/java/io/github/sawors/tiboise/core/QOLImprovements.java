@@ -261,7 +261,7 @@ public class QOLImprovements implements Listener {
             );
             // SHROOMLIGHT
             vanillabonusrecipes.add(
-                    new ShapedRecipe(Material.SHROOMLIGHT.getKey(), new ItemStack(Material.NAME_TAG))
+                    new ShapedRecipe(Material.SHROOMLIGHT.getKey(), new ItemStack(Material.SHROOMLIGHT))
                             .shape("XLX","LGL","XLX")
                             .setIngredient('L', new RecipeChoice.MaterialChoice(Tag.LEAVES))
                             .setIngredient('G',Material.GLOW_BERRIES)
@@ -379,7 +379,8 @@ public class QOLImprovements implements Listener {
         World w = event.getWorld();
         w.setGameRule(GameRule.DO_INSOMNIA, false);
         w.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        w.setGameRule(GameRule.NATURAL_REGENERATION, false);
+        //w.setGameRule(GameRule.NATURAL_REGENERATION, false);
+        // wrench
     }
     
     @EventHandler (priority = EventPriority.LOW)

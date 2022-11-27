@@ -64,7 +64,7 @@ public abstract class RadiusBreakingTool extends TiboiseItem {
         }
         
         if(tool.getItemMeta() instanceof Damageable d && !d.isUnbreakable() && breaker != null){
-            tool.damage((int)(damage/durabilitymultiplier),breaker);
+            breaker.damageItemStack(tool,(int)(damage/durabilitymultiplier));
         }
         
         /*for(Vector v : vectors2){
