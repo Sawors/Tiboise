@@ -43,4 +43,4 @@ permissions:
     default: op
   tiboise.infos:
     description: Allows you to get infos
-    default: op
+    default: not op

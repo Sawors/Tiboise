@@ -24,9 +24,14 @@ public class TiboiseMainCommand implements CommandExecutor, TabCompleter {
                             case "pack":
                                 ResourcePackManager.reloadPackData();
                                 for(Player p : Bukkit.getOnlinePlayers()){
-                                    p.setResourcePack(ResourcePackManager.getPackSource(), ResourcePackManager.getPackHash(),true);
+                                    ResourcePackManager.sendPlayerResourcePack(p);
                                 }
                         }
+                    }
+                case "pack":
+                    if(sender instanceof Player p){
+                        ResourcePackManager.sendPlayerResourcePack(p);
+                        
                     }
             }
         }

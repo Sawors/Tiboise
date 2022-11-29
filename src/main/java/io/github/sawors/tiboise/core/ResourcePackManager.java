@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.core;
 
 import io.github.sawors.tiboise.Main;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -35,6 +36,10 @@ public class ResourcePackManager implements Listener {
         }catch (IOException e){
             Main.logAdmin("Can't load resource pack, malformed hash file URL");
         }
+    }
+    
+    public static void sendPlayerResourcePack(Player p){
+        p.setResourcePack(src,packhash,true);
     }
     
     public static String getPackHash(){
