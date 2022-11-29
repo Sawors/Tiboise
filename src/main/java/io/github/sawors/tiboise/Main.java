@@ -6,10 +6,7 @@ import de.maxhenkel.voicechat.api.BukkitVoicechatService;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
-import io.github.sawors.tiboise.core.ItemVariant;
-import io.github.sawors.tiboise.core.QOLImprovements;
-import io.github.sawors.tiboise.core.ResourcePackManager;
-import io.github.sawors.tiboise.core.SpawnManager;
+import io.github.sawors.tiboise.core.*;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
 import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
@@ -133,6 +130,7 @@ public final class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ResourcePackManager(), this);
         getServer().getPluginManager().registerEvents(new PlayerCompassMarker(), this);
         getServer().getPluginManager().registerEvents(new ExplorationGeneralFeatures(), this);
+        getServer().getPluginManager().registerEvents(new OfflinePlayerManagement(), this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
