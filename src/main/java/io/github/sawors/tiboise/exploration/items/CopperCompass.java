@@ -7,12 +7,10 @@ import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,10 +32,17 @@ public class CopperCompass extends TiboiseItem implements Listener {
     
     public final static String MARKER_INVENTORY_NAME = "Markers";
     public final static int MARKER_INVENTORY_ROW_AMOUNT = 6;
+    public final static List<TiboiseGUI.SortingType> ALLOWED_SORTING_TYPES = List.of(
+            TiboiseGUI.SortingType.ALPHABETICAL,
+            TiboiseGUI.SortingType.DATE,
+            TiboiseGUI.SortingType.VALUE,
+            TiboiseGUI.SortingType.DISTANCE
+    );
+    public final static TiboiseGUI.SortingType DEFAULT_SORTING_TYPE = TiboiseGUI.SortingType.DATE;
     // TODO : move this to the future DisplayItem class
     private static Map<Inventory, PlayerCompassMarker> inventoryLink = new HashMap<>();
     private static Map<Inventory, MarkerInventoryType> inventoryTypeLink = new HashMap<>();
-    private static Map<UUID, TiboiseGUI.SortingType> playerPreferedSorting = new HashMap<>();
+    private static Map<UUID, TiboiseGUI.SortingType> playerPreferredSorting = new HashMap<>();
     
     private static GUIDisplayItem backButtonFactory = new GUIDisplayItem(MarkerOptionsButton.BACK.toString(),Material.INK_SAC)
             .setName(Component.text(ChatColor.GOLD + "← Go Back").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
@@ -49,11 +54,39 @@ public class CopperCompass extends TiboiseItem implements Listener {
     }
 
     private enum MarkerOptionsButton{
-        RENAME, DELETE, ADD_NEW, CHANGE_ICON, BACK, SET_ICON
+        RENAME, DELETE, ADD_NEW, CHANGE_ICON, BACK, SET_ICON, SORT
     }
 
     public CopperCompass(){
         setMaterial(Material.COMPASS);
+    }
+
+    public static TiboiseGUI.SortingType getPreferredSortingMethod(UUID playerId){
+        return playerPreferredSorting.get(playerId) != null ? playerPreferredSorting.get(playerId) : DEFAULT_SORTING_TYPE;
+    }
+
+    public static void setPlayerPreferredSorting(UUID playerId, TiboiseGUI.SortingType sorting){
+        // reassigning parameter, might be changed to a new variable if it causes issues
+        sorting = ALLOWED_SORTING_TYPES.contains(sorting) ? sorting : DEFAULT_SORTING_TYPE;
+        playerPreferredSorting.put(playerId,sorting);
+    }
+
+    public static String getSortingDescription(TiboiseGUI.SortingType sorting){
+        switch(sorting){
+            case ALPHABETICAL -> {
+                return "Sort the markers alphabetically according to their name";
+            }
+            case DATE -> {
+                return  "Sort the markers according to their creation date";
+            }
+            case VALUE -> {
+                return "Sort the markers according to their distance from the 0 0";
+            }
+            case DISTANCE -> {
+                return "Sort the marker according to their distance to the player";
+            }
+        }
+        return "Sort the markers [THIS IS A BUG, PLEASE REPORT IT !]";
     }
     
     @EventHandler
@@ -72,7 +105,24 @@ public class CopperCompass extends TiboiseItem implements Listener {
     public static void showPlayerMarkerListInventory(Player p){
         Inventory showInv = Bukkit.createInventory(p,9*MARKER_INVENTORY_ROW_AMOUNT, Component.text(ChatColor.DARK_GRAY+MARKER_INVENTORY_NAME));
         List<PlayerCompassMarker> markers = new ArrayList<>(PlayerCompassMarker.getPlayerMarkers(p));
-        markers.sort(Comparator.comparing(PlayerCompassMarker::getCreationDate));
+        // TOTEST
+        //  does this sorting switch work ?
+        switch (getPreferredSortingMethod(p.getUniqueId())){
+            case ALPHABETICAL -> {
+                markers.sort(Comparator.comparing(PlayerCompassMarker::getName));
+            }
+            case DATE -> {
+                markers.sort(Comparator.comparing(PlayerCompassMarker::getCreationDate));
+            }
+            case VALUE -> {
+                // might be a little resource intensive, if so add an option in the config to disable this sorting method
+                markers.sort(Comparator.comparingDouble(m -> m.getDestination().distance(m.getDestination().getWorld().getSpawnLocation())));
+            }
+            case DISTANCE -> {
+                // might be a little resource intensive, if so add an option in the config to disable this sorting method
+                markers.sort(Comparator.comparingDouble(m -> m.getDestination().distance(p.getLocation())));
+            }
+        }
         Location lastDeath = p.getLastDeathLocation();
         if(lastDeath != null){
             PlayerCompassMarker deathMarker = new PlayerCompassMarker("Last Death", lastDeath, PlayerCompassMarker.MarkerVisualIcon.DEATH);
@@ -94,12 +144,26 @@ public class CopperCompass extends TiboiseItem implements Listener {
                 break;
             }
         }
-        // TOTEST
         ItemStack addMarkerButton = new GUIDisplayItem(MarkerOptionsButton.ADD_NEW.toString(),Material.RED_BANNER)
                 .setName(Component.text(ChatColor.GOLD + "Add a new Marker").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
                 .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click to add a new Marker at your position <<")))
                 .get();
         showInv.setItem(getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,5), addMarkerButton);
+        List<Component> sortingMethodsLore = new ArrayList<>();
+        sortingMethodsLore.add(Component.text(ChatColor.GRAY+"Sorting method :"));
+        for(TiboiseGUI.SortingType sorting : ALLOWED_SORTING_TYPES){
+            Component tcomp = Component.text(getSortingDescription(sorting)).color(TextColor.color(Color.GRAY.asRGB()));
+            if(sorting.equals(getPreferredSortingMethod(p.getUniqueId()))){
+                tcomp = Component.text(">> ").append(tcomp).color(TextColor.color(Color.YELLOW.asRGB())).decoration(TextDecoration.BOLD, TextDecoration.State.TRUE);
+            }
+            sortingMethodsLore.add(tcomp);
+        }
+        // TOTEST
+        ItemStack sortButton = new GUIDisplayItem(MarkerOptionsButton.SORT.toString(),Material.HOPPER)
+                .setName(Component.text(ChatColor.GOLD + "Sort Markers").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
+                .setLore(sortingMethodsLore)
+                .get();
+        showInv.setItem(getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,9), sortButton);
         
         registerMarkerInventory(showInv, null,MarkerInventoryType.LIST_DISPLAY);
         p.closeInventory();
@@ -113,6 +177,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
         
         if(inv.getHolder() instanceof Player p && inventoryTypeLink.containsKey(inv) && inventoryLink.containsKey(inv) && clicked != null && p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm){
             ItemStack compassitem = p.getInventory().getItemInMainHand();
+            UUID pId = p.getUniqueId();
             event.setCancelled(true);
             switch(inventoryTypeLink.get(inv)){
                 case LIST_DISPLAY -> {
@@ -134,9 +199,34 @@ public class CopperCompass extends TiboiseItem implements Listener {
                         } else {
                             showPlayerMarkerOptionsInventory(p, marker);
                         }
-                    } else if(Objects.equals(GUIDisplayItem.getDisplayItemType(clicked), MarkerOptionsButton.ADD_NEW.toString())){
-                        PlayerCompassMarker.addMarkerForPlayer(p, new PlayerCompassMarker("Marker",p.getLocation()));
-                        showPlayerMarkerListInventory(p);
+                    } else {
+                        try{
+                            String clickedType = GUIDisplayItem.getDisplayItemType(clicked);
+                            if(clickedType != null){
+                                MarkerOptionsButton type = MarkerOptionsButton.valueOf(clickedType);
+                                switch(type){
+                                    case ADD_NEW -> {
+                                        PlayerCompassMarker.addMarkerForPlayer(p, new PlayerCompassMarker("Marker",p.getLocation()));
+                                        showPlayerMarkerListInventory(p);
+                                    }
+                                    case SORT -> {
+                                        // TOTEST
+                                        // cycle through sorting modes
+                                        ArrayList<TiboiseGUI.SortingType> sortings = new ArrayList<>(ALLOWED_SORTING_TYPES);
+                                        int index = sortings.indexOf(getPreferredSortingMethod(p.getUniqueId()));
+                                        index++;
+                                        index = index >= ALLOWED_SORTING_TYPES.size() ? 0 : Math.max(index, 0);
+                                        playerPreferredSorting.put(pId,sortings.get(index));
+                                        p.closeInventory();
+                                        showPlayerMarkerListInventory(p);
+                                    }
+                                    default -> {
+                                        return;
+                                    }
+                                }
+                            }
+                        } catch (IllegalArgumentException ignored){}
+
                     }
                 }
                 case OPTIONS -> {

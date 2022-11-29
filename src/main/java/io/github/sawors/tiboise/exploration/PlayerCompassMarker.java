@@ -3,6 +3,7 @@ package io.github.sawors.tiboise.exploration;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.sawors.tiboise.exploration.items.CopperCompass;
 import io.github.sawors.tiboise.gui.GUIDisplayItem;
+import io.github.sawors.tiboise.gui.TiboiseGUI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -46,8 +47,12 @@ public class PlayerCompassMarker implements Listener {
     
     private final LocalDateTime creationDate;
     
-    private enum MarkerDataFields {
+    private enum MarkerDataField {
         NAME, WORLD, ICON_ITEM, ICON_TYPE, ID, X, Y, Z, CREATION_DATE
+    }
+
+    private enum PlayerPreferencesField {
+        SORTING_METHOD
     }
 
     public enum MarkerVisualIcon {
@@ -231,24 +236,30 @@ public class PlayerCompassMarker implements Listener {
             YamlConfiguration data = YamlConfiguration.loadConfiguration(storage);
             ConfigurationSection markerSection = data.getConfigurationSection("markers") != null ? data.getConfigurationSection("markers") : data.getDefaultSection();
             if(markerSection != null){
+                // loading of player preferences
+                TiboiseGUI.SortingType sorting = CopperCompass.DEFAULT_SORTING_TYPE;
+                try{
+                    sorting = TiboiseGUI.SortingType.valueOf(data.getString(PlayerPreferencesField.SORTING_METHOD.toString().toLowerCase(Locale.ROOT)));
+                } catch (IllegalArgumentException ignored){}
+                CopperCompass.setPlayerPreferredSorting(p.getUniqueId(),sorting);
                 for(String key : data.getKeys(false)){
                     ConfigurationSection markerdata = markerSection.getConfigurationSection(key);
                     if(markerdata != null){
-                        String name = markerdata.getString(MarkerDataFields.NAME.toString().toLowerCase());
-                        String world = markerdata.getString(MarkerDataFields.WORLD.toString().toLowerCase());
+                        String name = markerdata.getString(MarkerDataField.NAME.toString().toLowerCase());
+                        String world = markerdata.getString(MarkerDataField.WORLD.toString().toLowerCase());
                         MarkerVisualIcon icontype = MarkerVisualIcon.DEFAULT;
                         try{
-                            icontype = MarkerVisualIcon.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString().toLowerCase()));
+                            icontype = MarkerVisualIcon.valueOf(markerdata.getString(MarkerDataField.ICON_TYPE.toString().toLowerCase()));
                         } catch (IllegalArgumentException ignored){}
 
                         UUID id = UUID.randomUUID();
                         try{
                             id = UUID.fromString(key);
                         } catch (IllegalArgumentException ignored){}
-                        int x = markerdata.getInt(MarkerDataFields.X.toString().toLowerCase());
-                        int y = markerdata.getInt(MarkerDataFields.Y.toString().toLowerCase());
-                        int z = markerdata.getInt(MarkerDataFields.Z.toString().toLowerCase());
-                        LocalDateTime creation = markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase()) != null ? LocalDateTime.parse(Objects.requireNonNull(markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase())),DEFAULT_DATETIME_FORMAT) : LocalDateTime.now();
+                        int x = markerdata.getInt(MarkerDataField.X.toString().toLowerCase());
+                        int y = markerdata.getInt(MarkerDataField.Y.toString().toLowerCase());
+                        int z = markerdata.getInt(MarkerDataField.Z.toString().toLowerCase());
+                        LocalDateTime creation = markerdata.getString(MarkerDataField.CREATION_DATE.toString().toLowerCase()) != null ? LocalDateTime.parse(Objects.requireNonNull(markerdata.getString(MarkerDataField.CREATION_DATE.toString().toLowerCase())),DEFAULT_DATETIME_FORMAT) : LocalDateTime.now();
                         name = name != null ? name : "Marker";
                         world = world != null ? world : Bukkit.getWorlds().get(0).getName();
 
@@ -275,16 +286,20 @@ public class PlayerCompassMarker implements Listener {
             if(loadedMarkersMap.containsKey(p.getUniqueId())){
                 YamlConfiguration markerdata = new YamlConfiguration();
                 ConfigurationSection markerSection = markerdata.createSection("markers");
+                // TOTEST
+                //  does this new saving scheme work ?
+                // saving preferences
+                markerdata.set(PlayerPreferencesField.SORTING_METHOD.toString().toLowerCase(Locale.ROOT), CopperCompass.getPreferredSortingMethod(p.getUniqueId()));
                 for(PlayerCompassMarker marker : loadedMarkersMap.get(p.getUniqueId())){
                     ConfigurationSection section =  markerSection.createSection(marker.getId().toString());
-                    section.set(MarkerDataFields.NAME.toString().toLowerCase(), marker.getName());
-                    section.set(MarkerDataFields.WORLD.toString().toLowerCase(), marker.getWorld());
-                    section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), DEFAULT_MARKER_MATERIAL.toString());
-                    section.set(MarkerDataFields.ICON_TYPE.toString().toLowerCase(), marker.getIcon().toString());
-                    section.set(MarkerDataFields.X.toString().toLowerCase(), marker.getX());
-                    section.set(MarkerDataFields.Y.toString().toLowerCase(), marker.getY());
-                    section.set(MarkerDataFields.Z.toString().toLowerCase(), marker.getZ());
-                    section.set(MarkerDataFields.CREATION_DATE.toString().toLowerCase(Locale.ROOT),marker.getCreationDate().format(DEFAULT_DATETIME_FORMAT));
+                    section.set(MarkerDataField.NAME.toString().toLowerCase(), marker.getName());
+                    section.set(MarkerDataField.WORLD.toString().toLowerCase(), marker.getWorld());
+                    section.set(MarkerDataField.ICON_ITEM.toString().toLowerCase(), DEFAULT_MARKER_MATERIAL.toString());
+                    section.set(MarkerDataField.ICON_TYPE.toString().toLowerCase(), marker.getIcon().toString());
+                    section.set(MarkerDataField.X.toString().toLowerCase(), marker.getX());
+                    section.set(MarkerDataField.Y.toString().toLowerCase(), marker.getY());
+                    section.set(MarkerDataField.Z.toString().toLowerCase(), marker.getZ());
+                    section.set(MarkerDataField.CREATION_DATE.toString().toLowerCase(Locale.ROOT),marker.getCreationDate().format(DEFAULT_DATETIME_FORMAT));
                 }
                 markerdata.save(storage);
             }
