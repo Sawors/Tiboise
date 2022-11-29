@@ -304,6 +304,13 @@ public class QOLImprovements implements Listener {
                     }
                 }
             }
+
+            // DOUBLE THE AMOUNT OF IRON TRAPDOORS CRAFTED
+            NamespacedKey trapKey = Material.IRON_TRAPDOOR.getKey();
+            Bukkit.removeRecipe(trapKey);
+            ShapedRecipe trapRecipe = new ShapedRecipe(trapKey, new ItemStack(Material.IRON_TRAPDOOR).asQuantity(2))
+                    .shape("III","III").setIngredient('I',Material.IRON_INGOT);
+            Bukkit.addRecipe(trapRecipe);
             
             for(Recipe r : vanillabonusrecipes){
                 try{

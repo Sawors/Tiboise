@@ -229,29 +229,32 @@ public class PlayerCompassMarker implements Listener {
         Set<PlayerCompassMarker> markers = new HashSet<>();
         if(storage.exists()){
             YamlConfiguration data = YamlConfiguration.loadConfiguration(storage);
-            for(String key : data.getKeys(false)){
-                ConfigurationSection markerdata = data.getConfigurationSection(key);
-                if(markerdata != null){
-                    String name = markerdata.getString(MarkerDataFields.NAME.toString().toLowerCase());
-                    String world = markerdata.getString(MarkerDataFields.WORLD.toString().toLowerCase());
-                    MarkerVisualIcon icontype = MarkerVisualIcon.DEFAULT;
-                    try{
-                        icontype = MarkerVisualIcon.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString().toLowerCase()));
-                    } catch (IllegalArgumentException ignored){}
+            ConfigurationSection markerSection = data.getConfigurationSection("markers") != null ? data.getConfigurationSection("markers") : data.getDefaultSection();
+            if(markerSection != null){
+                for(String key : data.getKeys(false)){
+                    ConfigurationSection markerdata = markerSection.getConfigurationSection(key);
+                    if(markerdata != null){
+                        String name = markerdata.getString(MarkerDataFields.NAME.toString().toLowerCase());
+                        String world = markerdata.getString(MarkerDataFields.WORLD.toString().toLowerCase());
+                        MarkerVisualIcon icontype = MarkerVisualIcon.DEFAULT;
+                        try{
+                            icontype = MarkerVisualIcon.valueOf(markerdata.getString(MarkerDataFields.ICON_TYPE.toString().toLowerCase()));
+                        } catch (IllegalArgumentException ignored){}
 
-                    UUID id = UUID.randomUUID();
-                    try{
-                        id = UUID.fromString(key);
-                    } catch (IllegalArgumentException ignored){}
-                    int x = markerdata.getInt(MarkerDataFields.X.toString().toLowerCase());
-                    int y = markerdata.getInt(MarkerDataFields.Y.toString().toLowerCase());
-                    int z = markerdata.getInt(MarkerDataFields.Z.toString().toLowerCase());
-                    LocalDateTime creation = markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase()) != null ? LocalDateTime.parse(Objects.requireNonNull(markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase())),DEFAULT_DATETIME_FORMAT) : LocalDateTime.now();
-                    name = name != null ? name : "Marker";
-                    world = world != null ? world : Bukkit.getWorlds().get(0).getName();
-                    
-                    PlayerCompassMarker marker = new PlayerCompassMarker(name,world,icontype,id,x,y,z,creation);
-                    markers.add(marker);
+                        UUID id = UUID.randomUUID();
+                        try{
+                            id = UUID.fromString(key);
+                        } catch (IllegalArgumentException ignored){}
+                        int x = markerdata.getInt(MarkerDataFields.X.toString().toLowerCase());
+                        int y = markerdata.getInt(MarkerDataFields.Y.toString().toLowerCase());
+                        int z = markerdata.getInt(MarkerDataFields.Z.toString().toLowerCase());
+                        LocalDateTime creation = markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase()) != null ? LocalDateTime.parse(Objects.requireNonNull(markerdata.getString(MarkerDataFields.CREATION_DATE.toString().toLowerCase())),DEFAULT_DATETIME_FORMAT) : LocalDateTime.now();
+                        name = name != null ? name : "Marker";
+                        world = world != null ? world : Bukkit.getWorlds().get(0).getName();
+
+                        PlayerCompassMarker marker = new PlayerCompassMarker(name,world,icontype,id,x,y,z,creation);
+                        markers.add(marker);
+                    }
                 }
             }
         }
@@ -271,8 +274,9 @@ public class PlayerCompassMarker implements Listener {
             }
             if(loadedMarkersMap.containsKey(p.getUniqueId())){
                 YamlConfiguration markerdata = new YamlConfiguration();
+                ConfigurationSection markerSection = markerdata.createSection("markers");
                 for(PlayerCompassMarker marker : loadedMarkersMap.get(p.getUniqueId())){
-                    ConfigurationSection section =  markerdata.createSection(marker.getId().toString());
+                    ConfigurationSection section =  markerSection.createSection(marker.getId().toString());
                     section.set(MarkerDataFields.NAME.toString().toLowerCase(), marker.getName());
                     section.set(MarkerDataFields.WORLD.toString().toLowerCase(), marker.getWorld());
                     section.set(MarkerDataFields.ICON_ITEM.toString().toLowerCase(), DEFAULT_MARKER_MATERIAL.toString());

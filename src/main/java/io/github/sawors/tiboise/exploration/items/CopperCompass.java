@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.exploration.items;
 
 import io.github.sawors.tiboise.exploration.PlayerCompassMarker;
 import io.github.sawors.tiboise.gui.GUIDisplayItem;
+import io.github.sawors.tiboise.gui.TiboiseGUI;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -36,6 +37,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
     // TODO : move this to the future DisplayItem class
     private static Map<Inventory, PlayerCompassMarker> inventoryLink = new HashMap<>();
     private static Map<Inventory, MarkerInventoryType> inventoryTypeLink = new HashMap<>();
+    private static Map<UUID, TiboiseGUI.SortingType> playerPreferedSorting = new HashMap<>();
     
     private static GUIDisplayItem backButtonFactory = new GUIDisplayItem(MarkerOptionsButton.BACK.toString(),Material.INK_SAC)
             .setName(Component.text(ChatColor.GOLD + "← Go Back").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
