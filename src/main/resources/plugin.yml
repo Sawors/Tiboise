@@ -25,7 +25,6 @@ commands:
       - tb
       - t
     usage: ûwû
-    permission: tiboise.infos
 softdepend:
   - voicechat
 depend:
@@ -41,6 +40,3 @@ permissions:
   tiboise.test:
     description: Allows you to use the test command
     default: op
-  tiboise.infos:
-    description: Allows you to get infos
-    default: not op
