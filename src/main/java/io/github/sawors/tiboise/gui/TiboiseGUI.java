@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TiboiseGUI implements Listener {
+public class TiboiseGUI implements Listener {
 
     // static fields referring to the global storage of inventories
     public static Map<Inventory, String> inventoryReferenceMap = new HashMap<>();
@@ -54,6 +54,33 @@ public abstract class TiboiseGUI implements Listener {
         return this;
     }
 
+    public int getRowAmount() {
+        return this.rows;
+    }
+
+    public Component getName(){
+        return this.name;
+    }
+
+    /**
+     *
+     * @return the MUTABLE version of the button map. The main difference with TiboiseGUIArchetype is that the Archetype map is immutable
+     */
+    protected Map<GUIDisplayItem, Integer> getButtonMap(){
+        return this.inventoryButtonsMap;
+    }
+
+    public void addButton(GUIDisplayItem button, int slot){
+        inventoryButtonsMap.put(button,slot);
+    }
+
+    public void setName(Component name){
+        this.name = name;
+    }
+
+    public void setSize(int rows){
+        this.rows = rows;
+    }
 
 
     public TiboiseGUI build(){
