@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -96,11 +95,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
             showPlayerMarkerListInventory(p);
         }
     }
-    @EventHandler
-    public static void cleanMapsOnPlayerCloseInventory(InventoryCloseEvent event){
-        inventoryLink.remove(event.getInventory());
-        inventoryTypeLink.remove(event.getInventory());
-    }
+
 
     public static void showPlayerMarkerListInventory(Player p){
         Inventory showInv = Bukkit.createInventory(p,9*MARKER_INVENTORY_ROW_AMOUNT, Component.text(ChatColor.DARK_GRAY+MARKER_INVENTORY_NAME));
@@ -126,7 +121,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
         Location lastDeath = p.getLastDeathLocation();
         if(lastDeath != null){
             PlayerCompassMarker deathMarker = new PlayerCompassMarker("Last Death", lastDeath, PlayerCompassMarker.MarkerVisualIcon.DEATH);
-            showInv.setItem(getSlotForRow(1,5), deathMarker.getDisplayItem(true,true,p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm && deathMarker.getDestination().equals(cm.getLodestone())));
+            showInv.setItem(TiboiseGUI.getSlotForRow(1,5), deathMarker.getDisplayItem(true,true,p.getInventory().getItemInMainHand().getItemMeta() instanceof CompassMeta cm && deathMarker.getDestination().equals(cm.getLodestone())));
         }
     
         int slot = 9;
@@ -148,7 +143,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
                 .setName(Component.text(ChatColor.GOLD + "Add a new Marker").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
                 .setLore(List.of(Component.text(ChatColor.YELLOW+">> Click to add a new Marker at your position <<")))
                 .get();
-        showInv.setItem(getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,5), addMarkerButton);
+        showInv.setItem(TiboiseGUI.getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,5), addMarkerButton);
         List<Component> sortingMethodsLore = new ArrayList<>();
         sortingMethodsLore.add(Component.text(ChatColor.GRAY+"Sorting method :"));
         for(TiboiseGUI.SortingType sorting : ALLOWED_SORTING_TYPES){
@@ -163,7 +158,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
                 .setName(Component.text(ChatColor.GOLD + "Sort Markers").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
                 .setLore(sortingMethodsLore)
                 .get();
-        showInv.setItem(getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,9), sortButton);
+        showInv.setItem(TiboiseGUI.getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,9), sortButton);
         
         registerMarkerInventory(showInv, null,MarkerInventoryType.LIST_DISPLAY);
         p.closeInventory();
@@ -328,7 +323,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
             }
         }
     
-        iconListGui.setItem(getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,1), backButtonFactory.get());
+        iconListGui.setItem(TiboiseGUI.getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,1), backButtonFactory.get());
     
         registerMarkerInventory(iconListGui,marker,MarkerInventoryType.ICONS);
         p.closeInventory();
@@ -402,13 +397,5 @@ public class CopperCompass extends TiboiseItem implements Listener {
         return inventoryTypeLink.get(inv);
     }
     
-    /**
-     *
-     * @param row The row of which you want to get the place (starting from 1)
-     * @param place The slot to get the value (starting from 1, left)
-     * @return The absolute value of the slot (used in Bukkit Inventories to refer to inventory slots)
-     */
-    private static int getSlotForRow(int row, int place){
-        return (9*(row-1))-1+place;
-    }
+
 }
