@@ -20,10 +20,7 @@ import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
-import io.github.sawors.tiboise.items.GiveItemCommand;
-import io.github.sawors.tiboise.items.ItemGlobalListeners;
-import io.github.sawors.tiboise.items.MagicStick;
-import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.items.*;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
 import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
@@ -146,6 +143,7 @@ public final class Main extends JavaPlugin {
         registerItem(new Excavator());
         registerItem(new Broadaxe());
         registerItem(new CopperCompass());
+        registerItem(new TiboiseWrench());
         if(isModuleEnabled(ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
         }

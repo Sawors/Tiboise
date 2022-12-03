@@ -8,19 +8,24 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Fence;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class TiboiseWrench extends TiboiseItem implements Listener {
     public TiboiseWrench(){
         setMaterial(Material.STICK);
+        setId("wrench");
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setDisplayName(Component.text("Wrench").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setLore(List.of(
@@ -30,12 +35,11 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
     }
 
     @EventHandler
-    public static void onPlayerUseWrench(PlayerInteractEvent event){
+    public void onPlayerUseWrench(PlayerInteractEvent event){
         Block b = event.getClickedBlock();
         boolean sneaking = event.getPlayer().isSneaking();
-        if(b != null){
-            BlockState state = b.getState();
-
+        if(b != null && Objects.equals(event.getHand(), EquipmentSlot.HAND)){
+            
             BlockData data = b.getBlockData();
 
             // TOTEST
@@ -69,16 +73,24 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
                 // if disconnected : try to connect
                 else {
                     for(BlockFace face : fc.getAllowedFaces()){
-                        if(b.getRelative(face).getBlockData() instanceof Fence){
+                        Block relative = b.getRelative(face);
+                        if(relative.getBlockData() instanceof Fence f2){
+                            BlockData b2dt = f2.clone();
                             fc.setFace(face,true);
+                            if(sneaking){
+                                relative.setBlockData(b2dt);
+                            }
                         }
                     }
                 }
             }
-
-
-
+    
             b.setBlockData(data);
         }
+    }
+    
+    @Override
+    public @Nullable Recipe getRecipe() {
+        return new ShapedRecipe(getIdAsKey(),this.get()).shape("XIX","XII","IXX").setIngredient('X',Material.AIR).setIngredient('I',Material.IRON_INGOT);
     }
 }

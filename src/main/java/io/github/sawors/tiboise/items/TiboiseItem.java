@@ -138,6 +138,8 @@ public abstract class TiboiseItem {
         }
 
         item.setItemMeta(meta);
+        
+        Main.logAdmin(getId().hashCode());
 
         return item;
     }
@@ -259,5 +261,11 @@ public abstract class TiboiseItem {
                 ItemVariant.DEFAULT
         );
     }
+    
+    public NamespacedKey getIdAsKey(){
+        return new NamespacedKey(Main.getPlugin(),getId());
+    }
+    
+    
 
 }

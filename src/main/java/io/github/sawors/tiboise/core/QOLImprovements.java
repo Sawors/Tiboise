@@ -21,6 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.world.WorldLoadEvent;
@@ -310,7 +311,7 @@ public class QOLImprovements implements Listener {
             NamespacedKey trapKey = Material.IRON_TRAPDOOR.getKey();
             Bukkit.removeRecipe(trapKey);
             ShapedRecipe trapRecipe = new ShapedRecipe(trapKey, new ItemStack(Material.IRON_TRAPDOOR).asQuantity(2))
-                    .shape("III","III").setIngredient('I',Material.IRON_INGOT);
+                    .shape("II","II").setIngredient('I',Material.IRON_INGOT);
             Bukkit.addRecipe(trapRecipe);
             
             for(Recipe r : vanillabonusrecipes){
@@ -510,6 +511,21 @@ public class QOLImprovements implements Listener {
     @EventHandler
     public void removeAnvilDamage(AnvilDamagedEvent event){
         event.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void removeAnvilCost(PrepareAnvilEvent event){
+        if(event.getView().getTopInventory() instanceof AnvilInventory inv){
+            inv.setRepairCost(0);
+            inv.setRepairCostAmount(0);
+            
+            ItemStack result = inv.getResult();
+            ItemStack base = inv.getFirstItem();
+            ItemStack added = inv.getSecondItem();
+            if(added != null && added.getType().equals(Material.ENCHANTED_BOOK)){
+                event.setResult(null);
+            }
+        }
     }
     
     

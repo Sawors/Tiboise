@@ -14,6 +14,5 @@ public class MagicStick extends TiboiseItem implements Listener {
 
     @EventHandler
     public static void testListener(PlayerInteractEvent event){
-
     }
 }

@@ -16,10 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
@@ -90,7 +87,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
     
     @EventHandler
     public static void openMarkerInventory(PlayerInteractEvent event){
-        if(event.getItem() != null && TiboiseItem.getItemId(event.getItem()).equals(new CopperCompass().getId()) && event.getAction().isRightClick()){
+        if(event.getItem() != null && TiboiseItem.getItemId(event.getItem()).equals(new CopperCompass().getId()) && event.getAction().isRightClick() && Objects.equals(event.getHand(), EquipmentSlot.HAND)){
             Player p = event.getPlayer();
             showPlayerMarkerListInventory(p);
         }
@@ -343,7 +340,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
     
     @Override
     public @Nullable Recipe getRecipe() {
-        ShapedRecipe recipe = new ShapedRecipe(getItemIdKey(),this.get());
+        ShapedRecipe recipe = new ShapedRecipe(getIdAsKey(),this.get());
         recipe.shape("CRC","RBR","CRC").setIngredient('C', Material.COPPER_INGOT).setIngredient('R',Material.REDSTONE).setIngredient('B',new ItemStack(Material.COMPASS));
         return recipe;
     }
