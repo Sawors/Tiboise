@@ -138,8 +138,6 @@ public abstract class TiboiseItem {
         }
 
         item.setItemMeta(meta);
-        
-        Main.logAdmin(getId().hashCode());
 
         return item;
     }

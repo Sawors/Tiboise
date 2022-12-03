@@ -1,13 +1,11 @@
 package io.github.sawors.tiboise.items;
 
+import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.TiboiseUtils;
 import io.github.sawors.tiboise.core.ItemTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Axis;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.*;
@@ -23,6 +21,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -47,12 +46,11 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
         // TODO : add worldguard support for this
         Block b = event.getClickedBlock();
         boolean sneaking = event.getPlayer().isSneaking();
-        if(b != null && Objects.equals(event.getHand(), EquipmentSlot.HAND) && !event.useInteractedBlock().equals(Event.Result.DENY)){
+        if(b != null && Objects.equals(event.getHand(), EquipmentSlot.HAND) && !event.useInteractedBlock().equals(Event.Result.DENY) && TiboiseItem.getItemId(event.getPlayer().getInventory().getItemInMainHand()).equals(TiboiseItem.getItemId(new TiboiseWrench().get()))){
             
             BlockData data = b.getBlockData();
-
-            // TOTEST
-            //  Check if the rotation works and if this blockstate modification is enough to actually modify the block
+            final BlockData reference = data.clone();
+            
             if(data instanceof Orientable or){
                 // rotate along X/Y/Z axes if not sneaking
                 Axis axis = or.getAxis();
@@ -146,8 +144,17 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
             }
             
             
-    
-            b.setBlockData(data);
+            if(!data.equals(reference)){
+                b.setBlockData(data);
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        event.getPlayer().closeInventory();
+                    }
+                }.runTask(Main.getPlugin());
+                b.getWorld().playSound(b.getLocation(),b.getType().createBlockData().getSoundGroup().getPlaceSound(),1,1);
+                b.getWorld().spawnParticle(Particle.BLOCK_DUST,b.getLocation().add(.5,.5,.5),8,.5,.5,.5,.1,b.getBlockData());
+            }
         }
     }
     

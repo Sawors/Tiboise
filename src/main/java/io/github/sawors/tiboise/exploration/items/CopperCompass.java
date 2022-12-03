@@ -70,16 +70,16 @@ public class CopperCompass extends TiboiseItem implements Listener {
     public static String getSortingDescription(TiboiseGUI.SortingType sorting){
         switch(sorting){
             case ALPHABETICAL -> {
-                return "Sort the markers alphabetically according to their name";
+                return "Sorting : Name (alphabetically)";
             }
             case DATE -> {
-                return  "Sort the markers according to their creation date";
+                return  "Sorting : Creation Date";
             }
             case VALUE -> {
-                return "Sort the markers according to their distance from the 0 0";
+                return "Sorting : Distance (relative to world spawn)";
             }
             case DISTANCE -> {
-                return "Sort the marker according to their distance to the player";
+                return "Sorting : Distance (relative to the player)";
             }
         }
         return "Sort the markers [THIS IS A BUG, PLEASE REPORT IT !]";
@@ -97,8 +97,6 @@ public class CopperCompass extends TiboiseItem implements Listener {
     public static void showPlayerMarkerListInventory(Player p){
         Inventory showInv = Bukkit.createInventory(p,9*MARKER_INVENTORY_ROW_AMOUNT, Component.text(ChatColor.DARK_GRAY+MARKER_INVENTORY_NAME));
         List<PlayerCompassMarker> markers = new ArrayList<>(PlayerCompassMarker.getPlayerMarkers(p));
-        // TOTEST
-        //  does this sorting switch work ?
         switch (getPreferredSortingMethod(p.getUniqueId())){
             case ALPHABETICAL -> {
                 markers.sort(Comparator.comparing(PlayerCompassMarker::getName));
@@ -142,7 +140,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
                 .get();
         showInv.setItem(TiboiseGUI.getSlotForRow(MARKER_INVENTORY_ROW_AMOUNT,5), addMarkerButton);
         List<Component> sortingMethodsLore = new ArrayList<>();
-        sortingMethodsLore.add(Component.text(ChatColor.GRAY+"Sorting method :"));
+        sortingMethodsLore.add(Component.text(ChatColor.GRAY+"Sorting methods :"));
         for(TiboiseGUI.SortingType sorting : ALLOWED_SORTING_TYPES){
             Component tcomp = Component.text(getSortingDescription(sorting)).color(TextColor.color(Color.GRAY.asRGB()));
             if(sorting.equals(getPreferredSortingMethod(p.getUniqueId()))){
@@ -150,7 +148,6 @@ public class CopperCompass extends TiboiseItem implements Listener {
             }
             sortingMethodsLore.add(tcomp);
         }
-        // TOTEST
         ItemStack sortButton = new GUIDisplayItem(MarkerOptionsButton.SORT.toString(),Material.HOPPER)
                 .setName(Component.text(ChatColor.GOLD + "Sort Markers").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
                 .setLore(sortingMethodsLore)
@@ -202,7 +199,6 @@ public class CopperCompass extends TiboiseItem implements Listener {
                                         showPlayerMarkerListInventory(p);
                                     }
                                     case SORT -> {
-                                        // TOTEST
                                         // cycle through sorting modes
                                         ArrayList<TiboiseGUI.SortingType> sortings = new ArrayList<>(ALLOWED_SORTING_TYPES);
                                         int index = sortings.indexOf(getPreferredSortingMethod(p.getUniqueId()));

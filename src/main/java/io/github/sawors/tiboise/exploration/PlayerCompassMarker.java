@@ -234,15 +234,17 @@ public class PlayerCompassMarker implements Listener {
         Set<PlayerCompassMarker> markers = new HashSet<>();
         if(storage.exists()){
             YamlConfiguration data = YamlConfiguration.loadConfiguration(storage);
-            ConfigurationSection markerSection = data.getConfigurationSection("markers") != null ? data.getConfigurationSection("markers") : data.getDefaultSection();
+            ConfigurationSection markerSection = data.getConfigurationSection("markers") != null ? data.getConfigurationSection("markers") : data.getRoot();
             if(markerSection != null){
                 // loading of player preferences
                 TiboiseGUI.SortingType sorting = CopperCompass.DEFAULT_SORTING_TYPE;
                 try{
-                    sorting = TiboiseGUI.SortingType.valueOf(data.getString(PlayerPreferencesField.SORTING_METHOD.toString().toLowerCase(Locale.ROOT)));
+                    if(data.getString(PlayerPreferencesField.SORTING_METHOD.toString().toLowerCase(Locale.ROOT)) != null){
+                        sorting = TiboiseGUI.SortingType.valueOf(data.getString(PlayerPreferencesField.SORTING_METHOD.toString().toLowerCase(Locale.ROOT)));
+                    }
                 } catch (IllegalArgumentException ignored){}
                 CopperCompass.setPlayerPreferredSorting(p.getUniqueId(),sorting);
-                for(String key : data.getKeys(false)){
+                for(String key : markerSection.getKeys(false)){
                     ConfigurationSection markerdata = markerSection.getConfigurationSection(key);
                     if(markerdata != null){
                         String name = markerdata.getString(MarkerDataField.NAME.toString().toLowerCase());
@@ -289,7 +291,7 @@ public class PlayerCompassMarker implements Listener {
                 // TOTEST
                 //  does this new saving scheme work ?
                 // saving preferences
-                markerdata.set(PlayerPreferencesField.SORTING_METHOD.toString().toLowerCase(Locale.ROOT), CopperCompass.getPreferredSortingMethod(p.getUniqueId()));
+                markerdata.set(PlayerPreferencesField.SORTING_METHOD.toString().toLowerCase(Locale.ROOT), CopperCompass.getPreferredSortingMethod(p.getUniqueId()).toString());
                 for(PlayerCompassMarker marker : loadedMarkersMap.get(p.getUniqueId())){
                     ConfigurationSection section =  markerSection.createSection(marker.getId().toString());
                     section.set(MarkerDataField.NAME.toString().toLowerCase(), marker.getName());

@@ -6,12 +6,10 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class OfflinePlayerManagement implements Listener {
@@ -31,11 +29,11 @@ public class OfflinePlayerManagement implements Listener {
                 public void run() {
                     p.playSound(p.getLocation(),fsound,1,1);
                 }
-            }.runTaskLater(Main.getPlugin(),40);
+            }.runTaskLater(Main.getPlugin(),30);
     
-            event.getPlayer().sendMessage(Component.text("There is an error in the loading of the resource pack.").hoverEvent(Component.text(ChatColor.YELLOW+"Click to reload").asHoverEvent()).clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND,"/tiboise pack")).color(TextColor.color(Color.RED.asRGB())));
-        } else {
-            event.getPlayer().sendMessage(Component.text("There is an error in the loading of the resource pack.").hoverEvent(new ItemStack(Material.GOLD_INGOT).asHoverEvent()).color(TextColor.color(0xFFFFFF)));
+            
+        } else if(event.getStatus().equals(PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD)){
+            event.getPlayer().sendMessage(Component.text(ChatColor.GOLD+"There is an error in the loading of the resource pack.").hoverEvent(Component.text(ChatColor.YELLOW+"Click to reload").asHoverEvent()).clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND,"/tiboise pack")).color(TextColor.color(Color.RED.asRGB())));
         }
     }
     
