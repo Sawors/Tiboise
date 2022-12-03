@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TiboiseGUI implements Listener {
+public abstract class TiboiseGUI implements Listener {
 
     // static fields referring to the global storage of inventories
     public static Map<Inventory, String> inventoryReferenceMap = new HashMap<>();

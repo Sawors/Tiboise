@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.core;
 
 import com.destroystokyo.paper.MaterialSetTag;
+import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Main;
 import io.github.sawors.tiboise.items.TiboiseItem;
@@ -171,7 +172,7 @@ public class QOLImprovements implements Listener {
     //
     // TORCH PUT THE TARGET ON FIRE
     @EventHandler
-    public static void setEntityOnFireWhenHitWithTorch(EntityDamageByEntityEvent event){
+    public void setEntityOnFireWhenHitWithTorch(EntityDamageByEntityEvent event){
         if(event.getDamager() instanceof Player p && Objects.equals(p.getInventory().getItemInMainHand().getType(),Material.TORCH)){
             event.getEntity().setFireTicks(20*2);
         }
@@ -194,12 +195,12 @@ public class QOLImprovements implements Listener {
     //
     //  REMOVE XP EARNING
     @EventHandler
-    public static void removeXpEarning(PlayerExpChangeEvent event){
+    public void removeXpEarning(PlayerExpChangeEvent event){
         event.setAmount(0);
         event.getPlayer().setLevel(0);
     }
     @EventHandler
-    public static void removeAdvancementXp(PlayerAdvancementDoneEvent event){
+    public void removeAdvancementXp(PlayerAdvancementDoneEvent event){
         new BukkitRunnable(){
             @Override
             public void run() {
@@ -233,7 +234,7 @@ public class QOLImprovements implements Listener {
     // MORE VANILLA RECIPE
     //
     @EventHandler
-    public static void onLoad(PluginEnableEvent event){
+    public void onLoad(PluginEnableEvent event){
         if(event.getPlugin().equals(Main.getPlugin())){
             List<Recipe> vanillabonusrecipes = new ArrayList<>();
             
@@ -382,7 +383,7 @@ public class QOLImprovements implements Listener {
     //
     // SET GAMERULES
     @EventHandler
-    public static void onWorldLoad(WorldLoadEvent event){
+    public void onWorldLoad(WorldLoadEvent event){
         World w = event.getWorld();
         w.setGameRule(GameRule.DO_INSOMNIA, false);
         w.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
@@ -391,7 +392,7 @@ public class QOLImprovements implements Listener {
     }
     
     @EventHandler (priority = EventPriority.LOW)
-    public static void onPlayerJoin(PlayerJoinEvent event){
+    public void onPlayerJoin(PlayerJoinEvent event){
         Player p = event.getPlayer();
         for (@NotNull Iterator<Recipe> it = Bukkit.recipeIterator(); it.hasNext(); ) {
             Recipe r = it.next();
@@ -504,6 +505,11 @@ public class QOLImprovements implements Listener {
                 }
             }
         }
+    }
+    
+    @EventHandler
+    public void removeAnvilDamage(AnvilDamagedEvent event){
+        event.setCancelled(true);
     }
     
     
