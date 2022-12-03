@@ -174,7 +174,10 @@ public final class Main extends JavaPlugin {
 //            FishingManager.loadLegendaryFishVariants();
 //            FishingManager.loadWaterZones();
         }
+        
         CropsManager.loadBonemealList();
+        
+        TiboiseUtils.initialize();
     }
 
     @Override

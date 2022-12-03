@@ -1,28 +1,36 @@
 package io.github.sawors.tiboise.items;
 
+import io.github.sawors.tiboise.TiboiseUtils;
 import io.github.sawors.tiboise.core.ItemTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Axis;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Orientable;
-import org.bukkit.block.data.type.Fence;
+import org.bukkit.block.data.*;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.Stairs;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class TiboiseWrench extends TiboiseItem implements Listener {
+    
     public TiboiseWrench(){
         setMaterial(Material.STICK);
         setId("wrench");
@@ -34,11 +42,12 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
         ));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerUseWrench(PlayerInteractEvent event){
+        // TODO : add worldguard support for this
         Block b = event.getClickedBlock();
         boolean sneaking = event.getPlayer().isSneaking();
-        if(b != null && Objects.equals(event.getHand(), EquipmentSlot.HAND)){
+        if(b != null && Objects.equals(event.getHand(), EquipmentSlot.HAND) && !event.useInteractedBlock().equals(Event.Result.DENY)){
             
             BlockData data = b.getBlockData();
 
@@ -63,7 +72,7 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
                     }
                 }
                 or.setAxis(axis);
-            } else if(data instanceof Fence fc){
+            } /*else if(data instanceof Fence fc){
                 // if already connected : disconnect
                 if(fc.getFaces().size() >= 1){
                     for(BlockFace face : fc.getFaces()){
@@ -72,18 +81,71 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
                 }
                 // if disconnected : try to connect
                 else {
+                    Main.logAdmin(fc.getMaterial());
                     for(BlockFace face : fc.getAllowedFaces()){
                         Block relative = b.getRelative(face);
                         if(relative.getBlockData() instanceof Fence f2){
-                            BlockData b2dt = f2.clone();
+                            final Fence b2dt = (Fence) f2.clone();
                             fc.setFace(face,true);
+                            
                             if(sneaking){
-                                relative.setBlockData(b2dt);
+                                new BukkitRunnable(){
+                                    @Override
+                                    public void run() {
+                                        for(BlockFace face1 : b2dt.getAllowedFaces()){
+                                            b2dt.setFace(face1,false);
+                                            Main.logAdmin("hehehehe");
+                                        }
+                                        relative.setBlockData(b2dt);
+                                    }
+                                }.runTaskLater(Main.getPlugin(),60);
                             }
+                            
+                        }
+                    }
+                }
+            }*/
+            else if(data instanceof Directional dr){
+                if(!sneaking){
+                    BlockFace facing = dr.getFacing();
+                    if(facing.equals(BlockFace.UP)){
+                        dr.setFacing(BlockFace.DOWN);
+                    } else if (facing.equals(BlockFace.DOWN)) {
+                        dr.setFacing(BlockFace.UP);
+                    } else if(!facing.equals(BlockFace.SELF)){
+                        boolean halfRotation = dr.getFaces().contains(BlockFace.NORTH_EAST);
+                        boolean quarterRotation = dr.getFaces().contains(BlockFace.NORTH_NORTH_EAST);
+                        int step = halfRotation ? 2 : 4;
+                        step = quarterRotation ? 1 : step;
+        
+                        List<BlockFace> possibleFaces = TiboiseUtils.getSortedHorizontalBlockFaces();
+                        int index = possibleFaces.indexOf(facing);
+                        if(index < 0) return;
+                        index = (index+step) % possibleFaces.size();
+                        BlockFace endFace = possibleFaces.get(index);
+                        if (dr.getFaces().contains(endFace)) {
+                            dr.setFacing(endFace);
+                        }
+                    }
+                } else if(data instanceof Stairs str){
+                    str.setHalf(str.getHalf().equals(Bisected.Half.TOP) ? Bisected.Half.BOTTOM : Bisected.Half.TOP);
+                } else if(data instanceof Door door){
+                    door.setHinge(door.getHinge() == Door.Hinge.LEFT ? Door.Hinge.RIGHT : Door.Hinge.LEFT);
+                }
+                if(b.getType().equals(Material.IRON_TRAPDOOR) && sneaking){
+                    Player p = event.getPlayer();
+                    if(data instanceof Openable openable && data instanceof Powerable pw && !pw.isPowered()){
+                        if(TiboiseUtils.consumeItemInInventory(p.getInventory(),new ItemStack(Material.REDSTONE)) ){
+                            openable.setOpen(!openable.isOpen());
+                            b.getWorld().playSound(b.getLocation(), !openable.isOpen() ? Sound.BLOCK_IRON_TRAPDOOR_CLOSE : Sound.BLOCK_IRON_TRAPDOOR_OPEN,1,1);
+                        } else {
+                            p.sendActionBar(Component.text(ChatColor.RED+"You must have "+ChatColor.BOLD+"redstone dust"+ChatColor.RED+" in your inventory in order to switch the "+data.getMaterial().toString().toLowerCase(Locale.ROOT).replaceAll("_"," ")));
                         }
                     }
                 }
             }
+            
+            
     
             b.setBlockData(data);
         }
