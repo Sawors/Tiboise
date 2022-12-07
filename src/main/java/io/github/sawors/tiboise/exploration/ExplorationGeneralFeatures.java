@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.exploration;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,7 +25,7 @@ public class ExplorationGeneralFeatures implements Listener {
                 p.setCompassTarget(new Location(p.getWorld(), 0,0,-1000000));
                 p.updateInventory();
             }
-        }.runTask(Main.getPlugin());
+        }.runTask(Tiboise.getPlugin());
     }
     @EventHandler
     public void setCompassNorth(PlayerJoinEvent event){
@@ -36,7 +36,7 @@ public class ExplorationGeneralFeatures implements Listener {
                 p.setCompassTarget(new Location(p.getWorld(), 0,0,-1000000));
                 p.updateInventory();
             }
-        }.runTask(Main.getPlugin());
+        }.runTask(Tiboise.getPlugin());
     }
     @EventHandler
     public void setCompassNorth(PlayerBedLeaveEvent event){
@@ -47,7 +47,7 @@ public class ExplorationGeneralFeatures implements Listener {
                 p.setCompassTarget(new Location(p.getWorld(), 0,0,-1000000));
                 p.updateInventory();
             }
-        }.runTask(Main.getPlugin());
+        }.runTask(Tiboise.getPlugin());
     }
     
     

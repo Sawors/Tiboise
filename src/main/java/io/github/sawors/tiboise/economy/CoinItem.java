@@ -1,7 +1,7 @@
 package io.github.sawors.tiboise.economy;
 
 import io.github.sawors.tiboise.ConfigModules;
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemTag;
 import io.github.sawors.tiboise.items.IdentifiedItem;
 import io.github.sawors.tiboise.items.TiboiseItem;
@@ -87,7 +87,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
     }
 
     public static NamespacedKey getCoinValueKey(){
-        return new NamespacedKey((Main.getPlugin(Main.class)), "value");
+        return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "value");
     }
 
     private Component buildCoinName(String variant){
@@ -172,10 +172,10 @@ public class CoinItem extends IdentifiedItem implements Listener {
 
     public static void loadCoinValues(){
         try{
-            ConfigurationSection valuesection = Objects.requireNonNull(Main.getModuleSection(ConfigModules.ECONOMY)).getConfigurationSection("coin-values");
+            ConfigurationSection valuesection = Objects.requireNonNull(Tiboise.getModuleSection(ConfigModules.ECONOMY)).getConfigurationSection("coin-values");
             Set<String> values = Objects.requireNonNull(valuesection).getKeys(false);
 
-            Main.logAdmin("Loading coin values...");
+            Tiboise.logAdmin("Loading coin values...");
 
             for(String key : values){
                 ConfigurationSection coinsection = valuesection.getConfigurationSection(key);
@@ -187,11 +187,11 @@ public class CoinItem extends IdentifiedItem implements Listener {
                         coinvalues.put(key.toLowerCase(Locale.ROOT), val);
                         coincolors.put(key.toLowerCase(Locale.ROOT), color);
                     }
-                    Main.logAdmin("Loaded coin "+key+" = "+val+" ("+color+")");
+                    Tiboise.logAdmin("Loaded coin "+key+" = "+val+" ("+color+")");
                 }
             }
 
-            Main.logAdmin("Finished loading coin values");
+            Tiboise.logAdmin("Finished loading coin values");
         } catch (NullPointerException e){
             e.printStackTrace();
         }
@@ -211,7 +211,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
                         coinflippers.remove(p.getUniqueId());
                     }
                 }
-            }.runTaskLater(Main.getPlugin(), 20*5);
+            }.runTaskLater(Tiboise.getPlugin(), 20*5);
         }
     }
     

@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.core.commands;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.IdentifiedItem;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -27,7 +27,7 @@ public class GetIdCommand implements CommandExecutor {
                 return true;
             }
             if(itemidentifier != null && item.hasItemMeta()){
-                p.sendMessage("The identifier of item ["+ Main.getComponentContent(item.displayName())+"] is "+itemidentifier);
+                p.sendMessage("The identifier of item ["+ Tiboise.getComponentContent(item.displayName())+"] is "+itemidentifier);
             } else {
                 p.sendMessage("This item has no identifier");
             }

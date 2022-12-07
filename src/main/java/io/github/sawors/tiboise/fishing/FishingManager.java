@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.fishing;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
@@ -22,10 +22,10 @@ public class FishingManager implements Listener {
 
 
     public static void loadFishVariants(){
-        File basedir = new File(Main.getPlugin().getDataFolder()+ File.separator+"fishing");
+        File basedir = new File(Tiboise.getPlugin().getDataFolder()+ File.separator+"fishing");
         File variants = new File(basedir+File.separator+"fish_variants.yml");
         if(!variants.exists()){
-            try(InputStream in = Main.getPlugin().getResource("fishing/fish_variants.yml"); FileOutputStream out = new FileOutputStream(variants)){
+            try(InputStream in = Tiboise.getPlugin().getResource("fishing/fish_variants.yml"); FileOutputStream out = new FileOutputStream(variants)){
                 if(in != null){
                     variants.createNewFile();
                     out.write(in.readAllBytes());
@@ -53,10 +53,10 @@ public class FishingManager implements Listener {
 
 
     public static void loadLegendaryFishVariants(){
-        File basedir = new File(Main.getPlugin().getDataFolder()+ File.separator+"fishing");
+        File basedir = new File(Tiboise.getPlugin().getDataFolder()+ File.separator+"fishing");
         File legendary = new File(basedir+File.separator+"legendary_fish_variants.yml");
         if(!legendary.exists()){
-            try(InputStream in = Main.getPlugin().getResource("fishing/legendary_fish_variants.yml"); FileOutputStream out = new FileOutputStream(legendary)){
+            try(InputStream in = Tiboise.getPlugin().getResource("fishing/legendary_fish_variants.yml"); FileOutputStream out = new FileOutputStream(legendary)){
                 if(in != null){
                     legendary.createNewFile();
                     out.write(in.readAllBytes());
@@ -68,10 +68,10 @@ public class FishingManager implements Listener {
     }
 
     public static void loadWaterZones(){
-        File basedir = new File(Main.getPlugin().getDataFolder()+ File.separator+"fishing");
+        File basedir = new File(Tiboise.getPlugin().getDataFolder()+ File.separator+"fishing");
         File watertypes = new File(basedir+File.separator+"water_types.yml");
         if(!watertypes.exists()){
-            try(InputStream in = Main.getPlugin().getResource("fishing/water_types.yml"); FileOutputStream out = new FileOutputStream(watertypes)){
+            try(InputStream in = Tiboise.getPlugin().getResource("fishing/water_types.yml"); FileOutputStream out = new FileOutputStream(watertypes)){
                 if(in != null){
                     watertypes.createNewFile();
                     out.write(in.readAllBytes());

@@ -59,14 +59,14 @@ public class TiboiseUtils {
                 for(InternalStructure structure : packet.getStructures().getValues()){
                     
                     if(structure.getDataWatcherModifier().size() > 0){
-                        Main.logAdmin("WATCHERS FOUND");
+                        Tiboise.logAdmin("WATCHERS FOUND");
                         for(int i = 0; i<structure.getDataWatcherModifier().getValues().size(); i++){
                             structure.getDataWatcherModifier().getValues().get(i).asMap().forEach(((integer, wrappedWatchableObject) -> {
                                 output.add(integer+" : "+wrappedWatchableObject);
                             }));
                         }
                     } else if(structure.getAttributeCollectionModifier().size() > 0){
-                        Main.logAdmin("W COLLECTION FOUND");
+                        Tiboise.logAdmin("W COLLECTION FOUND");
                         for(int i = 0; i<structure.getAttributeCollectionModifier().getValues().size(); i++){
                             for(int i2 = 0; i<structure.getAttributeCollectionModifier().getFields().size(); i2++){
                                 structure.getAttributeCollectionModifier().readSafely(i2).forEach(w -> output.add(w.toString()));

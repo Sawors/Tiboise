@@ -52,7 +52,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.logging.Level;
 
-public final class Main extends JavaPlugin {
+public final class Tiboise extends JavaPlugin {
     private static File configfile = null;
     private static JavaPlugin instance = null;
     private static HashMap<String, TiboiseItem> itemmap = new HashMap<>();
@@ -107,12 +107,12 @@ public final class Main extends JavaPlugin {
     
         dbfile = new File(getPlugin().getDataFolder()+File.separator+"database.db");
         try{
-            Main.logAdmin("Database located at "+dbfile);
+            Tiboise.logAdmin("Database located at "+dbfile);
             dbfile.createNewFile();
         } catch (
                 IOException e){
             e.printStackTrace();
-            Main.logAdmin("database creation failed, could not access the file");
+            Tiboise.logAdmin("database creation failed, could not access the file");
         }
         DatabaseLink.connectInit();
         

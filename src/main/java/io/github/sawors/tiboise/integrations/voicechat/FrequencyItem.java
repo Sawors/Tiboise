@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.integrations.voicechat;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -53,7 +53,7 @@ public class FrequencyItem extends TiboiseItem {
     
     
     protected static NamespacedKey getFrequencyKey(){
-        return new NamespacedKey((Main.getPlugin(Main.class)), "radio-frequency");
+        return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "radio-frequency");
     }
     
     

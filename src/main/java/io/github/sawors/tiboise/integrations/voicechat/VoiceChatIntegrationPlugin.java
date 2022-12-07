@@ -2,18 +2,23 @@ package io.github.sawors.tiboise.integrations.voicechat;
 
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
+import de.maxhenkel.voicechat.api.VoicechatServerApi;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
-import io.github.sawors.tiboise.Main;
+import de.maxhenkel.voicechat.api.events.VoicechatServerStartedEvent;
+import io.github.sawors.tiboise.Tiboise;
 
 public class VoiceChatIntegrationPlugin implements VoicechatPlugin {
+    
+    private static VoicechatApi vcApi;
+    private static VoicechatServerApi voicechatServerApi;
     
     /**
      * @return the unique ID for this voice chat plugin
      */
     @Override
     public String getPluginId() {
-        return Main.getPlugin().getName();
+        return Tiboise.getPlugin().getName();
     }
     
     /**
@@ -23,7 +28,7 @@ public class VoiceChatIntegrationPlugin implements VoicechatPlugin {
      */
     @Override
     public void initialize(VoicechatApi api) {
-    
+        vcApi = api;
     }
     
     /**
@@ -35,5 +40,18 @@ public class VoiceChatIntegrationPlugin implements VoicechatPlugin {
     public void registerEvents(EventRegistration registration) {
         // TODO register your events
         registration.registerEvent(MicrophonePacketEvent.class, new PortableRadio()::copySendPacket);
+        registration.registerEvent(VoicechatServerStartedEvent.class, VoiceChatIntegrationPlugin::onServerStarted);
+    }
+    
+    private static void onServerStarted(VoicechatServerStartedEvent event) {
+        voicechatServerApi = event.getVoicechat();
+    }
+    
+    public static VoicechatServerApi getVoicechatServerApi(){
+        return voicechatServerApi;
+    }
+    
+    public static VoicechatApi getVoicechatApi(){
+        return vcApi;
     }
 }

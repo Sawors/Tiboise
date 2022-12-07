@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.core;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,13 +24,13 @@ public class ResourcePackManager implements Listener {
     
     @EventHandler
     public static void sendResourcePackOnJoin(PlayerJoinEvent event){
-        if(!Main.isServerInTestMode()){
+        if(!Tiboise.isServerInTestMode()){
             new BukkitRunnable(){
                 @Override
                 public void run() {
                     sendPlayerResourcePack(event.getPlayer());
                 }
-            }.runTaskLater(Main.getPlugin(),60);
+            }.runTaskLater(Tiboise.getPlugin(),60);
         }
     }
     
@@ -44,7 +44,7 @@ public class ResourcePackManager implements Listener {
                     sendPlayerResourcePack(p);
                     reloadingPlayers.add(p.getUniqueId());
                 }
-            }.runTaskLater(Main.getPlugin(),20);
+            }.runTaskLater(Tiboise.getPlugin(),20);
         } else if(event.getStatus().equals(PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED)){
             reloadingPlayers.remove(p.getUniqueId());
         }
@@ -54,12 +54,12 @@ public class ResourcePackManager implements Listener {
         try(InputStream in = new URL(hashfile).openStream(); Scanner hashread = new Scanner(in)){
             packhash = hashread.next();
         }catch (IOException e){
-            Main.logAdmin("Can't load resource pack, malformed hash file URL");
+            Tiboise.logAdmin("Can't load resource pack, malformed hash file URL");
         }
     }
     
     public static void sendPlayerResourcePack(Player p){
-        p.setResourcePack(src,packhash,true);
+        p.setResourcePack(src,packhash);
     }
     
     public static String getPackHash(){

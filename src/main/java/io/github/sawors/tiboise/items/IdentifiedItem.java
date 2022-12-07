@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.items;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -36,6 +36,6 @@ public abstract class IdentifiedItem extends TiboiseItem{
     }
 
     public static NamespacedKey getIdentifierKey(){
-        return new NamespacedKey((Main.getPlugin(Main.class)), "identifier");
+        return new NamespacedKey((Tiboise.getPlugin(Tiboise.class)), "identifier");
     }
 }

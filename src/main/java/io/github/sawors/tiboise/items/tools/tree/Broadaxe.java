@@ -2,7 +2,7 @@ package io.github.sawors.tiboise.items.tools.tree;
 
 import com.destroystokyo.paper.MaterialSetTag;
 import com.google.common.collect.Lists;
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemVariant;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.items.tools.VeinMinerUtility;
@@ -94,7 +94,7 @@ public class Broadaxe extends TiboiseItem implements Listener {
             
                     it++;
                 }
-            }.runTaskTimer(Main.getPlugin(),0, period);
+            }.runTaskTimer(Tiboise.getPlugin(),0, period);
         } else {
             for(Block b : cutlist){
                 b.breakNaturally(tool,true);
@@ -119,7 +119,7 @@ public class Broadaxe extends TiboiseItem implements Listener {
             return null;
         }
         
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Main.getPlugin(),variant.toString().toLowerCase(Locale.ROOT)+"_"+getId()),new Broadaxe(variant).get());
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Tiboise.getPlugin(),variant.toString().toLowerCase(Locale.ROOT)+"_"+getId()),new Broadaxe(variant).get());
         recipe.shape(
                 "MMM",
                 "MSX",
@@ -151,7 +151,7 @@ public class Broadaxe extends TiboiseItem implements Listener {
         super.setVariant(variant);
         String varname = variant.toLowerCase(Locale.ROOT);
         String append = variant.equalsIgnoreCase("gold") || variant.equalsIgnoreCase("wood") ? "en" : "";
-        setDisplayName(Component.text(Main.getUpperCamelCase(Character.toUpperCase(varname.charAt(0))+varname.substring(1)+append+" "+getId())).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        setDisplayName(Component.text(Tiboise.getUpperCamelCase(Character.toUpperCase(varname.charAt(0))+varname.substring(1)+append+" "+getId())).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         try{
             switch (ItemVariant.valueOf(variant.toUpperCase(Locale.ROOT))){
                 case STONE -> {setMaterial(Material.STONE_AXE);}

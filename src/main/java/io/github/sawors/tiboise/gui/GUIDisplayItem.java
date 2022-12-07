@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.gui;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -84,13 +84,13 @@ public class GUIDisplayItem {
     }
     
     public static NamespacedKey getDisplayTypeKey(){
-        return new NamespacedKey(Main.getPlugin(),"display_type");
+        return new NamespacedKey(Tiboise.getPlugin(),"display_type");
     }
     protected static NamespacedKey getDisplayIdKey(){
-        return new NamespacedKey(Main.getPlugin(),"display_id");
+        return new NamespacedKey(Tiboise.getPlugin(),"display_id");
     }
     public static NamespacedKey getIconKey(){
-        return new NamespacedKey(Main.getPlugin(), "display_icon");
+        return new NamespacedKey(Tiboise.getPlugin(), "display_icon");
     }
     
     public String getIcon() {

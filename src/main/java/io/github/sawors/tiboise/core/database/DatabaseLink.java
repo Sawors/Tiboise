@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.core.database;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -43,7 +43,7 @@ public class DatabaseLink {
     private static Connection connect(){
         Connection co;
         try{
-            String target = "jdbc:sqlite:"+ Main.getDbFile().getCanonicalFile();
+            String target = "jdbc:sqlite:"+ Tiboise.getDbFile().getCanonicalFile();
             co = DriverManager.getConnection(target);
             return co;
         } catch (

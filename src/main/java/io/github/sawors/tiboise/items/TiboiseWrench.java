@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.items;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
 import io.github.sawors.tiboise.core.ItemTag;
 import net.kyori.adventure.text.Component;
@@ -151,7 +151,7 @@ public class TiboiseWrench extends TiboiseItem implements Listener {
                     public void run() {
                         event.getPlayer().closeInventory();
                     }
-                }.runTask(Main.getPlugin());
+                }.runTask(Tiboise.getPlugin());
                 b.getWorld().playSound(b.getLocation(),b.getType().createBlockData().getSoundGroup().getPlaceSound(),1,1);
                 b.getWorld().spawnParticle(Particle.BLOCK_DUST,b.getLocation().add(.5,.5,.5),8,.5,.5,.5,.1,b.getBlockData());
             }

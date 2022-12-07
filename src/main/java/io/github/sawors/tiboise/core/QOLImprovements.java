@@ -3,7 +3,7 @@ package io.github.sawors.tiboise.core;
 import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -165,7 +165,7 @@ public class QOLImprovements implements Listener {
                         block.getWorld().spawnParticle(Particle.FLAME, block.getLocation(), 1);
                         block.breakNaturally();
                     }
-                }.runTaskLater(Main.getPlugin(), 1);
+                }.runTaskLater(Tiboise.getPlugin(), 1);
             }
         }
     }
@@ -189,7 +189,7 @@ public class QOLImprovements implements Listener {
                 public void run() {
                     event.getEntity().remove();
                 }
-            }.runTask(Main.getPlugin());
+            }.runTask(Tiboise.getPlugin());
         }
     }
     
@@ -208,7 +208,7 @@ public class QOLImprovements implements Listener {
                 event.getPlayer().setLevel(0);
                 event.getPlayer().setExp(0);
             }
-        }.runTaskLater(Main.getPlugin(),1);
+        }.runTaskLater(Tiboise.getPlugin(),1);
     }
     
     //
@@ -236,7 +236,7 @@ public class QOLImprovements implements Listener {
     //
     @EventHandler
     public void onLoad(PluginEnableEvent event){
-        if(event.getPlugin().equals(Main.getPlugin())){
+        if(event.getPlugin().equals(Tiboise.getPlugin())){
             List<Recipe> vanillabonusrecipes = new ArrayList<>();
             
             // SADDLES
@@ -293,7 +293,7 @@ public class QOLImprovements implements Listener {
                             // Adding unsafely here just to allow putting looting on axes
                             ref.addUnsafeEnchantments(enchantmap);
                         } catch (IllegalArgumentException e){
-                            Main.logAdmin("ERROR", ref.getType()+" CANNOT HAVE ENCHANTEMENT SPECIFIED");
+                            Tiboise.logAdmin("ERROR", ref.getType()+" CANNOT HAVE ENCHANTEMENT SPECIFIED");
                         }
                         Bukkit.removeRecipe(sr.getKey());
                         ShapedRecipe ench = new ShapedRecipe(sr.getKey(),ref);
@@ -318,7 +318,7 @@ public class QOLImprovements implements Listener {
                 try{
                     Bukkit.addRecipe(r);
                 }catch (IllegalStateException e){
-                    Main.logAdmin("ERROR", "Error in adding recipe for "+r.getResult().getType());
+                    Tiboise.logAdmin("ERROR", "Error in adding recipe for "+r.getResult().getType());
                 }
             }
     
@@ -404,7 +404,7 @@ public class QOLImprovements implements Listener {
         }
         
         // add the player to the team
-        Main.addPlayerToInvisibleNametagTeam(p);
+        Tiboise.addPlayerToInvisibleNametagTeam(p);
         
         // rename. TODO : merge this with the nickname mechanic
         String name = null;
@@ -488,7 +488,7 @@ public class QOLImprovements implements Listener {
                         }
                     }
                     
-                }.runTaskTimer(Main.getPlugin(), 0, DISK_ROTATION_PERIOD);
+                }.runTaskTimer(Tiboise.getPlugin(), 0, DISK_ROTATION_PERIOD);
             }
             
             

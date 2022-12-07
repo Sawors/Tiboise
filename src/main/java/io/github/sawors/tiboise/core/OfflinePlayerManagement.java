@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.core;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
@@ -29,7 +29,7 @@ public class OfflinePlayerManagement implements Listener {
                 public void run() {
                     p.playSound(p.getLocation(),fsound,1,1);
                 }
-            }.runTaskLater(Main.getPlugin(),30);
+            }.runTaskLater(Tiboise.getPlugin(),30);
     
             
         } else if(event.getStatus().equals(PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD)){

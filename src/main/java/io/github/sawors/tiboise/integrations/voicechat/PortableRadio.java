@@ -3,7 +3,7 @@ package io.github.sawors.tiboise.integrations.voicechat;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.VoicechatServerApi;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -98,7 +98,7 @@ public class PortableRadio extends FrequencyItem implements Listener {
                         public void run() {
                             radiocache.remove(otherid);
                         }
-                    }.runTaskLater(Main.getPlugin(),(long)(cacheduration*20));
+                    }.runTaskLater(Tiboise.getPlugin(),(long)(cacheduration*20));
                 }
             }
             if(transmit){
@@ -138,7 +138,7 @@ public class PortableRadio extends FrequencyItem implements Listener {
     
     @Override
     public @Nullable Recipe getRecipe() {
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Main.getPlugin(),getId()),new PortableRadio().get());
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Tiboise.getPlugin(),getId()),new PortableRadio().get());
         recipe.shape(
                 "XLX",
                 "CAC",

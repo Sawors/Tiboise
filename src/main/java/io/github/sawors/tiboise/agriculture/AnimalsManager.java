@@ -8,12 +8,11 @@ import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.Pair;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
-import io.github.sawors.tiboise.Main;
-import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.Tiboise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Bee;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -34,7 +33,9 @@ import java.util.UUID;
 
 public class AnimalsManager implements Listener {
     
-    private static Set<UUID> arthuragornChickens = new HashSet<>();
+    private static Set<UUID> packetEntityUUID = new HashSet<>();
+    private static Set<Integer> packetEntityIntegerId = new HashSet<>();
+    private static Set<PacketContainer> trash = new HashSet<>();
     
     @EventHandler
     public static void duckChance(EntityBreedEvent event){
@@ -48,7 +49,10 @@ public class AnimalsManager implements Listener {
     @EventHandler
     public static void logChickens(EntityAddToWorldEvent event){
         if(event.getEntity() instanceof Chicken c && c.getName().equals("Arthuragorn")){
-            arthuragornChickens.add(event.getEntity().getUniqueId());
+            packetEntityUUID.add(event.getEntity().getUniqueId());
+        }
+        if(event.getEntity() instanceof Bee c && c.getName().equals("carlotta")){
+            packetEntityUUID.add(event.getEntity().getUniqueId());
         }
     }
     
@@ -56,7 +60,7 @@ public class AnimalsManager implements Listener {
     //
     //      PACKETS
     //
-    static PacketAdapter blockprojectiles = new PacketAdapter(Main.getPlugin(), PacketType.Play.Server.SPAWN_ENTITY) {
+    static PacketAdapter replaceArthuragornChickens = new PacketAdapter(Tiboise.getPlugin(), PacketType.Play.Server.SPAWN_ENTITY) {
         @Override
         public void onPacketSending(PacketEvent event) {
             PacketContainer packet = event.getPacket();
@@ -67,8 +71,8 @@ public class AnimalsManager implements Listener {
                 new BukkitRunnable(){
                     @Override
                     public void run() {
-                        if(packet.getEntityTypeModifier().read(0) == EntityType.CHICKEN && arthuragornChickens.contains(packet.getUUIDs().readSafely(0))){
-        
+                        if(packet.getEntityTypeModifier().read(0) == EntityType.CHICKEN && packetEntityUUID.contains(packet.getUUIDs().readSafely(0))){
+                            packetEntityIntegerId.add(entid);
                             PacketContainer spawn = packet.shallowClone();
         
                             new BukkitRunnable(){
@@ -77,8 +81,9 @@ public class AnimalsManager implements Listener {
                                     spawn.getEntityTypeModifier().write(0, EntityType.ARMOR_STAND);
                                     spawn.getUUIDs().write(0, entityID);
                                     spawn.getIntegers().write(0, entid);
+                                    spawn.getDoubles().write(1, spawn.getDoubles().read(1)-.75);
                                     try {
-                                        Main.getProtocolManager().sendServerPacket(event.getPlayer(), spawn);
+                                        Tiboise.getProtocolManager().sendServerPacket(event.getPlayer(), spawn);
                                     } catch (
                                             InvocationTargetException e) {
                                         e.printStackTrace();
@@ -99,14 +104,14 @@ public class AnimalsManager implements Listener {
                                             list.add(pair);
                                             equipment.getSlotStackPairLists().write(0, list);
                                             try {
-                                                Main.getProtocolManager().sendServerPacket(event.getPlayer(), equipment);
+                                                Tiboise.getProtocolManager().sendServerPacket(event.getPlayer(), equipment);
                                             } catch (InvocationTargetException e) {
                                                 e.printStackTrace();
                                             }
                         
                         
                                             // send data (invisibility here)
-                                            PacketContainer packet = Main.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_METADATA);
+                                            PacketContainer packet = Tiboise.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_METADATA);
                                             packet.getIntegers().write(0, entid); //Set packet's entity id
                                             WrappedDataWatcher watcher = new WrappedDataWatcher(); //Create data watcher, the Entity Metadata packet requires this
                                             WrappedDataWatcher.Serializer serializer = WrappedDataWatcher.Registry.get(Byte.class); //Found this through google, needed for some stupid reason
@@ -115,74 +120,65 @@ public class AnimalsManager implements Listener {
                                             watcher.setObject(15, serializer, (byte) (0x01)); //Set status to glowing, found on protocol page
                                             packet.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects()); //Make the packet's datawatcher the one we created
                                             try {
-                                                Main.getProtocolManager().sendServerPacket(event.getPlayer(), packet);
+                                                Tiboise.getProtocolManager().sendServerPacket(event.getPlayer(), packet);
                                             } catch (InvocationTargetException e) {
                                                 e.printStackTrace();
                                             }
                                         }
-                                    }.runTaskLater(Main.getPlugin(), 1);
+                                    }.runTaskLater(Tiboise.getPlugin(), 1);
                                 }
-                            }.runTaskLater(Main.getPlugin(), 1);
+                            }.runTaskLater(Tiboise.getPlugin(), 1);
                         }
                     }
-                }.runTaskLater(Main.getPlugin(),1);
+                }.runTaskLater(Tiboise.getPlugin(),1);
             }
         }
     };
     
-    static PacketAdapter adapterSpawn = new PacketAdapter(Main.getPlugin(), PacketType.Play.Server.SPAWN_ENTITY) {
+    private static int ydisplace = 4096;
+    static PacketAdapter adapterLocation = new PacketAdapter(Tiboise.getPlugin(), PacketType.Play.Server.ENTITY_VELOCITY) {
         @Override
         public void onPacketSending(PacketEvent event) {
             PacketContainer packet = event.getPacket();
-            Main.logAdmin("\n"+ChatColor.GOLD+PacketType.Play.Server.SPAWN_ENTITY);
-            for(String str : TiboiseUtils.getPacketContentPrint(packet)){
-                Main.logAdmin(str);
+            if(packetEntityIntegerId.contains(packet.getIntegers().read(0))){
+                int movement = packet.getIntegers().read(1);
+                if(movement != 0) packet.getIntegers().write(1, 0);
+                //packet.getShorts().write(1, (short) (-(ydisplace/4)));
+                //Main.logAdmin("x: "+packet.getShorts().read(0)+"\ny: "+packet.getShorts().read(1)+"\nz:"+packet.getShorts().read(2));
             }
         }
     };
-    static PacketAdapter adapterMeta = new PacketAdapter(Main.getPlugin(), PacketType.Play.Server.ENTITY_METADATA) {
+    static PacketAdapter adapterLocation2 = new PacketAdapter(Tiboise.getPlugin(), PacketType.Play.Server.REL_ENTITY_MOVE_LOOK) {
         @Override
         public void onPacketSending(PacketEvent event) {
             PacketContainer packet = event.getPacket();
-            Main.logAdmin("\n"+ChatColor.GOLD+packet.getType());
-            for(String str : TiboiseUtils.getPacketContentPrint(packet)){
-                Main.logAdmin(str);
+            if(packetEntityIntegerId.contains(packet.getIntegers().read(0))){
+                short movement = packet.getShorts().read(1);
+                if(movement != 0) packet.getShorts().write(1, (short) 0);
+                //packet.getShorts().write(1, (short) (-(ydisplace/4)));
+                //Main.logAdmin("x: "+packet.getShorts().read(0)+"\ny: "+packet.getShorts().read(1)+"\nz:"+packet.getShorts().read(2));
             }
         }
     };
-    static PacketAdapter adapterStatus = new PacketAdapter(Main.getPlugin(), PacketType.Play.Server.ENTITY_STATUS) {
+    static PacketAdapter adapterLocation3 = new PacketAdapter(Tiboise.getPlugin(), PacketType.Play.Server.POSITION) {
         @Override
         public void onPacketSending(PacketEvent event) {
             PacketContainer packet = event.getPacket();
-            Main.logAdmin("\n"+ChatColor.GOLD+packet.getType());
-            for(String str : TiboiseUtils.getPacketContentPrint(packet)){
-                Main.logAdmin(str);
+            if(packetEntityIntegerId.contains(packet.getIntegers().read(0))){
+                short movement = packet.getShorts().read(1);
+                if(movement != 0) packet.getShorts().write(1, (short) 0);
+                //packet.getShorts().write(1, (short) (-(ydisplace/4)));
+                //Main.logAdmin("x: "+packet.getShorts().read(0)+"\ny: "+packet.getShorts().read(1)+"\nz:"+packet.getShorts().read(2));
             }
         }
     };
-    static PacketAdapter adapterEffects = new PacketAdapter(Main.getPlugin(), PacketType.Play.Server.ENTITY_EFFECT) {
-        @Override
-        public void onPacketSending(PacketEvent event) {
-            PacketContainer packet = event.getPacket();
-            Main.logAdmin("\n"+ChatColor.GOLD+packet.getType());
-            for(String str : TiboiseUtils.getPacketContentPrint(packet)){
-                Main.logAdmin(str);
-            }
-        }
-    };
-    static PacketAdapter adapterEquipment = new PacketAdapter(Main.getPlugin(), PacketType.Play.Server.ENTITY_EQUIPMENT) {
-        @Override
-        public void onPacketSending(PacketEvent event) {
-            PacketContainer packet = event.getPacket();
-            Main.logAdmin("\n"+ChatColor.GOLD+packet.getType());
-            for(String str : TiboiseUtils.getPacketContentPrint(packet)){
-                Main.logAdmin(str);
-            }
-        }
-    };
+    
     @EventHandler(priority = EventPriority.HIGH)
     public static void onEnable(PluginEnableEvent event){
-        Main.getProtocolManager().addPacketListener(blockprojectiles);
+        Tiboise.getProtocolManager().addPacketListener(replaceArthuragornChickens);
+        Tiboise.getProtocolManager().addPacketListener(adapterLocation);
+        //Main.getProtocolManager().addPacketListener(adapterLocation2);
+        //Main.getProtocolManager().addPacketListener(adapterLocation3);
 //        Main.getProtocolManager().addPacketListener(adapterSpawn);
 //        Main.getProtocolManager().addPacketListener(adapterEffects);
 //        Main.getProtocolManager().addPacketListener(adapterEquipment);

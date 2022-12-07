@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.agriculture;
 
-import io.github.sawors.tiboise.Main;
+import io.github.sawors.tiboise.Tiboise;
 import org.bukkit.Particle;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
@@ -30,7 +30,7 @@ public class CropsManager implements Listener {
     }
     
     public static void loadBonemealList(){
-        try(InputStream in = Main.getPlugin().getResource("agriculture/bonemeal_list.yml")){
+        try(InputStream in = Tiboise.getPlugin().getResource("agriculture/bonemeal_list.yml")){
             if(in != null){
                 YamlConfiguration config = YamlConfiguration.loadConfiguration(new InputStreamReader(in));
                 blacklistmode = Objects.equals(config.getString("mode"), "blacklist");
