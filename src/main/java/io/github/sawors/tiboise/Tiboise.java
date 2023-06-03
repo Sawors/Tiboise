@@ -13,17 +13,14 @@ import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
-import io.github.sawors.tiboise.exploration.PlayerCompassMarker;
-import io.github.sawors.tiboise.exploration.PlayerMarkerCommand;
-import io.github.sawors.tiboise.exploration.items.CopperCompass;
 import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
-import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
-import io.github.sawors.tiboise.items.*;
-import io.github.sawors.tiboise.items.tools.radius.Excavator;
-import io.github.sawors.tiboise.items.tools.radius.Hammer;
-import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
+import io.github.sawors.tiboise.items.GiveItemCommand;
+import io.github.sawors.tiboise.items.ItemGlobalListeners;
+import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.items.utility.coppercompass.PlayerCompassMarker;
+import io.github.sawors.tiboise.items.utility.coppercompass.PlayerMarkerCommand;
 import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -33,13 +30,8 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -47,17 +39,16 @@ import org.bukkit.scoreboard.Team;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.sql.Time;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 
 public final class Tiboise extends JavaPlugin {
     private static File configfile = null;
     private static JavaPlugin instance = null;
-    private static HashMap<String, TiboiseItem> itemmap = new HashMap<>();
-    private static HashSet<Integer> registeredlisteners = new HashSet<>();
     private static boolean testmode = false;
     private static Team t;
     // modules
@@ -140,18 +131,8 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setTabCompleter(maincommand);
 
-        registerItem(new MagicStick());
-        registerItem(new Hammer());
-        registerItem(new Excavator());
-        registerItem(new Broadaxe());
-        registerItem(new CopperCompass());
-        registerItem(new TiboiseWrench());
-        if(isModuleEnabled(ConfigModules.ECONOMY)){
-            registerItem(new CoinItem());
-        }
-        if(isVoiceChatEnabled()){
-            registerItem(new PortableRadio());
-        }
+        
+        
     
         // made so player nametags disappear, TODO add a config option to control this
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -178,6 +159,9 @@ public final class Tiboise extends JavaPlugin {
 //            FishingManager.loadLegendaryFishVariants();
 //            FishingManager.loadWaterZones();
         }
+        
+        // ITEM REGISTRATION :
+        TiboiseItem.loadItems();
         
         CropsManager.loadBonemealList();
         
@@ -262,49 +246,6 @@ public final class Tiboise extends JavaPlugin {
                 p.sendMessage(Component.text(output));
             }
         }
-    }
-
-    private void registerItem(TiboiseItem item){
-        itemmap.put(item.getId(), item);
-    
-        Recipe defaultrecipe = item.getRecipe();
-        if(defaultrecipe != null) Bukkit.addRecipe(defaultrecipe);
-        for(ItemVariant var : item.getPossibleVariants()){
-            Recipe variantrecipe = item.getRecipe(var);
-            if(variantrecipe != null) Bukkit.addRecipe(variantrecipe);
-        }
-
-        if(item instanceof Listener listener){
-            for(Method method : listener.getClass().getMethods()){
-                if(!registeredlisteners.contains(method.hashCode()) && method.getAnnotation(EventHandler.class) != null && method.getParameters().length >= 1 && Event.class.isAssignableFrom(method.getParameters()[0].getType())){
-                    // method is recognized as handling an event
-                    /*
-                    plugin -> parameter
-                    listener -> parameter
-                    for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : plugin.getPluginLoader().createRegisteredListeners(listener, plugin).entrySet()) {
-                        getEventListeners(getRegistrationClass(entry.getKey())).registerAll(entry.getValue());
-                    }
-                    */
-                    Class<? extends Event> itemclass = method.getParameters()[0].getType().asSubclass(Event.class);
-
-                    getServer().getPluginManager().registerEvent(itemclass, listener, method.getAnnotation(EventHandler.class).priority(), EventExecutor.create(method, itemclass),getPlugin());
-                    registeredlisteners.add(method.hashCode());
-                }
-            }
-        }
-    }
-
-    public static TiboiseItem getRegisteredItem(String id){
-        return itemmap.get(id);
-    }
-
-    public static Inventory getItemListDisplay(){
-        Inventory itemsview = Bukkit.createInventory(null, 6*9, Component.text("Item List"));
-        for(TiboiseItem item : itemmap.values()){
-            itemsview.addItem(item.get());
-        }
-
-        return itemsview;
     }
 
 

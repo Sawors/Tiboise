@@ -1,7 +1,6 @@
-package io.github.sawors.tiboise.exploration;
+package io.github.sawors.tiboise.items.utility.coppercompass;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.sawors.tiboise.exploration.items.CopperCompass;
 import io.github.sawors.tiboise.gui.GUIDisplayItem;
 import io.github.sawors.tiboise.gui.TiboiseGUI;
 import net.kyori.adventure.text.Component;

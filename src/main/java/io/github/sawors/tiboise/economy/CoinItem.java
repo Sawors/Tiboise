@@ -2,14 +2,13 @@ package io.github.sawors.tiboise.economy;
 
 import io.github.sawors.tiboise.ConfigModules;
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.core.ItemTag;
-import io.github.sawors.tiboise.items.IdentifiedItem;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -20,23 +19,64 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.logging.Level;
 
-public class CoinItem extends IdentifiedItem implements Listener {
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
+
+public class CoinItem extends TiboiseItem implements Listener {
 
     private static Map<String, Integer> coinvalues = new HashMap<>();
     private static Map<String, String> coincolors = new HashMap<>();
     // UUID : Player, UUID : Item (coin)
     private static Map<UUID, UUID> coinflippers = new HashMap<>();
-
+    
+    @Override
+    public void onRegister() {
+        // generate conversion crafts
+        List<String> sortedCoins = new ArrayList<>(coinvalues.keySet());
+        sortedCoins.sort(Comparator.comparingInt(c -> coinvalues.get(c)));
+        logAdmin(sortedCoins);
+        for(int i = 0; i<sortedCoins.size(); i++){
+            final String actual = sortedCoins.get(i);
+            final int actualValue = coinvalues.get(actual);
+            String previous = null;
+            if(i > 0){
+                previous = sortedCoins.get(i-1);
+            }
+            
+            // add conversion recipes
+            if(previous != null){
+                int previousValue = coinvalues.get(previous);
+                if(previousValue == 0) return;
+                final int quantity = Math.floorDiv(actualValue,previousValue);
+                if(quantity > 64 || quantity < 1){
+                    Bukkit.getLogger().log(Level.WARNING, "Could not create the recipe to convert "+previous+" coin to "+actual+" coin (conversion impossible within vanilla stack limits)");
+                } else {
+                    ShapelessRecipe recipeUp = new ShapelessRecipe(new NamespacedKey(Tiboise.getPlugin(),previous.toLowerCase(Locale.ROOT)+"_coin"+"_to_"+actual.toLowerCase(Locale.ROOT)+"_coin"), new CoinItem(actual).get().asQuantity(1));
+                    recipeUp.addIngredient(new CoinItem(previous).get().asQuantity(quantity));
+                    ShapelessRecipe recipeDown = new ShapelessRecipe(new NamespacedKey(Tiboise.getPlugin(),actual.toLowerCase(Locale.ROOT)+"_coin"+"_to_"+previous.toLowerCase(Locale.ROOT)+"_coin"), new CoinItem(previous).get().asQuantity(quantity));
+                    recipeDown.addIngredient(new CoinItem(actual).get().asQuantity(1));
+                    try{
+                        Bukkit.addRecipe(recipeUp);
+                        Bukkit.addRecipe(recipeDown);
+                    } catch (IllegalStateException e){
+                        e.printStackTrace();
+                    }
+                }
+                
+            }
+        }
+    }
+    
     public CoinItem() {
         super();
         setCoinBaseAttributes();
-
     }
 
     public CoinItem(int value){
@@ -48,18 +88,22 @@ public class CoinItem extends IdentifiedItem implements Listener {
     public CoinItem(String variant){
         super();
         setCoinBaseAttributes();
-        setCoinVariant(variant);
+        setVariant(variant);
     }
 
     private void setCoinBaseAttributes(){
         setMaterial(Material.GOLD_NUGGET);
-        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
-        setIdentifier(RandomStringUtils.randomNumeric(6));
         setId("coin");
     }
-
+    
+    @Override
+    public void setVariant(String variant) {
+        super.setVariant(variant);
+        setCoinVariant(variant);
+    }
+    
     public void setCoinValue(int value){
-        this.setLore(List.of(Component.text(""),Component.text(ChatColor.GRAY+"a coin with a value of "+value).asComponent()));
+        this.setLore(List.of(Component.text("Value : "+value+"c").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)));
         addData(getCoinValueKey(), String.valueOf(value));
     }
     
@@ -67,7 +111,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
         return coinvalues.get(name);
     }
 
-    public void setCoinVariant(String variant){
+    private void setCoinVariant(String variant){
         int value = -1;
         String name = null;
         String ref = variant.toLowerCase(Locale.ROOT);
@@ -82,7 +126,6 @@ public class CoinItem extends IdentifiedItem implements Listener {
         if(name != null && name.length() > 0 && value >= 0){
             setCoinValue(value);
             setDisplayName(buildCoinName(variant));
-            setVariant(variant.toLowerCase(Locale.ROOT));
         }
     }
 
@@ -175,7 +218,7 @@ public class CoinItem extends IdentifiedItem implements Listener {
             ConfigurationSection valuesection = Objects.requireNonNull(Tiboise.getModuleSection(ConfigModules.ECONOMY)).getConfigurationSection("coin-values");
             Set<String> values = Objects.requireNonNull(valuesection).getKeys(false);
 
-            Tiboise.logAdmin("Loading coin values...");
+            logAdmin("Loading coin values...");
 
             for(String key : values){
                 ConfigurationSection coinsection = valuesection.getConfigurationSection(key);
@@ -187,11 +230,11 @@ public class CoinItem extends IdentifiedItem implements Listener {
                         coinvalues.put(key.toLowerCase(Locale.ROOT), val);
                         coincolors.put(key.toLowerCase(Locale.ROOT), color);
                     }
-                    Tiboise.logAdmin("Loaded coin "+key+" = "+val+" ("+color+")");
+                    logAdmin("Loaded coin "+key+" = "+val+" ("+color+")");
                 }
             }
 
-            Tiboise.logAdmin("Finished loading coin values");
+            logAdmin("Finished loading coin values");
         } catch (NullPointerException e){
             e.printStackTrace();
         }

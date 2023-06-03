@@ -1,36 +1,123 @@
 package io.github.sawors.tiboise.items;
 
+import io.github.sawors.tiboise.ConfigModules;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemTag;
 import io.github.sawors.tiboise.core.ItemVariant;
+import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
+import io.github.sawors.tiboise.items.tools.radius.Excavator;
+import io.github.sawors.tiboise.items.tools.radius.Hammer;
+import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
+import io.github.sawors.tiboise.items.utility.PortableCraftingTable;
+import io.github.sawors.tiboise.items.utility.coppercompass.CopperCompass;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.EventExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.logging.Level;
 
 public abstract class TiboiseItem {
-
-
-
-    // When creating a new object NEVER FORGET to register it in main class Stones on onEnable using Tiboise.registerItem(StonesItem item)
+    
+    //
+    //  ITEM REGISTERING
+    //
+    private static Map<String, TiboiseItem> itemmap = new HashMap<>();
+    private static Set<Integer> registeredlisteners = new HashSet<>();
+    
+    //
+    // Register items here !
+    public static void loadItems(){
+        registerItem(new MagicStick());
+        registerItem(new Hammer());
+        registerItem(new Excavator());
+        registerItem(new Broadaxe());
+        registerItem(new CopperCompass());
+        registerItem(new TiboiseWrench());
+        registerItem(new PortableCraftingTable());
+        if(Tiboise.isModuleEnabled(ConfigModules.ECONOMY)){
+            registerItem(new CoinItem());
+        }
+        if(Tiboise.isVoiceChatEnabled()){
+            registerItem(new PortableRadio());
+        }
+    }
+    
+    private static void registerItem(TiboiseItem item){
+        
+        item.onRegister();
+        
+        itemmap.put(item.getId(), item);
+        
+        Recipe defaultrecipe = item.getRecipe();
+        if(defaultrecipe != null) Bukkit.addRecipe(defaultrecipe);
+        for(ItemVariant var : item.getPossibleVariants()){
+            Recipe variantrecipe = item.getRecipe(var);
+            if(variantrecipe != null) Bukkit.addRecipe(variantrecipe);
+        }
+        
+        if(item instanceof Listener listener){
+            for(Method method : listener.getClass().getMethods()){
+                if(!registeredlisteners.contains(method.hashCode()) && method.getAnnotation(EventHandler.class) != null && method.getParameters().length >= 1 && Event.class.isAssignableFrom(method.getParameters()[0].getType())){
+                    // method is recognized as handling an event
+                    /*
+                    plugin -> parameter
+                    listener -> parameter
+                    for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : plugin.getPluginLoader().createRegisteredListeners(listener, plugin).entrySet()) {
+                        getEventListeners(getRegistrationClass(entry.getKey())).registerAll(entry.getValue());
+                    }
+                    */
+                    Class<? extends Event> itemclass = method.getParameters()[0].getType().asSubclass(Event.class);
+                    
+                    Bukkit.getServer().getPluginManager().registerEvent(itemclass, listener, method.getAnnotation(EventHandler.class).priority(), EventExecutor.create(method, itemclass), Tiboise.getPlugin());
+                    registeredlisteners.add(method.hashCode());
+                }
+            }
+        }
+    }
+    
+    public static @Nullable TiboiseItem getRegisteredItem(String id){
+        return itemmap.get(id);
+    }
+    
+    public static Inventory getItemListDisplay(){
+        Inventory itemsview = Bukkit.createInventory(null, 6*9, Component.text("Item List"));
+        for(TiboiseItem item : itemmap.values()){
+            itemsview.addItem(item.get());
+        }
+        
+        return itemsview;
+    }
+    
+    
+    //
+    // INSTANTIATION DATA
+    //
     Component name;
-    ArrayList<Component> lore;
+    List<Component> lore;
     HashSet<String> tags;
     String variant;
     String id;
     boolean unique;
     Material basematerial;
-    HashMap<NamespacedKey, String> additionaldata = new HashMap<>();
+    Map<NamespacedKey, String> additionaldata = new HashMap<>();
     // just added this in case we need to create items with durability
     // setting this to true will give the item its durability stat back
     boolean overwriteunbreakable = true;
@@ -88,8 +175,12 @@ public abstract class TiboiseItem {
     public void setId(String id){
         this.id = id;
     }
-
+    
     public void setLore(List<Component> lore){
+        this.lore = lore;
+    }
+    
+    public void addLore(List<Component> lore){
         this.lore.addAll(lore);
     }
 
@@ -264,6 +355,57 @@ public abstract class TiboiseItem {
         return new NamespacedKey(Tiboise.getPlugin(),getId());
     }
     
+    /**
+     *
+     * @param item the ItemStack to get the data from
+     * @return the corresponding but with the data from the item retrieved
+     * Unlike getRegisteredItem, which returns the ItemStack with its data reset to default, this method
+     * attempts to clone the data extracted from the ItemStack to the new VbItem.
+     */
+    public static @Nullable TiboiseItem cloneFromItemStack(ItemStack item){
+        if(item == null){
+            return null;
+        }
+        TiboiseItem target = getRegisteredItem(getItemId(item));
+        if(target == null){
+            return null;
+        }
+        
+        //      Component name;
+        //    ArrayList<Component> lore;
+        //    HashSet<String> tags;
+        //    String variant;
+        //    HashMap<NamespacedKey, String> additionaldata = new HashMap<>();
+        ItemMeta meta = item.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        // Display Name
+        target.setDisplayName(item.displayName());
+        // Lore
+        target.setLore(meta.lore());
+        // Variant
+        target.setVariant(container.get(getItemVariantKey(), PersistentDataType.STRING));
+        // Tags
+        for(String s : getItemTags(item)){
+            try{
+                target.addTag(ItemTag.valueOf(s));
+            } catch (IllegalArgumentException e){
+                Bukkit.getLogger().log(Level.INFO, "trying to get an incorrect item tag for item "+target.getId()+" (tag : "+s+")");
+            }
+        }
+        // Additional Data
+        for(NamespacedKey key : container.getKeys()){
+            if(key.equals(getItemTagsKey()) || key.equals(getItemVariantKey()) || key.equals(getItemIdKey())){
+                continue;
+            }
+            target.addData(key, container.get(key, PersistentDataType.STRING));
+        }
+        
+        
+        return target;
+    }
     
+    public void onRegister(){
+        // add a way for inherited items to do something when they are initialized
+    }
 
 }

@@ -1,4 +1,4 @@
-package io.github.sawors.tiboise.exploration;
+package io.github.sawors.tiboise.items.utility.coppercompass;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;

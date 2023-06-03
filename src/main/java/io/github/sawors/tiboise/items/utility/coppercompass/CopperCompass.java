@@ -1,6 +1,5 @@
-package io.github.sawors.tiboise.exploration.items;
+package io.github.sawors.tiboise.items.utility.coppercompass;
 
-import io.github.sawors.tiboise.exploration.PlayerCompassMarker;
 import io.github.sawors.tiboise.gui.GUIDisplayItem;
 import io.github.sawors.tiboise.gui.TiboiseGUI;
 import io.github.sawors.tiboise.items.TiboiseItem;
