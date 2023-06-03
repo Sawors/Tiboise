@@ -9,6 +9,7 @@ import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
 import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
+import io.github.sawors.tiboise.items.utility.PackingScotch;
 import io.github.sawors.tiboise.items.utility.PortableCraftingTable;
 import io.github.sawors.tiboise.items.utility.coppercompass.CopperCompass;
 import net.kyori.adventure.text.Component;
@@ -52,6 +53,8 @@ public abstract class TiboiseItem {
         registerItem(new CopperCompass());
         registerItem(new TiboiseWrench());
         registerItem(new PortableCraftingTable());
+        registerItem(new PackingScotch());
+        
         if(Tiboise.isModuleEnabled(ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
         }
