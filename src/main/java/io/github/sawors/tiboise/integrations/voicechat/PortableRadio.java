@@ -48,6 +48,7 @@ public class PortableRadio extends FrequencyItem implements Listener {
         );
     }
     
+    
     public void copySendPacket(MicrophonePacketEvent event){
         
         if(Bukkit.getOnlinePlayers().size() <= 1){
@@ -63,6 +64,8 @@ public class PortableRadio extends FrequencyItem implements Listener {
         if (!(event.getSenderConnection().getPlayer().getPlayer() instanceof Player player)) {
             return;
         }
+        
+        
         
         ItemStack emitter = TiboiseItem.getItemId(player.getInventory().getItemInMainHand()).equals(new PortableRadio().getId()) ? player.getInventory().getItemInMainHand() : TiboiseItem.getItemId(player.getInventory().getItemInOffHand()).equals(new PortableRadio().getId()) ? player.getInventory().getItemInOffHand() : null;
         if(emitter == null){

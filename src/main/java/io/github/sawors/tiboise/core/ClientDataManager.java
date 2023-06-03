@@ -1,6 +1,10 @@
 package io.github.sawors.tiboise.core;
 
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,7 +19,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.UUID;
 
-public class ResourcePackManager implements Listener {
+public class ClientDataManager implements Listener {
     
     private final static String src = "https://github.com/Sawors/Tiboise/raw/master/src/main/resources/resourcepack/Tiboise-1.19.2.zip";
     private final static String hashfile = "https://raw.githubusercontent.com/Sawors/Tiboise/master/src/main/resources/resourcepack/sha1.txt";
@@ -23,15 +27,31 @@ public class ResourcePackManager implements Listener {
     private static String packhash = null;
     
     @EventHandler
-    public static void sendResourcePackOnJoin(PlayerJoinEvent event){
+    public static void checkResourcesOnJoin(PlayerJoinEvent event){
+        final Player p = event.getPlayer();
         if(!Tiboise.isServerInTestMode()){
             new BukkitRunnable(){
                 @Override
                 public void run() {
                     sendPlayerResourcePack(event.getPlayer());
+                    
+                    if(VoiceChatIntegrationPlugin.getVoicechatServerApi().getConnectionOf(p.getUniqueId()) == null){
+                        p.sendActionBar(Component.text(ChatColor.RED+"PLEASE INSTALL THE VOICE CHAT MOD IN ORDER TO COMMUNICATE !"));
+                        p.sendMessage(Component.text(ChatColor.RED+"You do not have the Simple Voice Chat mod installed, which means that you are unable to communicate with other players using the voice chat. Please click ")
+                                .append(Component.text(ChatColor.GOLD+""+ChatColor.GOLD+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://minhaskamal.github.io/DownGit/#/home?url=https:%2F%2Fgithub.com%2FSawors%2Fmc-dev-server%2Fblob%2Fmain%2Fmods%20tiboise%20updated.zip")))
+                        );
+                    }
+                    
                 }
-            }.runTaskLater(Tiboise.getPlugin(),60);
+            }.runTaskLater(Tiboise.getPlugin(),20*4);
         }
+        p.sendActionBar(Component.text(ChatColor.RED+"PLEASE INSTALL THE VOICE CHAT MOD IN ORDER TO COMMUNICATE !"));
+        p.sendMessage(Component.text(ChatColor.RED+"You do not seem to have the simple voice chat mod installed. Please click ")
+                .append(Component.text(ChatColor.GOLD+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://minhaskamal.github.io/DownGit/#/home?url=https:%2F%2Fgithub.com%2FSawors%2Fmc-dev-server%2Fblob%2Fmain%2Fmods%20tiboise%20updated.zip")))
+                .append(Component.text(ChatColor.RED+" in order to install the server recommended modpack, or "))
+                .append(Component.text(ChatColor.GOLD+"here").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat")))
+                .append(Component.text(ChatColor.RED+" if you want the mod alone."))
+        );
     }
     
     @EventHandler

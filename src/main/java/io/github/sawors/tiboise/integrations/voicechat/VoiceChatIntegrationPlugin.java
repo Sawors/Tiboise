@@ -11,7 +11,7 @@ import io.github.sawors.tiboise.Tiboise;
 public class VoiceChatIntegrationPlugin implements VoicechatPlugin {
     
     private static VoicechatApi vcApi;
-    private static VoicechatServerApi voicechatServerApi;
+    public static VoicechatServerApi voicechatServerApi;
     
     /**
      * @return the unique ID for this voice chat plugin

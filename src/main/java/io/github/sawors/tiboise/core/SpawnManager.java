@@ -4,6 +4,7 @@ import io.papermc.paper.world.MoonPhase;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Warden;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,7 +49,7 @@ public class SpawnManager implements Listener {
         if(event.getEntity() instanceof Monster m && blockedreasons.contains(event.getSpawnReason())){
             EntityType type = m.getType();
             event.setCancelled(true);
-                if(exceptions.contains(type) && Math.random() <= .1){
+                if(exceptions.contains(type) && Math.random() <= .05){
                     switch (type){
                         case SPIDER -> {
                             Location spawnloc = m.getLocation();
@@ -59,6 +60,11 @@ public class SpawnManager implements Listener {
                         case WITCH -> {
                             if(m.getLocation().getWorld().getMoonPhase().equals(MoonPhase.FULL_MOON)){
                                 event.setCancelled(false);
+                            }
+                        }
+                        case DROWNED -> {
+                            if(m.getLocation().getNearbyEntitiesByType(Player.class,32).size() >=1){
+                                event.setCancelled(true);
                             }
                         }
                         default -> {event.setCancelled(false);}
