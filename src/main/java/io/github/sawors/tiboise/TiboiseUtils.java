@@ -8,10 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class TiboiseUtils {
     private static List<BlockFace> sortedBlockFaceList;
@@ -83,5 +80,18 @@ public class TiboiseUtils {
             }
         }
         return output;
+    }
+    
+    public static String capitalizeFirstLetter(String text){
+        if(text.contains(" ") || text.contains("_")){
+            final String separator = text.contains("_") ? "_" : " ";
+            StringBuilder bd = new StringBuilder();
+            for(String s : text.split(separator)){
+                bd.append(s.substring(0, 1).toUpperCase(Locale.ROOT)).append(s.substring(1).toLowerCase(Locale.ROOT)).append(separator);
+            }
+            bd.deleteCharAt(bd.length()-1);
+            return bd.toString();
+        }
+        return text.substring(0,1).toUpperCase(Locale.ROOT)+text.substring(1).toLowerCase(Locale.ROOT);
     }
 }
