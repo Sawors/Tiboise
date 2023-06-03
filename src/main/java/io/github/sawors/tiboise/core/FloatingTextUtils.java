@@ -14,7 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class FloatingTextUtils implements Listener {
     
-    private static final String cleanupDisplayTag = "cleanup";
+    public static final String cleanupDisplayTag = "cleanup";
     
     public static void cleanupTempDisplays(World world){
         for(Display temp : world.getEntitiesByClass(Display.class)){
@@ -24,7 +24,7 @@ public class FloatingTextUtils implements Listener {
         }
     }
     
-    private static NamespacedKey getTemporaryTagKey(){
+    public static NamespacedKey getTemporaryTagKey(){
         return new NamespacedKey(Tiboise.getPlugin(), "temporary_entity_tag");
     }
     

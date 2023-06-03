@@ -5,7 +5,12 @@ import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -26,13 +31,19 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.*;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
+
 public class QOLImprovements implements Listener {
+    
+    private final static boolean DO_CHAT_BUBBLES = true;
+    private static Map<UUID, TextDisplay> playerChatBubbles = new  HashMap<>();
     
     
     //
@@ -293,7 +304,7 @@ public class QOLImprovements implements Listener {
                             // Adding unsafely here just to allow putting looting on axes
                             ref.addUnsafeEnchantments(enchantmap);
                         } catch (IllegalArgumentException e){
-                            Tiboise.logAdmin("ERROR", ref.getType()+" CANNOT HAVE ENCHANTEMENT SPECIFIED");
+                            logAdmin("ERROR", ref.getType()+" CANNOT HAVE ENCHANTEMENT SPECIFIED");
                         }
                         Bukkit.removeRecipe(sr.getKey());
                         ShapedRecipe ench = new ShapedRecipe(sr.getKey(),ref);
@@ -318,7 +329,7 @@ public class QOLImprovements implements Listener {
                 try{
                     Bukkit.addRecipe(r);
                 }catch (IllegalStateException e){
-                    Tiboise.logAdmin("ERROR", "Error in adding recipe for "+r.getResult().getType());
+                    logAdmin("ERROR", "Error in adding recipe for "+r.getResult().getType());
                 }
             }
     
@@ -526,6 +537,80 @@ public class QOLImprovements implements Listener {
                 event.setResult(null);
             }
         }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public static void prettyPlayerMessages(AsyncChatEvent event){
+        TextComponent message = (TextComponent) event.message();
+        String content = message.content();
+        Component author = event.getPlayer().displayName();
+        
+        // overwrite default event content without cancelling it in order to allow usage by other methods
+        if(!event.isCancelled()){
+            for(Audience p : event.viewers()){
+                p.sendMessage(author.append(Component.text(" : ")).color(NamedTextColor.GRAY).append(Component.text(content).color(NamedTextColor.WHITE)).clickEvent(ClickEvent.suggestCommand("/msg "+event.getPlayer().getName()+" ")));
+            }
+            event.viewers().clear();
+            
+            Player p = event.getPlayer();
+            
+            // Wrapping the generation of the text bubble in a runnable since we are in an async context
+            final int period = 1;
+            if(DO_CHAT_BUBBLES){
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        // TODO : set back to 2
+                        if(p.getLocation().getNearbyEntitiesByType(Player.class,16).size() < 1) return;
+                        final int lineWidth = 78*2;
+                        final int lineAmount = Math.min(1,content.length()/lineWidth);
+                        final Vector displacement = new Vector(0,2+(lineAmount*.1),0);
+                        TextDisplay bubble = (TextDisplay) p.getWorld().spawnEntity(p.getLocation().add(displacement),EntityType.TEXT_DISPLAY);
+                        if(playerChatBubbles.containsKey(p.getUniqueId())) playerChatBubbles.get(p.getUniqueId()).remove();
+                        playerChatBubbles.put(p.getUniqueId(), bubble);
+                        bubble.setLineWidth(lineWidth);
+                        bubble.text(message);
+                        bubble.setBillboard(Display.Billboard.CENTER);
+                        bubble.setSeeThrough(true);
+                        bubble.getPersistentDataContainer().set(FloatingTextUtils.getTemporaryTagKey(), PersistentDataType.STRING,FloatingTextUtils.cleanupDisplayTag);
+                        
+                        final int max = Math.max((int) ((20.0*(content.replaceAll(" ","").length()/15.0))/period),30);
+                        new BukkitRunnable(){
+                            
+                            
+                            int count = 0;
+                            
+                            @Override
+                            public void run() {
+                                if(!bubble.isValid()){
+                                    this.cancel();
+                                    return;
+                                }
+                                if(count >= max){
+                                    this.cancel();
+                                    if(bubble.isValid()){
+                                        bubble.remove();
+                                    }
+                                    if(playerChatBubbles.containsKey(p.getUniqueId()) && playerChatBubbles.get(p.getUniqueId()).getUniqueId().equals(bubble.getUniqueId())){
+                                        playerChatBubbles.remove(p.getUniqueId());
+                                    }
+                                    return;
+                                }
+                                
+                                final Location pLoc = p.getLocation();
+                                
+                                bubble.teleport(pLoc.add(displacement));
+                                /*bubble.getLocation().setYaw(pLoc.getYaw());
+                                bubble.getLocation().setPitch(pLoc.getPitch());*/
+                                
+                                count++;
+                            }
+                        }.runTaskTimer(Tiboise.getPlugin(),0,period);
+                    }
+                }.runTask(Tiboise.getPlugin());
+            }
+        }
+        
     }
     
     
