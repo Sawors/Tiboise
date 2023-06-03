@@ -12,6 +12,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.data.Directional;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
@@ -33,7 +34,8 @@ public class PackingScotch extends TiboiseItem implements Listener {
         ));
     }
     
-    @EventHandler
+    
+    @EventHandler(priority = EventPriority.HIGH)
     public static void packBlock(PlayerInteractEvent event){
         
         final String packedBlockItemId = "packed_block";
@@ -75,9 +77,11 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 for(Map.Entry<String,Integer> line : contentSummary.entrySet()){
                     lore.add(Component.text(" - "+TiboiseUtils.capitalizeFirstLetter(line.getKey()).replaceAll("_"," ")+" "+line.getValue()+"x").color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
                 }
-                if(lore.size() > 8){
-                    lore.subList(0,7);
-                    lore.add(Component.text(" ...").color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+                final int maxLoreSize = 10;
+                if(lore.size() > maxLoreSize){
+                    final int loreBaseSize = lore.size();
+                    lore = lore.subList(0,maxLoreSize);
+                    lore.add(Component.text("   ... and "+(loreBaseSize-maxLoreSize)+" more").color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
                 }
                 
                 meta.lore(lore);
@@ -92,8 +96,8 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 
                 final Location center = clicked.getLocation().add(.5,.5,.5);
                 center.getWorld().playSound(center,clicked.getBlockSoundGroup().getBreakSound(),1,1);
-                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_STEP,1,1);
-                center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,16,.25,.25,.25,.05,clicked.getBlockData());
+                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_PLACE,1,1);
+                center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,32,.25,.25,.25,.05,clicked.getBlockData());
                 center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,8,.25,.25,.25,.05,Bukkit.createBlockData(Material.SLIME_BLOCK));
                 
                 clicked.setType(Material.AIR);
@@ -137,6 +141,13 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 for(Map.Entry<Integer,ItemStack> entry : content.entrySet()){
                     inv.setItem(entry.getKey(),entry.getValue());
                 }
+                
+                final Location center = toReplace.getLocation().add(.5,.5,.5);
+                center.getWorld().playSound(center,toReplace.getBlockSoundGroup().getPlaceSound(),1,1);
+                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_BREAK,1,1);
+                center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,12,.45,.45,.45,.05,Bukkit.createBlockData(Material.SLIME_BLOCK));
+                center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,8,.45,.45,.45,.05,Bukkit.createBlockData(Material.WHITE_CONCRETE));
+                
                 src.setAmount(src.getAmount()-1);
                 
                 
