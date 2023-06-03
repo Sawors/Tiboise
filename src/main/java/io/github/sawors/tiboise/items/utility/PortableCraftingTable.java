@@ -25,13 +25,13 @@ public class PortableCraftingTable extends TiboiseItem implements Listener {
         
         setMaterial(Material.LEATHER);
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
-        setLore(List.of(Component.text("This item allows you to open a crafting table inventory on right click").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)));
+        setLore(List.of(Component.text("This item allows you to open a crafting table on the go").color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)));
     }
     
     
     @EventHandler
     public static void openCraftingInventory(PlayerInteractEvent event){
-        if(TiboiseItem.getItemId(event.getItem()).equals(new PortableCraftingTable().getId())){
+        if(event.getItem() != null && TiboiseItem.getItemId(event.getItem()).equals(new PortableCraftingTable().getId())){
             event.getPlayer().openWorkbench(event.getPlayer().getLocation(),true);
             event.getPlayer().playSound(event.getPlayer().getLocation(),Sound.ENTITY_VILLAGER_WORK_MASON,.75f,1.25f);
         }

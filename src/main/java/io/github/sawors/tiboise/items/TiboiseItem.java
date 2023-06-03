@@ -227,6 +227,8 @@ public abstract class TiboiseItem {
         for(Map.Entry<NamespacedKey, String> entry : additionaldata.entrySet()){
             meta.getPersistentDataContainer().set(entry.getKey(), PersistentDataType.STRING,entry.getValue());
         }
+        
+        meta.setCustomModelData(this.id.hashCode());
 
         item.setItemMeta(meta);
 
