@@ -36,22 +36,18 @@ public class ClientDataManager implements Listener {
                     sendPlayerResourcePack(event.getPlayer());
                     
                     if(VoiceChatIntegrationPlugin.getVoicechatServerApi().getConnectionOf(p.getUniqueId()) == null){
-                        p.sendActionBar(Component.text(ChatColor.RED+"PLEASE INSTALL THE VOICE CHAT MOD IN ORDER TO COMMUNICATE !"));
-                        p.sendMessage(Component.text(ChatColor.RED+"You do not have the Simple Voice Chat mod installed, which means that you are unable to communicate with other players using the voice chat. Please click ")
-                                .append(Component.text(ChatColor.GOLD+""+ChatColor.GOLD+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://minhaskamal.github.io/DownGit/#/home?url=https:%2F%2Fgithub.com%2FSawors%2Fmc-dev-server%2Fblob%2Fmain%2Fmods%20tiboise%20updated.zip")))
+                        p.sendMessage(Component.text(ChatColor.RED+"You do not seem to have the simple voice chat mod installed. Please click ")
+                                .append(Component.text(ChatColor.GOLD+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://minhaskamal.github.io/DownGit/#/home?url=https:%2F%2Fgithub.com%2FSawors%2Fmc-dev-server%2Fblob%2Fmain%2Fmods%20tiboise%20updated.zip")))
+                                .append(Component.text(ChatColor.RED+" in order to install the server recommended modpack, or "))
+                                .append(Component.text(ChatColor.GOLD+"here").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat")))
+                                .append(Component.text(ChatColor.RED+" if you want the mod alone."))
                         );
                     }
                     
                 }
             }.runTaskLater(Tiboise.getPlugin(),20*4);
         }
-        p.sendActionBar(Component.text(ChatColor.RED+"PLEASE INSTALL THE VOICE CHAT MOD IN ORDER TO COMMUNICATE !"));
-        p.sendMessage(Component.text(ChatColor.RED+"You do not seem to have the simple voice chat mod installed. Please click ")
-                .append(Component.text(ChatColor.GOLD+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://minhaskamal.github.io/DownGit/#/home?url=https:%2F%2Fgithub.com%2FSawors%2Fmc-dev-server%2Fblob%2Fmain%2Fmods%20tiboise%20updated.zip")))
-                .append(Component.text(ChatColor.RED+" in order to install the server recommended modpack, or "))
-                .append(Component.text(ChatColor.GOLD+"here").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat")))
-                .append(Component.text(ChatColor.RED+" if you want the mod alone."))
-        );
+        
     }
     
     @EventHandler

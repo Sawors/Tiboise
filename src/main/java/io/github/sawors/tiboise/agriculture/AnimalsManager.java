@@ -10,12 +10,8 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Tiboise;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.entity.Bee;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
+import org.bukkit.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -26,16 +22,17 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class AnimalsManager implements Listener {
     
     private static Set<UUID> packetEntityUUID = new HashSet<>();
     private static Set<Integer> packetEntityIntegerId = new HashSet<>();
     private static Set<PacketContainer> trash = new HashSet<>();
+    
+    // TODO : add config
+    private static final int maxAnimalsPerChunck = 12;
+    
     
     @EventHandler
     public static void duckChance(EntityBreedEvent event){
@@ -184,5 +181,28 @@ public class AnimalsManager implements Listener {
 //        Main.getProtocolManager().addPacketListener(adapterEquipment);
         //Main.getProtocolManager().addPacketListener(adapterMeta);
 //        Main.getProtocolManager().addPacketListener(adapterStatus);
+    }
+    
+    @EventHandler
+    public static void manageAnimalBreeding(EntityBreedEvent event){
+        final Entity children = event.getEntity();
+        final Breedable father = (Breedable) event.getFather();
+        final Breedable mother = (Breedable) event.getMother();
+        
+        if(Arrays.stream(children.getChunk().getEntities()).filter(e -> e instanceof Animals).count() > maxAnimalsPerChunck){
+            event.setCancelled(true);
+            
+            father.setBreed(false);
+            mother.setBreed(false);
+            
+            final Location center = children.getLocation().clone().add(0,1,0);
+            final World w = center.getWorld();
+            
+            w.spawnParticle(Particle.SMOKE_NORMAL,center,8,.5,.5,.5,0);
+            if(children instanceof Animals animal && animal.getAmbientSound() != null) w.playSound(center, animal.getAmbientSound(),.5f,.5f);
+            for(Player p : center.getNearbyEntitiesByType(Player.class,4)){
+                p.sendActionBar(Component.text("There is already to much animals nearby !"));
+            }
+        }
     }
 }

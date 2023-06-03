@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -128,6 +129,7 @@ public final class Tiboise extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerCompassMarker(), this);
         getServer().getPluginManager().registerEvents(new ExplorationGeneralFeatures(), this);
         getServer().getPluginManager().registerEvents(new OfflinePlayerManagement(), this);
+        getServer().getPluginManager().registerEvents(new FloatingTextUtils(), this);
         
         Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
@@ -161,7 +163,9 @@ public final class Tiboise extends JavaPlugin {
         }
        
         
-    
+        for(World w : Bukkit.getWorlds()){
+            FloatingTextUtils.cleanupTempDisplays(w);
+        }
         
         
 
