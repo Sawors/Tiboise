@@ -25,7 +25,10 @@ public class PortableCraftingTable extends TiboiseItem implements Listener {
         
         setMaterial(Material.LEATHER);
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
-        setLore(List.of(Component.text("This item allows you to open a crafting table on the go").color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)));
+        setLore(List.of(
+                Component.text("This item allows you to open").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),
+                Component.text("a crafting table on the go").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+        ));
     }
     
     
