@@ -64,6 +64,9 @@ public final class Tiboise extends JavaPlugin {
     private static ProtocolManager protocolManager;
     // database
     private static File dbfile;
+    // versions and patchnote
+    private static final String version = "1.1";
+    
 
     @Override
     public void onEnable() {
@@ -179,6 +182,10 @@ public final class Tiboise extends JavaPlugin {
 
     public static JavaPlugin getPlugin(){
         return instance;
+    }
+    
+    public static String getVersion(){
+        return version;
     }
 
     public static boolean isModuleEnabled(ConfigModules module){

@@ -12,6 +12,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -611,6 +612,32 @@ public class QOLImprovements implements Listener {
             }
         }
         
+    }
+    
+    @EventHandler
+    public static void welcomeMessage(PlayerJoinEvent event){
+        final Player p = event.getPlayer();
+        Component message = Component.text("");
+        message = message
+                .append(
+                        Component.text("Hello, welcome to Tiboise! You can have access to a world map using ")
+                                .color(NamedTextColor.GOLD)
+                )
+                .append(
+                        Component.text("this link")
+                                .color(NamedTextColor.GREEN)
+                                .decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)
+                )
+                .append(
+                        Component.text(".")
+                                .color(NamedTextColor.GOLD)
+                )
+                .append(
+                        Component.text("The server is currently running the "+Tiboise.getVersion()+" version of Tiboise.").color(NamedTextColor.DARK_GRAY)
+                                .hoverEvent(Component.text("> click to read the patchnote <").color(NamedTextColor.GRAY).decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE))
+                                .clickEvent(ClickEvent.openUrl(""))
+                )
+        ;
     }
     
     
