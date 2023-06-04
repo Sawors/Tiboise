@@ -627,17 +627,20 @@ public class QOLImprovements implements Listener {
                         Component.text("this link")
                                 .color(NamedTextColor.GREEN)
                                 .decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)
+                                .hoverEvent(Component.text("> click to go to the website <").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE))
+                                .clickEvent(ClickEvent.openUrl("http://mc.sawors.com:8080"))
                 )
                 .append(
                         Component.text(".")
                                 .color(NamedTextColor.GOLD)
                 )
                 .append(
-                        Component.text("The server is currently running the "+Tiboise.getVersion()+" version of Tiboise.").color(NamedTextColor.DARK_GRAY)
-                                .hoverEvent(Component.text("> click to read the patchnote <").color(NamedTextColor.GRAY).decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE))
-                                .clickEvent(ClickEvent.openUrl(""))
+                        Component.text("\nThe server is currently running Tiboise version "+Tiboise.getVersion()).color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
+                                .hoverEvent(Component.text("> click to read the patchnote <").color(NamedTextColor.GRAY).decoration(TextDecoration.BOLD, TextDecoration.State.TRUE))
+                                .clickEvent(ClickEvent.openUrl("https://github.com/Sawors/Tiboise/blob/master/patchnotes/"+Tiboise.getVersion()+".md"))
                 )
         ;
+        p.sendMessage(message);
     }
     
     
