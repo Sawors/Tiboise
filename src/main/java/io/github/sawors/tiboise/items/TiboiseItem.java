@@ -294,7 +294,8 @@ public abstract class TiboiseItem {
         return new NamespacedKey(Tiboise.getPlugin(), "variant");
     }
 
-    public static String getItemId(ItemStack item){
+    public static @NotNull String getItemId(ItemStack item){
+        if(item == null) return "null";
         String itemid = getItemData(item, getItemIdKey());
         if(itemid == null || itemid.length() == 0){
             itemid = item.getType().toString().toLowerCase(Locale.ROOT);

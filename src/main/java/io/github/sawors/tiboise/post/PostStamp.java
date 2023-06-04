@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class PostStamp extends TiboiseItem implements Listener {
     
     UUID sender;
@@ -89,15 +87,36 @@ public class PostStamp extends TiboiseItem implements Listener {
     
     
     public static OfflinePlayer getSender(ItemStack sendableItem){
-        Pair<UUID,UUID> couple = deserializeSenderAndReceiver(Objects.requireNonNull(sendableItem.getItemMeta().getPersistentDataContainer().get(getPathingKey(), PersistentDataType.STRING)));
-        UUID sender = couple.getKey();
-        return Bukkit.getOfflinePlayer(sender);
+        try{
+            Pair<UUID,UUID> couple = deserializeSenderAndReceiver(Objects.requireNonNull(sendableItem.getItemMeta().getPersistentDataContainer().get(getPathingKey(), PersistentDataType.STRING)));
+            UUID sender = couple.getKey();
+            return Bukkit.getOfflinePlayer(sender);
+        } catch (NullPointerException n){
+            return null;
+        }
     }
     
     public static OfflinePlayer getReceiver(ItemStack sendableItem){
-        Pair<UUID,UUID> couple = deserializeSenderAndReceiver(Objects.requireNonNull(sendableItem.getItemMeta().getPersistentDataContainer().get(getPathingKey(), PersistentDataType.STRING)));
-        UUID sender = couple.getValue();
-        return Bukkit.getOfflinePlayer(sender);
+        try{
+            Pair<UUID,UUID> couple = deserializeSenderAndReceiver(Objects.requireNonNull(sendableItem.getItemMeta().getPersistentDataContainer().get(getPathingKey(), PersistentDataType.STRING)));
+            UUID sender = couple.getValue();
+            return Bukkit.getOfflinePlayer(sender);
+        } catch (NullPointerException n){
+            return null;
+        }
+    }
+    
+    public static Pair<UUID,UUID> deserializeSenderAndReceiver(ItemStack source) throws ArrayIndexOutOfBoundsException, IllegalStateException{
+        final String serializedData = source.getItemMeta().getPersistentDataContainer().get(getPathingKey(),PersistentDataType.STRING);
+        if(serializedData == null) return null;
+        if(!serializedData.contains(":")){
+            throw new IllegalStateException("this string does not contain any stamp data");
+        }
+        final String senderString = serializedData.substring(0,serializedData.indexOf(":"));
+        final String receiverString = serializedData.substring(serializedData.indexOf(":")+1);
+        final UUID sender = UUID.fromString(senderString);
+        final UUID receiver = UUID.fromString(receiverString);
+        return Pair.of(sender,receiver);
     }
     
     private static Pair<UUID,UUID> deserializeSenderAndReceiver(String serializedData) throws ArrayIndexOutOfBoundsException, IllegalStateException{
@@ -105,16 +124,22 @@ public class PostStamp extends TiboiseItem implements Listener {
             throw new IllegalStateException("this string does not contain any stamp data");
         }
         final String senderString = serializedData.substring(0,serializedData.indexOf(":"));
-        final String receiverString = serializedData.substring(serializedData.indexOf(":"));
+        final String receiverString = serializedData.substring(serializedData.indexOf(":")+1);
         final UUID sender = UUID.fromString(senderString);
-        logAdmin(sender);
         final UUID receiver = UUID.fromString(receiverString);
-        logAdmin(receiver);
         return Pair.of(sender,receiver);
     }
     
+    public static void setSenderAndReceiver(ItemStack item, UUID sender, UUID receiver){
+        if(item != null){
+            ItemMeta meta = item.getItemMeta();
+            meta.getPersistentDataContainer().set(getPathingKey(),PersistentDataType.STRING,generatePathString(sender,receiver));
+            item.setItemMeta(meta);
+        }
+    }
+    
     @EventHandler
-    public static void setSenderAndReceiver(PrepareAnvilEvent event){
+    public static void anvilPathingCreate(PrepareAnvilEvent event){
         AnvilInventory inv = event.getInventory();
         ItemStack input = (inv.getFirstItem() != null && !inv.getFirstItem().getType().isAir()) ? inv.getFirstItem() : inv.getSecondItem();
         ItemStack result = inv.getResult();
@@ -138,8 +163,6 @@ public class PostStamp extends TiboiseItem implements Listener {
                 meta.lore(buildLore(senderName,receiverName));
                 PersistentDataContainer container = meta.getPersistentDataContainer();
                 container.set(getPathingKey(),PersistentDataType.STRING,generatePathString(sender.getUniqueId(),receiver.getUniqueId()));
-                logAdmin("sender",sender.getUniqueId());
-                logAdmin("receiver",receiver.getUniqueId());
                 final ItemStack finalResult = result;
                 new BukkitRunnable(){
                     @Override

@@ -26,6 +26,8 @@ import java.util.*;
 
 public class PackingScotch extends TiboiseItem implements Listener {
     
+    public static final String packedBlockItemId = "packed_block";
+    
     public PackingScotch(){
         setMaterial(Material.SLIME_BALL);
         setLore(List.of(
@@ -39,7 +41,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public static void packBlock(PlayerInteractEvent event){
         
-        final String packedBlockItemId = "packed_block";
+        
         ItemStack src = event.getPlayer().getInventory().getItemInMainHand();
         final Block clicked = event.getClickedBlock();
         if(TiboiseItem.getItemId(src).equals(new PackingScotch().getId()) && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)){
