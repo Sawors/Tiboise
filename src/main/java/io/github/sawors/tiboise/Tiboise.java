@@ -22,7 +22,6 @@ import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerCompassMarker;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerMarkerCommand;
-import io.github.sawors.tiboise.painting.PaintingHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
@@ -114,7 +113,6 @@ public final class Tiboise extends JavaPlugin {
         
         ClientDataManager.reloadPackData();
         
-        getServer().getPluginManager().registerEvents(new PaintingHandler(), this);
         getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
         getServer().getPluginManager().registerEvents(new SpawnManager(),this);
         getServer().getPluginManager().registerEvents(new QOLImprovements(),this);
