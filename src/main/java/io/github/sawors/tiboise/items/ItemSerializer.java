@@ -12,18 +12,14 @@ public class ItemSerializer {
     public String serialize(ItemStack item, int slot){
         if(item == null) return null;
         return "{" +
-                "(" + (slot - 1) + ")" +
+                "(" + slot + ")" +
                 Arrays.toString(item.serializeAsBytes()) +
-                "},";
-    }
-    
-    public String serialize(ItemStack item){
-        return serialize(item,0);
+                "}";
     }
     
     public Map<Integer,ItemStack> deserialize(String serializedItems){
         Map<Integer,ItemStack> content = new HashMap<>();
-
+        
         // deserialize
         for(String itemString : serializedItems.split("\\{")){
             if(itemString.length() == 0) continue;
@@ -58,8 +54,9 @@ public class ItemSerializer {
         for(int i = 0; i<content.length; i++){
             ItemStack item = content[i];
             if(item == null) continue;
-            contentString.append(serialize(item,i));
+            contentString.append(serialize(item,i)).append(",");
         }
+        contentString.replace(contentString.length()-1,contentString.length(),"");
         return contentString.toString();
     }
     

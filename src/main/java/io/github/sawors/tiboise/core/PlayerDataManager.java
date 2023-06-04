@@ -15,16 +15,26 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 
-public class ClientDataManager implements Listener {
+public class PlayerDataManager implements Listener {
     
     private final static String src = "https://github.com/Sawors/Tiboise/raw/master/src/main/resources/resourcepack/Tiboise-1.19.2.zip";
     private final static String hashfile = "https://raw.githubusercontent.com/Sawors/Tiboise/master/src/main/resources/resourcepack/sha1.txt";
     private static HashSet<UUID> reloadingPlayers = new HashSet<>();
     private static String packhash = null;
+    
+    final private static Map<String, UUID> nickNamesMap = new HashMap<>(Map.of(
+            "GrosOrteilDePied",UUID.fromString("66e25a14-b468-4cb1-8cde-6cf6054255ba"),
+            "MOLE1283", UUID.fromString("30b80f6f-f0dc-4b4a-96b2-c37b28494b1b"),
+            "WalidBedouin", UUID.fromString("6864eb4a-91d6-4292-8dfb-f398cbd5dc57")
+    ));
+    final private static Map<String, String> realNamesMap = new HashMap<>(Map.of(
+            "GrosOrteilDePied","DiggyDiggyMole",
+            "MOLE1283", "DimitriScgnt",
+            "WalidBedouin", "esprit-absent"
+    ));
+    
     
     @EventHandler
     public static void checkResourcesOnJoin(PlayerJoinEvent event){
@@ -48,6 +58,31 @@ public class ClientDataManager implements Listener {
             }.runTaskLater(Tiboise.getPlugin(),20*4);
         }
         
+    }
+    
+    public static void setNickName(UUID player, String nickname){
+        if(nickNamesMap.containsKey(nickname.replaceAll(" ",""))){
+            throw new IllegalArgumentException("a player already has this nickname");
+        }
+        nickNamesMap.put(nickname.replaceAll(" ",""),player);
+    }
+    
+    public static boolean hasNickName(UUID player){
+        return nickNamesMap.containsValue(player);
+    }
+    
+    public static String getNickName(UUID player){
+        Optional<Map.Entry<String,UUID>> pid = nickNamesMap.entrySet().stream().filter(p -> p.getValue().equals(player)).findFirst();
+        return pid.map(Map.Entry::getKey).orElse(null);
+    }
+    
+    public static UUID getNickNamedPlayer(String nickname){
+        return nickNamesMap.get(nickname);
+    }
+    
+    public static String getRealName(String playerName){
+        if(playerName == null) return null;
+        return realNamesMap.getOrDefault(playerName,playerName);
     }
     
     @EventHandler

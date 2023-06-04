@@ -250,8 +250,8 @@ public abstract class TiboiseItem {
     }
 
 
-    public String getPersistentDataPrint(){
-        PersistentDataContainer container = this.get().getItemMeta().getPersistentDataContainer();
+    public static String getPersistentDataPrint(ItemStack item){
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
         StringBuilder printed = new StringBuilder();
 
         printed
@@ -272,6 +272,12 @@ public abstract class TiboiseItem {
             printed.append("\n");
         }
         printed.append("]");
+        
+        printed.append("\nOther Data :");
+        for(NamespacedKey key : container.getKeys()){
+            if(key.equals(getItemTagsKey()) || key.equals(getItemTagsKey())) continue;
+            printed.append("\n - ").append(key).append(" : ").append(container.get(key,PersistentDataType.STRING));
+        }
 
         return printed.toString();
     }

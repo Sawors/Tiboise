@@ -58,7 +58,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 meta.displayName(Component.text("Packed "+TiboiseUtils.capitalizeFirstLetter(clicked.getType().toString())).color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
                 Map<String,Integer> contentSummary = new HashMap<>();
                 // serialize content
-                final String serializedInventory = new ItemSerializer().serializeInventory(container.getInventory());
+                String serializedInventory = new ItemSerializer().serializeInventory(container.getInventory());
                 for(ItemStack item : container.getSnapshotInventory().getContents()){
                     if(item == null) continue;
                     final String tiboiseId = TiboiseItem.getItemId(item);
@@ -77,7 +77,6 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 }
                 
                 meta.lore(lore);
-                
                 c.set(getStorageKey(),PersistentDataType.STRING,serializedInventory);
                 packedBlockItem.setItemMeta(meta);
                 Map<Integer,ItemStack> additional = event.getPlayer().getInventory().addItem(packedBlockItem);

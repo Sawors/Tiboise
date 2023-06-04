@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.core.commands;
 
-import io.github.sawors.tiboise.core.ClientDataManager;
+import io.github.sawors.tiboise.core.PlayerDataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,15 +22,15 @@ public class TiboiseMainCommand implements CommandExecutor, TabCompleter {
                         switch (args[1]){
                             case "packs":
                             case "pack":
-                                ClientDataManager.reloadPackData();
+                                PlayerDataManager.reloadPackData();
                                 for(Player p : Bukkit.getOnlinePlayers()){
-                                    ClientDataManager.sendPlayerResourcePack(p);
+                                    PlayerDataManager.sendPlayerResourcePack(p);
                                 }
                         }
                     }
                 case "pack":
                     if(sender instanceof Player p){
-                        ClientDataManager.sendPlayerResourcePack(p);
+                        PlayerDataManager.sendPlayerResourcePack(p);
                         
                     }
             }

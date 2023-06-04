@@ -1,9 +1,7 @@
 package io.github.sawors.tiboise.post;
 
-import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.jetbrains.annotations.Nullable;
@@ -11,15 +9,6 @@ import org.jetbrains.annotations.Nullable;
 public class PostEnvelope extends TiboiseItem {
     public PostEnvelope(){
         setMaterial(Material.PAPER);
-    }
-    
-    
-    public static NamespacedKey getContentTextKey(){
-        return new NamespacedKey(Tiboise.getPlugin(),"post-content-text");
-    }
-    
-    public static NamespacedKey getContentItemKey(){
-        return new NamespacedKey(Tiboise.getPlugin(),"post-content-item");
     }
     
     @Override

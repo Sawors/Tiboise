@@ -111,14 +111,14 @@ public final class Tiboise extends JavaPlugin {
         }
         DatabaseLink.connectInit();
         
-        ClientDataManager.reloadPackData();
+        PlayerDataManager.reloadPackData();
         
         getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
         getServer().getPluginManager().registerEvents(new SpawnManager(),this);
         getServer().getPluginManager().registerEvents(new QOLImprovements(),this);
         getServer().getPluginManager().registerEvents(new CropsManager(),this);
         getServer().getPluginManager().registerEvents(new AnimalsManager(), this);
-        getServer().getPluginManager().registerEvents(new ClientDataManager(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDataManager(), this);
         getServer().getPluginManager().registerEvents(new PlayerCompassMarker(), this);
         getServer().getPluginManager().registerEvents(new ExplorationGeneralFeatures(), this);
         getServer().getPluginManager().registerEvents(new OfflinePlayerManagement(), this);

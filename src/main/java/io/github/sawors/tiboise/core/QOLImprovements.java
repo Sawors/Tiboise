@@ -419,13 +419,13 @@ public class QOLImprovements implements Listener {
         Tiboise.addPlayerToInvisibleNametagTeam(p);
         
         // rename. TODO : merge this with the nickname mechanic
-        String name = null;
-        switch(p.getUniqueId().toString()){
-            case "66e25a14-b468-4cb1-8cde-6cf6054255ba" -> name = "Gros Orteil de Pied";
-            case "30b80f6f-f0dc-4b4a-96b2-c37b28494b1b" -> name = "MOLE1283";
-            case "6864eb4a-91d6-4292-8dfb-f398cbd5dc57" -> name = "Walid Bedouin";
-        }
-        if(name != null){
+        if(PlayerDataManager.hasNickName(p.getUniqueId())){
+            //switch(p.getUniqueId().toString()){
+            //            case "66e25a14-b468-4cb1-8cde-6cf6054255ba" -> name = "Gros Orteil de Pied";
+            //            case "30b80f6f-f0dc-4b4a-96b2-c37b28494b1b" -> name = "MOLE1283";
+            //            case "6864eb4a-91d6-4292-8dfb-f398cbd5dc57" -> name = "Walid Bedouin";
+            //        }
+            final String name = PlayerDataManager.getNickName(p.getUniqueId());
             Component compname = Component.text(name);
             p.displayName(compname);
             p.playerListName(compname);
@@ -562,7 +562,7 @@ public class QOLImprovements implements Listener {
                     @Override
                     public void run() {
                         // TODO : set back to 2
-                        if(p.getLocation().getNearbyEntitiesByType(Player.class,16).size() < 1) return;
+                        if(p.getLocation().getNearbyEntitiesByType(Player.class,16).size() < 2) return;
                         final int lineWidth = 78*2;
                         final int lineAmount = Math.min(1,content.length()/lineWidth);
                         final Vector displacement = new Vector(0,2+(lineAmount*.1),0);
