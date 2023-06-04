@@ -106,7 +106,6 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             
             PostEnvelopeClosed resultEnvelope = new PostEnvelopeClosed();
             resultEnvelope.setVariant(TiboiseItem.getItemVariant(envelope));
-            resultEnvelope.setDisplayName(envelope.getItemMeta().displayName());
             
             OfflinePlayer receiver = PostStamp.getReceiver(stamp);
             OfflinePlayer sender = PostStamp.getSender(stamp);
@@ -122,7 +121,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 resultEnvelope.addData(getContentTextKey(),content.toString());
                 //resultEnvelope.addData(getContentItemKey(),"");
                 resultEnvelope.setLore(List.of(
-                        Component.text("From ").color(NamedTextColor.GOLD)
+                        Component.text(" From ").color(NamedTextColor.GOLD)
                                 .append(Component.text(sender.getName()).color(NamedTextColor.YELLOW))
                                 .append(Component.text(" to ").color(NamedTextColor.GOLD))
                                 .append(Component.text(receiver.getName()).color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
@@ -131,7 +130,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 ItemStack finalOutput = resultEnvelope.get();
                 PostStamp.setSenderAndReceiver(finalOutput,sender.getUniqueId(),receiver.getUniqueId());
                 ItemMeta meta = finalOutput.getItemMeta();
-                meta.displayName(Objects.requireNonNull(meta.displayName()).color(NamedTextColor.GOLD));
+                meta.displayName(Component.text("Letter").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
                 finalOutput.setItemMeta(meta);
                 inv.setResult(finalOutput);
             }

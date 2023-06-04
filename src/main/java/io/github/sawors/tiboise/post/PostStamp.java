@@ -36,7 +36,6 @@ public class PostStamp extends TiboiseItem implements Listener {
     public PostStamp(){
         setMaterial(Material.PAPER);
         setVariant(formatTextToId(StampVariants.DEFAULT.toString()));
-        
     }
     
     @Override

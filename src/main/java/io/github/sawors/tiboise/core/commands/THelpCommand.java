@@ -19,8 +19,9 @@ public class THelpCommand implements CommandExecutor {
             if(ref != null){
                 p.sendMessage(
                         Component.text("Help for ").append(item.displayName()).append(Component.text(" : ")).color(NamedTextColor.GREEN)
-                                .append(Component.text("\n"+ref.getHelpText()))
+                                .append(Component.text("\n "+ref.getHelpText()).color(NamedTextColor.GRAY))
                 );
+                return true;
             }
         }
         return false;
