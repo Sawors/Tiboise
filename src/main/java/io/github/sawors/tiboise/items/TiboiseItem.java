@@ -12,6 +12,9 @@ import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
 import io.github.sawors.tiboise.items.utility.PackingScotch;
 import io.github.sawors.tiboise.items.utility.PortableCraftingTable;
 import io.github.sawors.tiboise.items.utility.coppercompass.CopperCompass;
+import io.github.sawors.tiboise.post.PostEnvelope;
+import io.github.sawors.tiboise.post.PostEnvelopeClosed;
+import io.github.sawors.tiboise.post.PostStamp;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -54,6 +57,9 @@ public abstract class TiboiseItem {
         registerItem(new TiboiseWrench());
         registerItem(new PortableCraftingTable());
         registerItem(new PackingScotch());
+        registerItem(new PostEnvelope());
+        registerItem(new PostEnvelopeClosed());
+        registerItem(new PostStamp());
         
         if(Tiboise.isModuleEnabled(ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
