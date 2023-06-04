@@ -8,6 +8,7 @@ import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
 import io.github.sawors.tiboise.core.*;
 import io.github.sawors.tiboise.core.commands.GetIdCommand;
+import io.github.sawors.tiboise.core.commands.ServerUtilityCommand;
 import io.github.sawors.tiboise.core.commands.TTestCommand;
 import io.github.sawors.tiboise.core.commands.TiboiseMainCommand;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
@@ -130,6 +131,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
         Objects.requireNonNull(getServer().getPluginCommand("kidnap")).setExecutor(new KidnapCommand());
         Objects.requireNonNull(getServer().getPluginCommand("marker")).setExecutor(new PlayerMarkerCommand());
+        Objects.requireNonNull(getServer().getPluginCommand("tadmin")).setExecutor(new ServerUtilityCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setTabCompleter(maincommand);

@@ -26,6 +26,9 @@ commands:
       - tb
       - t
     usage: ûwû
+  tadmin:
+    usage: /tadmin [sub-command] allows you to use multiple admin utilities.
+    permission: tiboise.admin
 softdepend:
   - voicechat
 depend:
@@ -40,4 +43,7 @@ permissions:
     default: op
   tiboise.test:
     description: Allows you to use the test command
+    default: op
+  tiboise.admin:
+    description: Allows you to use admin commands
     default: op
