@@ -16,8 +16,9 @@ import io.github.sawors.tiboise.post.PostEnvelope;
 import io.github.sawors.tiboise.post.PostEnvelopeClosed;
 import io.github.sawors.tiboise.post.PostStamp;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
@@ -147,7 +148,7 @@ public abstract class TiboiseItem {
             nameformated.append(c);
             lastchar = c;
         }
-        name = Component.translatable(ChatColor.WHITE + nameformated.toString());
+        name = Component.text(nameformated.toString()).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
 
         basematerial = Material.ROTTEN_FLESH;
         unique = false;
@@ -209,6 +210,10 @@ public abstract class TiboiseItem {
 
     public void overwriteUnbreakbale(boolean overwrite){
         this.overwriteunbreakable = overwrite;
+    }
+    
+    public NamespacedKey getItemReference(){
+        return new NamespacedKey(Tiboise.getPlugin(),this.getId());
     }
 
     public ItemStack get(){

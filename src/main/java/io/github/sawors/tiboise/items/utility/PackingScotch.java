@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.items.utility;
 
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.items.ItemSerializer;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -57,20 +58,11 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 meta.displayName(Component.text("Packed "+TiboiseUtils.capitalizeFirstLetter(clicked.getType().toString())).color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
                 Map<String,Integer> contentSummary = new HashMap<>();
                 // serialize content
-                StringBuilder contentString = new StringBuilder();
-                ItemStack[] content = container.getSnapshotInventory().getContents();
-                int slot = 0;
-                for(ItemStack item : content){
-                    slot++;
+                final String serializedInventory = new ItemSerializer().serializeInventory(container.getInventory());
+                for(ItemStack item : container.getSnapshotInventory().getContents()){
                     if(item == null) continue;
                     final String tiboiseId = TiboiseItem.getItemId(item);
                     contentSummary.put(tiboiseId,contentSummary.getOrDefault(tiboiseId,0)+item.getAmount());
-                    contentString
-                            .append("{")
-                            .append("(").append(slot-1).append(")")
-                            .append(Arrays.toString(item.serializeAsBytes()))
-                            .append("},")
-                    ;
                 }
                 List<Component> lore = new ArrayList<>();
                 lore.add(Component.text("Contains :").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
@@ -86,8 +78,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 
                 meta.lore(lore);
                 
-                contentString.deleteCharAt(contentString.length()-1);
-                c.set(getStorageKey(),PersistentDataType.STRING,contentString.toString());
+                c.set(getStorageKey(),PersistentDataType.STRING,serializedInventory);
                 packedBlockItem.setItemMeta(meta);
                 Map<Integer,ItemStack> additional = event.getPlayer().getInventory().addItem(packedBlockItem);
                 for(ItemStack overflow : additional.values()){
@@ -112,23 +103,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
             Block toReplace = clicked.getRelative(face);
             try{
                 
-                Map<Integer,ItemStack> content = new HashMap<>();
-                
-                // deserialize
-                for(String itemString : Objects.requireNonNull(src.getItemMeta().getPersistentDataContainer().get(getStorageKey(), PersistentDataType.STRING)).split("\\{")){
-                    if(itemString.length() == 0) continue;
-                    // byte array of each item
-                    String cleanedString = itemString.substring(itemString.indexOf("\\{")+1,itemString.lastIndexOf("}"));
-                    final int slot = Integer.parseInt(cleanedString.substring(cleanedString.indexOf("(")+1,cleanedString.indexOf(")")));
-                    cleanedString = cleanedString.substring(4);
-                    String[] itemBytesString = cleanedString.split(",");
-                    byte[] itemBytes = new byte[itemBytesString.length];
-                    for(int i = 0; i<itemBytesString.length; i++){
-                        itemBytes[i] = Integer.valueOf(itemBytesString[i].replaceAll(",","").replaceAll("\\[","").replaceAll("]","").replaceAll(" ","")).byteValue();
-                    }
-                    final ItemStack item = ItemStack.deserializeBytes(itemBytes);
-                    content.put(slot,item);
-                }
+                Map<Integer,ItemStack> content = new ItemSerializer().deserialize(Objects.requireNonNull(src.getItemMeta().getPersistentDataContainer().get(getStorageKey(), PersistentDataType.STRING)));
                 
                 toReplace.setType(Material.valueOf(src.getItemMeta().getPersistentDataContainer().get(getStoredMaterialKey(),PersistentDataType.STRING)));
                 if(toReplace.getBlockData() instanceof Directional directional){
