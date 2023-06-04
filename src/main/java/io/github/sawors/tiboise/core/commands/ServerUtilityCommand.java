@@ -17,7 +17,7 @@ public class ServerUtilityCommand implements CommandExecutor {
                 case "online", "list" -> {
                     Component msg = Component.text("Online Players :");
                     for(Player p : Bukkit.getOnlinePlayers()){
-                        msg = msg.append(Component.text("\n - "+p.getName()));
+                        msg = msg.append(Component.text("\n - "+p.getName()+" : "+p.getUniqueId()));
                     }
                     sender.sendMessage(msg);
                     return true;
