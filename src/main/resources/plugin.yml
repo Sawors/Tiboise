@@ -29,6 +29,8 @@ commands:
   tadmin:
     usage: /tadmin [sub-command] allows you to use multiple admin utilities.
     permission: tiboise.admin
+  thelp:
+    usage: /thelp gives you indication on the usage of the item you have in hand.
 softdepend:
   - voicechat
 depend:

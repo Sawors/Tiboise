@@ -360,6 +360,10 @@ public abstract class TiboiseItem {
         return nameformated.toString();
     }
     
+    public String getHelpText(){
+        return "This item does not have anything special.";
+    }
+    
     public @Nullable Recipe getRecipe(){
         return null;
     }

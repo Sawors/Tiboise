@@ -21,6 +21,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,7 +35,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     public PostEnvelopeClosed(){
         setMaterial(Material.PAPER);
-        setDisplayName(Component.text("Post Envelope (Closed)").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        setDisplayName(Component.text("Letter").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
     }
     
     @EventHandler
@@ -82,7 +83,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
         ShapelessRecipe recipe = new ShapelessRecipe(getItemReference(),closedEnvelope.get());
         recipe.addIngredient(new PostEnvelope().get());
         recipe.addIngredient(new PostStamp().getPlaceHolder());
-        recipe.addIngredient(Material.WRITTEN_BOOK);
+        recipe.addIngredient(Material.WRITABLE_BOOK);
         return recipe;
     }
     
@@ -95,7 +96,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             
             ItemStack envelope = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),new PostEnvelope().getId())).findFirst().orElse(null);
             ItemStack stamp = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),new PostStamp().getId())).findFirst().orElse(null);
-            ItemStack book = Arrays.stream(grid).filter(c -> c!=null && c.getType().equals(Material.WRITTEN_BOOK)).findFirst().orElse(null);
+            ItemStack book = Arrays.stream(grid).filter(c -> c!=null && c.getType().equals(Material.WRITABLE_BOOK)).findFirst().orElse(null);
             
             if(
                     stamp == null || envelope == null || book == null
@@ -113,25 +114,25 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             if(sender != null && sender.getName() != null && receiver != null && receiver.getName() != null){
                 
                 BookMeta bookMeta = (BookMeta) book.getItemMeta().clone();
-                final String title = bookMeta.getTitle();
                 StringBuilder content = new StringBuilder();
                 for(Component text : bookMeta.pages()){
                     content.append(((TextComponent) text).content()).append(" ");
                 }
                 
-                resultEnvelope.addData(getContentTitleKey(),title);
                 resultEnvelope.addData(getContentTextKey(),content.toString());
                 //resultEnvelope.addData(getContentItemKey(),"");
                 resultEnvelope.setLore(List.of(
                         Component.text("From ").color(NamedTextColor.GOLD)
                                 .append(Component.text(sender.getName()).color(NamedTextColor.YELLOW))
                                 .append(Component.text(" to ").color(NamedTextColor.GOLD))
-                                .append(Component.text(receiver.getName()).color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),
-                        Component.text(title != null ? title : "").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+                                .append(Component.text(receiver.getName()).color(NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
                 ));
                 
                 ItemStack finalOutput = resultEnvelope.get();
                 PostStamp.setSenderAndReceiver(finalOutput,sender.getUniqueId(),receiver.getUniqueId());
+                ItemMeta meta = finalOutput.getItemMeta();
+                meta.displayName(Objects.requireNonNull(meta.displayName()).color(NamedTextColor.GOLD));
+                finalOutput.setItemMeta(meta);
                 inv.setResult(finalOutput);
             }
             
@@ -152,7 +153,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 && event.isLeftClick()
                 && event.getCurrentItem() != null
                 && Objects.equals(TiboiseItem.getItemId(event.getCurrentItem()), new PostEnvelopeClosed().getId())
-                && Arrays.stream(inv.getMatrix()).anyMatch(i -> i!= null && i.getType().equals(Material.WRITTEN_BOOK))
+                && Arrays.stream(inv.getMatrix()).anyMatch(i -> i!= null && i.getType().equals(Material.WRITABLE_BOOK))
                 && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostStamp().getId()))
                 && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostEnvelope().getId()))
                 && Arrays.stream(inv.getMatrix()).filter(Objects::isNull).count() == 9-3
@@ -169,7 +170,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 if(amountLowered > 0){
                     nextAmounts.put(slot,amountLowered);
                 }
-                if (item.getType().equals(Material.WRITTEN_BOOK)) {
+                if (item.getType().equals(Material.WRITABLE_BOOK)) {
                     
                     final ItemStack book = item.clone().asOne();
                     new BukkitRunnable() {
@@ -263,8 +264,4 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
 //    public static NamespacedKey getContentItemKey(){
 //        return new NamespacedKey(Tiboise.getPlugin(),"post-content-item");
 //    }
-    
-    public static NamespacedKey getContentTitleKey(){
-        return new NamespacedKey(Tiboise.getPlugin(),"post-content-title");
-    }
 }
