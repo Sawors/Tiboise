@@ -20,7 +20,7 @@ public class PostEnvelope extends TiboiseItem {
     @Override
     public @Nullable Recipe getRecipe() {
         ShapelessRecipe recipe = new ShapelessRecipe(getItemReference(),new PostEnvelope().get());
-        recipe.addIngredient(Material.PAPER);
+        recipe.addIngredient(3,Material.PAPER);
         recipe.addIngredient(Material.INK_SAC);
         return recipe;
     }

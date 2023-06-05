@@ -81,7 +81,7 @@ public class PostStamp extends TiboiseItem implements Listener {
     @Override
     public @Nullable Recipe getRecipe() {
         ShapelessRecipe recipe = new ShapelessRecipe(getItemReference(),new PostStamp().get());
-        recipe.addIngredient(3,Material.PAPER);
+        recipe.addIngredient(Material.PAPER);
         recipe.addIngredient(Material.HONEYCOMB);
         return recipe;
     }
