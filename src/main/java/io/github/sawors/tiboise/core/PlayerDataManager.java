@@ -1,9 +1,11 @@
 package io.github.sawors.tiboise.core;
 
+import de.maxhenkel.voicechat.api.VoicechatConnection;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,13 +41,25 @@ public class PlayerDataManager implements Listener {
     @EventHandler
     public static void checkResourcesOnJoin(PlayerJoinEvent event){
         final Player p = event.getPlayer();
-        if(!Tiboise.isServerInTestMode()){
+        final boolean isTestMode = Tiboise.isServerInTestMode();
+        if(p.isOp() && isTestMode){
+            p.sendMessage(
+                    Component.text("The server is in test mode ! This is not intended for production !")
+                            .append(Component.text("\nTo change mode, please do \"tadmin testmode\""))
+                            .color(TextColor.color(0xFF7300))
+                            .hoverEvent(Component.text("Click to change mode"))
+                            .clickEvent(ClickEvent.runCommand("/tadmin testmode"))
+            );
+        }
+        // manually excluding myself in order to work quicker
+        if(!isTestMode){
             new BukkitRunnable(){
                 @Override
                 public void run() {
                     sendPlayerResourcePack(event.getPlayer());
                     
-                    if(VoiceChatIntegrationPlugin.getVoicechatServerApi().getConnectionOf(p.getUniqueId()) == null){
+                    final VoicechatConnection co = VoiceChatIntegrationPlugin.getVoicechatServerApi().getConnectionOf(p.getUniqueId()) ;
+                    if(co == null || co.isDisabled()){
                         p.sendMessage(Component.text(ChatColor.RED+"You do not seem to have the simple voice chat mod installed. Please click ")
                                 .append(Component.text(ChatColor.GOLD+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://minhaskamal.github.io/DownGit/#/home?url=https:%2F%2Fgithub.com%2FSawors%2Fmc-dev-server%2Fblob%2Fmain%2Fmods%20tiboise%20updated.zip")))
                                 .append(Component.text(ChatColor.RED+" in order to install the server recommended modpack, or "))
@@ -55,7 +69,7 @@ public class PlayerDataManager implements Listener {
                     }
                     
                 }
-            }.runTaskLater(Tiboise.getPlugin(),20*4);
+            }.runTaskLater(Tiboise.getPlugin(),20*3);
         }
         
     }

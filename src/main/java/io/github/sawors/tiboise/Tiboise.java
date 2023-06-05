@@ -40,6 +40,7 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.logging.Level;
 
@@ -126,7 +127,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
         Objects.requireNonNull(getServer().getPluginCommand("kidnap")).setExecutor(new KidnapCommand());
         Objects.requireNonNull(getServer().getPluginCommand("marker")).setExecutor(new PlayerMarkerCommand());
-        Objects.requireNonNull(getServer().getPluginCommand("tadmin")).setExecutor(new ServerUtilityCommand());
+        Objects.requireNonNull(getServer().getPluginCommand("tadmin")).setExecutor(new TAdminCommand());
         Objects.requireNonNull(getServer().getPluginCommand("thelp")).setExecutor(new THelpCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setExecutor(maincommand);
@@ -339,6 +340,17 @@ public final class Tiboise extends JavaPlugin {
         return testmode;
     }
     
+    public static void setTestMode(boolean testMode){
+        testmode = testMode;
+        try{
+            YamlConfiguration config = YamlConfiguration.loadConfiguration(configfile);
+            config.set(ConfigFields.TEST_MODE.getFieldName(),testMode);
+            config.save(configfile);
+        } catch (IllegalArgumentException | IOException e){
+            e.printStackTrace();
+        }
+    }
+    
     public static void addPlayerToInvisibleNametagTeam(Player p){
         t.addEntities(p);
     }
@@ -357,6 +369,29 @@ public final class Tiboise extends JavaPlugin {
     
     public static boolean isBungeeEnabled(){
         return usebungee;
+    }
+    
+    public enum ConfigModules {
+        FISHING, BETTERVANILLA, PAINTING, ECONOMY;
+        
+        
+        public String getName(){
+            return this.toString().toLowerCase(Locale.ROOT);
+        }
+    }
+    
+    public enum ConfigFields{
+        TEST_MODE("test-mode"),
+        ;
+        
+        private final String fieldName;
+        ConfigFields(String name){
+            this.fieldName = name;
+        }
+        
+        public String getFieldName(){
+            return fieldName;
+        }
     }
     
 }

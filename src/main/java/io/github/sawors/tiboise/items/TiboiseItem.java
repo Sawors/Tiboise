@@ -1,6 +1,5 @@
 package io.github.sawors.tiboise.items;
 
-import io.github.sawors.tiboise.ConfigModules;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemTag;
 import io.github.sawors.tiboise.core.ItemVariant;
@@ -62,7 +61,7 @@ public abstract class TiboiseItem {
         registerItem(new PostEnvelopeClosed());
         registerItem(new PostStamp());
         
-        if(Tiboise.isModuleEnabled(ConfigModules.ECONOMY)){
+        if(Tiboise.isModuleEnabled(Tiboise.ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
         }
         if(Tiboise.isVoiceChatEnabled()){

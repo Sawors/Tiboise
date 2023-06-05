@@ -1,6 +1,5 @@
 package io.github.sawors.tiboise.economy;
 
-import io.github.sawors.tiboise.ConfigModules;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
@@ -215,7 +214,7 @@ public class CoinItem extends TiboiseItem implements Listener {
 
     public static void loadCoinValues(){
         try{
-            ConfigurationSection valuesection = Objects.requireNonNull(Tiboise.getModuleSection(ConfigModules.ECONOMY)).getConfigurationSection("coin-values");
+            ConfigurationSection valuesection = Objects.requireNonNull(Tiboise.getModuleSection(Tiboise.ConfigModules.ECONOMY)).getConfigurationSection("coin-values");
             Set<String> values = Objects.requireNonNull(valuesection).getKeys(false);
 
             logAdmin("Loading coin values...");
