@@ -63,7 +63,7 @@ public final class Tiboise extends JavaPlugin {
     // database
     private static File dbfile;
     // versions and patchnote
-    private static final String version = "1.1";
+    private static final String version = "1.2";
     
 
     @Override
