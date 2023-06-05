@@ -39,7 +39,7 @@ public class TAdminCommand implements CommandExecutor {
                 
                 case "testmode" -> {
                     Tiboise.setTestMode(!Tiboise.isServerInTestMode());
-                    String message = Tiboise.isServerInTestMode() ? "The server is now in test mode, BE CAREFUL ! This mode is not intended to be used on a live server." : "The server is no more in tes mode.";
+                    String message = Tiboise.isServerInTestMode() ? "The server is now in test mode, BE CAREFUL ! This mode is not intended to be used on a live server." : "The server is no more in test mode.";
                     sender.sendMessage(Component.text(message).color(NamedTextColor.GREEN));
                 }
             }
