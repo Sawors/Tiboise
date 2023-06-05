@@ -36,11 +36,7 @@ public class PostStamp extends TiboiseItem implements Listener {
     public PostStamp(){
         setMaterial(Material.PAPER);
         setVariant(formatTextToId(StampVariants.DEFAULT.toString()));
-    }
-    
-    @Override
-    public String getHelpText() {
-        return "To fill this stamp, put it in an anvil and rename it to [sender]->[receiver] (replace [sender] by your name and [receiver] by the name of the person you want to send the letter to)";
+        setHelpText("To fill this stamp, put it in an anvil and rename it to [sender]->[receiver] (replace [sender] by your name and [receiver] by the name of the person you want to send the letter to)");
     }
     
     public PostStamp(StampVariants variant){

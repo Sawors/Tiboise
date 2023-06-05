@@ -8,6 +8,7 @@ import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
 import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
+import io.github.sawors.tiboise.items.utility.Flare;
 import io.github.sawors.tiboise.items.utility.PackingScotch;
 import io.github.sawors.tiboise.items.utility.PortableCraftingTable;
 import io.github.sawors.tiboise.items.utility.coppercompass.CopperCompass;
@@ -60,6 +61,7 @@ public abstract class TiboiseItem {
         registerItem(new PostEnvelope());
         registerItem(new PostEnvelopeClosed());
         registerItem(new PostStamp());
+        registerItem(new Flare());
         
         if(Tiboise.isModuleEnabled(Tiboise.ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
@@ -127,9 +129,12 @@ public abstract class TiboiseItem {
     boolean unique;
     Material basematerial;
     Map<NamespacedKey, String> additionaldata = new HashMap<>();
+    String helpText;
     // just added this in case we need to create items with durability
     // setting this to true will give the item its durability stat back
     boolean overwriteunbreakable = true;
+    
+    private static final String DEFAULT_HELP_TEXT = "This item has no particular mechanic.";
 
     public TiboiseItem(){
         String classname = this.getClass().getSimpleName();
@@ -137,6 +142,7 @@ public abstract class TiboiseItem {
         tags = new HashSet<>();
         lore = new ArrayList<>();
         variant = ItemVariant.DEFAULT.getFormatted();
+        helpText = DEFAULT_HELP_TEXT;
 
         StringBuilder nameformated = new StringBuilder();
         char lastchar = '/';
@@ -227,7 +233,8 @@ public abstract class TiboiseItem {
         }
         // useless in case we decide to overwrite the unbreakable tag
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        meta.getPersistentDataContainer().set(TiboiseItem.getItemIdKey(), PersistentDataType.STRING, id.toLowerCase(Locale.ROOT));
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        
         StringBuilder typeskey = new StringBuilder();
         for(String s : tags){
             typeskey.append(s.toUpperCase(Locale.ROOT)).append(":");
@@ -235,11 +242,14 @@ public abstract class TiboiseItem {
         if(typeskey.toString().endsWith(":")){
             typeskey.deleteCharAt(typeskey.lastIndexOf(":"));
         }
-        meta.getPersistentDataContainer().set(TiboiseItem.getItemVariantKey(), PersistentDataType.STRING, variant.toLowerCase(Locale.ROOT));
-        meta.getPersistentDataContainer().set(TiboiseItem.getItemTagsKey(), PersistentDataType.STRING, typeskey.toString().toLowerCase(Locale.ROOT));
+        // add data to Persistent Data Container
+        container.set(getItemIdKey(), PersistentDataType.STRING, id.toLowerCase(Locale.ROOT));
+        container.set(getItemVariantKey(), PersistentDataType.STRING, variant.toLowerCase(Locale.ROOT));
+        container.set(getItemTagsKey(), PersistentDataType.STRING, typeskey.toString().toLowerCase(Locale.ROOT));
         for(Map.Entry<NamespacedKey, String> entry : additionaldata.entrySet()){
-            meta.getPersistentDataContainer().set(entry.getKey(), PersistentDataType.STRING,entry.getValue());
+            container.set(entry.getKey(), PersistentDataType.STRING,entry.getValue());
         }
+        container.set(getHelpTextKey(),PersistentDataType.STRING,helpText);
         
         meta.setCustomModelData(this.id.hashCode());
 
@@ -359,8 +369,23 @@ public abstract class TiboiseItem {
         return nameformated.toString();
     }
     
+    public static String getItemHelpText(ItemStack item){
+        if(item != null && item.getItemMeta() != null){
+            return Objects.requireNonNullElse(item.getItemMeta().getPersistentDataContainer().get(getHelpTextKey(),PersistentDataType.STRING),DEFAULT_HELP_TEXT);
+        }
+        return DEFAULT_HELP_TEXT;
+    }
+    
     public String getHelpText(){
-        return "This item does not have anything special.";
+        return this.helpText;
+    }
+    
+    public void setHelpText(String helpText){
+        this.helpText = helpText;
+    }
+    
+    public static NamespacedKey getHelpTextKey(){
+        return new NamespacedKey(Tiboise.getPlugin(),"help-text");
     }
     
     public @Nullable Recipe getRecipe(){
