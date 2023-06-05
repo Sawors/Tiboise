@@ -83,7 +83,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
         ShapelessRecipe recipe = new ShapelessRecipe(getItemReference(),closedEnvelope.get());
         recipe.addIngredient(new PostEnvelope().get());
         recipe.addIngredient(new PostStamp().getPlaceHolder());
-        recipe.addIngredient(Material.WRITABLE_BOOK);
+        recipe.addIngredient(new RecipeChoice.ExactChoice(new ItemStack(Material.WRITABLE_BOOK),new ItemStack(Material.WRITTEN_BOOK)));
         return recipe;
     }
     
@@ -96,7 +96,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             
             ItemStack envelope = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),new PostEnvelope().getId())).findFirst().orElse(null);
             ItemStack stamp = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),new PostStamp().getId())).findFirst().orElse(null);
-            ItemStack book = Arrays.stream(grid).filter(c -> c!=null && c.getType().equals(Material.WRITABLE_BOOK)).findFirst().orElse(null);
+            ItemStack book = Arrays.stream(grid).filter(c -> c!=null && (c.getType().equals(Material.WRITABLE_BOOK) || c.getType().equals(Material.WRITTEN_BOOK))).findFirst().orElse(null);
             
             if(
                     stamp == null || envelope == null || book == null
@@ -152,7 +152,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 && event.isLeftClick()
                 && event.getCurrentItem() != null
                 && Objects.equals(TiboiseItem.getItemId(event.getCurrentItem()), new PostEnvelopeClosed().getId())
-                && Arrays.stream(inv.getMatrix()).anyMatch(i -> i!= null && i.getType().equals(Material.WRITABLE_BOOK))
+                && Arrays.stream(inv.getMatrix()).anyMatch(i -> i!= null && (i.getType().equals(Material.WRITABLE_BOOK) || i.getType().equals(Material.WRITTEN_BOOK)))
                 && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostStamp().getId()))
                 && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostEnvelope().getId()))
                 && Arrays.stream(inv.getMatrix()).filter(Objects::isNull).count() == 9-3
@@ -169,7 +169,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 if(amountLowered > 0){
                     nextAmounts.put(slot,amountLowered);
                 }
-                if (item.getType().equals(Material.WRITABLE_BOOK)) {
+                if (item.getType().equals(Material.WRITABLE_BOOK) || item.getType().equals(Material.WRITTEN_BOOK)) {
                     
                     final ItemStack book = item.clone().asOne();
                     new BukkitRunnable() {
