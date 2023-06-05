@@ -14,7 +14,7 @@ public class PostEnvelope extends TiboiseItem {
     
     @Override
     public String getHelpText() {
-        return "To fill this envelope, put it in a crafting grid with a completed stamp and a written book. \n Write your message in the book and do NOT sign it.";
+        return "To fill this envelope, put it in a crafting grid with a completed stamp and a written book. \n Write your message in the book. You can use as many pages as you want.";
     }
     
     @Override

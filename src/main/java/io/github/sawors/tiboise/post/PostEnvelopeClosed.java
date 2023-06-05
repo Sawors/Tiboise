@@ -155,7 +155,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 && Arrays.stream(inv.getMatrix()).anyMatch(i -> i!= null && (i.getType().equals(Material.WRITABLE_BOOK) || i.getType().equals(Material.WRITTEN_BOOK)))
                 && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostStamp().getId()))
                 && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostEnvelope().getId()))
-                && Arrays.stream(inv.getMatrix()).filter(Objects::isNull).count() == 9-3
+                && (Arrays.stream(inv.getMatrix()).filter(Objects::isNull).count() == 9-3 || Arrays.stream(inv.getMatrix()).filter(Objects::isNull).count() == 4-3)
         ) {
             ItemStack[] grid = inv.getMatrix();
             
