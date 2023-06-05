@@ -271,7 +271,7 @@ public class QOLImprovements implements Listener {
             vanillabonusrecipes.add(
                     new ShapelessRecipe(Material.GLOWSTONE_DUST.getKey(), new ItemStack(Material.GLOWSTONE_DUST).asQuantity(4))
                             .addIngredient(4, Material.FLINT)
-                            .addIngredient(Material.GLOW_BERRIES)
+                            .addIngredient(1,Material.GLOW_BERRIES)
             );
             // SHROOMLIGHT
             vanillabonusrecipes.add(
@@ -280,6 +280,18 @@ public class QOLImprovements implements Listener {
                             .setIngredient('L', new RecipeChoice.MaterialChoice(Tag.LEAVES))
                             .setIngredient('G',Material.GLOW_BERRIES)
                             .setIngredient('X',Material.AIR)
+            );
+            // GILDED BLACKSTONE
+            vanillabonusrecipes.add(
+                    new ShapedRecipe(Material.GILDED_BLACKSTONE.getKey(), new ItemStack(Material.GILDED_BLACKSTONE))
+                            .shape("NNN","NBN","NNN")
+                            .setIngredient('N', Material.GOLD_NUGGET)
+                            .setIngredient('B',Material.BLACKSTONE)
+            );
+            vanillabonusrecipes.add(
+                    new ShapelessRecipe(Material.GUNPOWDER.getKey(), new ItemStack(Material.GUNPOWDER).asQuantity(1))
+                            .addIngredient(2, Material.FLINT)
+                            .addIngredient(1,Material.COAL)
             );
             // MAKE GOLD ITEM ENCHANTED BY DEFAULT
             List<Material> goldtoedit = List.of(Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, Material.GOLDEN_AXE, Material.GOLDEN_SWORD);
@@ -530,13 +542,6 @@ public class QOLImprovements implements Listener {
         if(event.getView().getTopInventory() instanceof AnvilInventory inv){
             inv.setRepairCost(0);
             inv.setRepairCostAmount(0);
-            
-            ItemStack result = inv.getResult();
-            ItemStack base = inv.getFirstItem();
-            ItemStack added = inv.getSecondItem();
-            if(added != null && added.getType().equals(Material.ENCHANTED_BOOK)){
-                event.setResult(null);
-            }
         }
     }
     
