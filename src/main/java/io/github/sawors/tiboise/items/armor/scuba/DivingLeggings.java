@@ -28,7 +28,7 @@ public class DivingLeggings extends TiboiseItem implements Listener, DurabilityI
     public DivingLeggings(){
         setMaterial(Material.CHAINMAIL_LEGGINGS);
         setDisplayName(Component.text("Diving Leggings").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
-        overwriteShortLore("Makes mining underwater faster");
+        setShortLore("Makes mining underwater faster");
     }
     
     // COPY ARMOR EFFECT START

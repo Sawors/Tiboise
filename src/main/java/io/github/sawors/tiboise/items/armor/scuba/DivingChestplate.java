@@ -21,7 +21,7 @@ public class DivingChestplate extends TiboiseItem implements Listener, Durabilit
     public DivingChestplate() {
         setMaterial(Material.CHAINMAIL_CHESTPLATE);
         setDisplayName(Component.text("Diving Chestplate").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
-        overwriteShortLore("Grants you better protection against underwater menaces");
+        setShortLore("Grants you better protection against underwater menaces");
     }
     
     

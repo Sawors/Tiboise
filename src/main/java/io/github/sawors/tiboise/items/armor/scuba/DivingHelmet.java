@@ -29,7 +29,7 @@ public class DivingHelmet extends TiboiseItem implements Listener, DurabilityIte
     public DivingHelmet(){
         setMaterial(Material.CHAINMAIL_HELMET);
         setDisplayName(Component.text("Diving Helmet").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
-        overwriteShortLore("Helps you breath underwater");
+        setShortLore("Helps you breath underwater");
     }
     
     private static Map<UUID, BukkitRunnable> playerCheck = new HashMap<>();

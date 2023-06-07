@@ -9,6 +9,7 @@ import io.github.sawors.tiboise.items.armor.scuba.DivingBoots;
 import io.github.sawors.tiboise.items.armor.scuba.DivingChestplate;
 import io.github.sawors.tiboise.items.armor.scuba.DivingHelmet;
 import io.github.sawors.tiboise.items.armor.scuba.DivingLeggings;
+import io.github.sawors.tiboise.items.tools.AmethystPickaxe;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
 import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
@@ -73,6 +74,7 @@ public abstract class TiboiseItem {
         registerItem(new DivingChestplate());
         registerItem(new DivingLeggings());
         registerItem(new DivingBoots());
+        registerItem(new AmethystPickaxe());
         
         if(Tiboise.isModuleEnabled(Tiboise.ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
@@ -214,7 +216,7 @@ public abstract class TiboiseItem {
     }
     
     // TODO : make this work
-    public void overwriteShortLore(String shortLore){
+    public void setShortLore(String shortLore){
         List<StringBuilder> splitLore = List.of(new StringBuilder(shortLore));
         if(shortLore.length() > LORE_RECOMMENDED_LINE_WIDTH){
             

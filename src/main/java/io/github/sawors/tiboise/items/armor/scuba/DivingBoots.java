@@ -31,7 +31,7 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
     public DivingBoots(){
         setMaterial(Material.CHAINMAIL_BOOTS);
         setDisplayName(Component.text("Diving Leggings").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
-        overwriteShortLore("Make you swim faster");
+        setShortLore("Make you swim faster");
     }
     
     // COPY ARMOR EFFECT START

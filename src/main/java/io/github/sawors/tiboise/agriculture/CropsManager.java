@@ -3,7 +3,6 @@ package io.github.sawors.tiboise.agriculture;
 import io.github.sawors.tiboise.Tiboise;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,12 +34,15 @@ public class CropsManager implements Listener {
     @EventHandler
     public static void manageCropsNaturalGrow(BlockGrowEvent event){
         final Block b = event.getBlock();
-        final BlockState state = event.getNewState();
         
         final double growthTimeFactor = 2;
         
         // multiply by a factor the time needed for plants to grow
         if(Math.random() >= 1.0d/growthTimeFactor) event.setCancelled(true);
+        
+        
+        // prevent growth in caves unless exposed
+        if(b.getLightFromSky() == 0) event.setCancelled(true);
     }
     
     public static void loadBonemealList(){
