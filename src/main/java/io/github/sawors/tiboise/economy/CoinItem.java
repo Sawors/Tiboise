@@ -243,7 +243,7 @@ public class CoinItem extends TiboiseItem implements Listener {
     public static void coinFlip(PlayerDropItemEvent event){
         ItemStack item = event.getItemDrop().getItemStack();
         Player p = event.getPlayer();
-        if(p.getLocation().getPitch() <= -80 && TiboiseItem.getItemId(item).equals(new CoinItem().getId())){
+        if(p.getLocation().getPitch() <= -80 && TiboiseItem.getItemId(item).equals(getId(CoinItem.class))){
             final UUID coinid = event.getItemDrop().getUniqueId();
             coinflippers.put(p.getUniqueId(), coinid);
             new BukkitRunnable(){
@@ -261,7 +261,7 @@ public class CoinItem extends TiboiseItem implements Listener {
     public static void coinFlipPickup(PlayerAttemptPickupItemEvent event){
         ItemStack item = event.getItem().getItemStack();
         Player p = event.getPlayer();
-        if(coinflippers.containsKey(p.getUniqueId()) && TiboiseItem.getItemId(item).equals(new CoinItem().getId())){
+        if(coinflippers.containsKey(p.getUniqueId()) && TiboiseItem.getItemId(item).equals(getId(CoinItem.class))){
             coinflippers.remove(p.getUniqueId());
             String result = Math.random() >= .5 ? "Pile" : "Face";
             p.sendMessage(Component.text("Et... C'est "+result+" !").color(TextColor.color(Color.ORANGE.getRGB())).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE));

@@ -144,7 +144,7 @@ public class PostStamp extends TiboiseItem implements Listener {
         AnvilInventory inv = event.getInventory();
         ItemStack input = (inv.getFirstItem() != null && !inv.getFirstItem().getType().isAir()) ? inv.getFirstItem() : inv.getSecondItem();
         ItemStack result = inv.getResult();
-        if(input == null || input.getType().isAir() || !TiboiseItem.getItemId(input).equals(new PostStamp().getId())){
+        if(input == null || input.getType().isAir() || !TiboiseItem.getItemId(input).equals(getId(PostStamp.class))){
             return;
         }
         

@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.items.tools.radius;
 
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemVariant;
+import io.github.sawors.tiboise.items.DurabilityItem;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class Hammer extends RadiusBreakingTool implements Listener {
+public class Hammer extends RadiusBreakingTool implements Listener, DurabilityItem {
     
     private static final double durabilitymultiplier = 2;
     
@@ -59,7 +60,7 @@ public class Hammer extends RadiusBreakingTool implements Listener {
     public static void onPlayerDestroyBlock(BlockBreakEvent event){
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         Block target = event.getBlock();
-        if(target.isValidTool(item) && TiboiseItem.getItemId(item).equals(new Hammer().getId()) && !event.getPlayer().isSneaking()){
+        if(target.isValidTool(item) && TiboiseItem.getItemId(item).equals(getId(Hammer.class)) && !event.getPlayer().isSneaking()){
             radiusBreak(RadiusType.SQUARE,1,event.getBlock(), Objects.requireNonNull(event.getPlayer().getTargetBlockFace(8)),event.getPlayer().getInventory().getItemInMainHand(),durabilitymultiplier,event.getPlayer());
         }
     }
@@ -106,5 +107,15 @@ public class Hammer extends RadiusBreakingTool implements Listener {
                 ItemVariant.DIAMOND,
                 ItemVariant.NETHERITE
         );
+    }
+    
+    @Override
+    public String getRepairMaterialId() {
+        return TiboiseItem.getItemId(new ItemStack(Material.IRON_INGOT));
+    }
+    
+    @Override
+    public int getRepairPointPerItem() {
+        return 0;
     }
 }

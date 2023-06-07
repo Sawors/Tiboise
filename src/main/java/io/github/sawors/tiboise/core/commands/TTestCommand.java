@@ -17,6 +17,8 @@ import io.github.gaeqs.javayoutubedownloader.tag.Encoding;
 import io.github.gaeqs.javayoutubedownloader.tag.StreamType;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
+import io.github.sawors.tiboise.items.ItemTag;
+import io.github.sawors.tiboise.items.TiboiseItem;
 import javazoom.spi.mpeg.sampled.convert.MpegFormatConversionProvider;
 import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
 import org.bukkit.Bukkit;
@@ -27,6 +29,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.*;
@@ -52,6 +55,17 @@ public class TTestCommand implements CommandExecutor {
     
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        
+        if(commandSender instanceof Player p){
+            ItemStack ui = p.getInventory().getItemInMainHand();
+            TiboiseItem.addItemTag(ui, ItemTag.HIDE_GLINT.toString());
+            p.getInventory().setItemInMainHand(ui);
+        }
+        
+        
+        if(args.length > 0){
+            return true;
+        }
         /*try (CloseableHttpClient client = HttpClients.custom()
                 .setUserAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1")
                 .build()

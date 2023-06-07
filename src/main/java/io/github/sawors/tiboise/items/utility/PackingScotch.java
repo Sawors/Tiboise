@@ -44,7 +44,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
         
         ItemStack src = event.getPlayer().getInventory().getItemInMainHand();
         final Block clicked = event.getClickedBlock();
-        if(TiboiseItem.getItemId(src).equals(new PackingScotch().getId()) && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)){
+        if(TiboiseItem.getItemId(src).equals(getId(PackingScotch.class)) && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)){
             event.setCancelled(true);
             // packing the block
             if(clicked != null && (clicked.getType().equals(Material.CHEST) || clicked.getType().equals(Material.BARREL))){

@@ -1,7 +1,7 @@
 package io.github.sawors.tiboise.items.utility;
 
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.core.ItemTag;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -34,7 +34,7 @@ public class PortableCraftingTable extends TiboiseItem implements Listener {
     
     @EventHandler
     public static void openCraftingInventory(PlayerInteractEvent event){
-        if(event.getItem() != null && TiboiseItem.getItemId(event.getItem()).equals(new PortableCraftingTable().getId())){
+        if(event.getItem() != null && TiboiseItem.getItemId(event.getItem()).equals(getId(PortableCraftingTable.class))){
             event.getPlayer().openWorkbench(event.getPlayer().getLocation(),true);
             event.getPlayer().playSound(event.getPlayer().getLocation(),Sound.ENTITY_VILLAGER_WORK_MASON,.75f,1.25f);
         }

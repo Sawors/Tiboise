@@ -1,6 +1,5 @@
 package io.github.sawors.tiboise.items;
 
-import io.github.sawors.tiboise.core.ItemTag;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;

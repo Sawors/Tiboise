@@ -10,10 +10,12 @@ import io.github.sawors.tiboise.core.*;
 import io.github.sawors.tiboise.core.commands.*;
 import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
+import io.github.sawors.tiboise.economy.trade.TradingStation;
 import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
 import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
+import io.github.sawors.tiboise.items.CraftingPatcher;
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.TiboiseItem;
@@ -23,12 +25,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -110,28 +114,31 @@ public final class Tiboise extends JavaPlugin {
         DatabaseLink.connectInit();
         
         PlayerDataManager.reloadPackData();
+        final Server server = getServer();
+        final PluginManager manager = server.getPluginManager();
+        manager.registerEvents(new ItemGlobalListeners(), this);
+        manager.registerEvents(new SpawnManager(),this);
+        manager.registerEvents(new QOLImprovements(),this);
+        manager.registerEvents(new CropsManager(),this);
+        manager.registerEvents(new AnimalsManager(), this);
+        manager.registerEvents(new PlayerDataManager(), this);
+        manager.registerEvents(new PlayerCompassMarker(), this);
+        manager.registerEvents(new ExplorationGeneralFeatures(), this);
+        manager.registerEvents(new OfflinePlayerManagement(), this);
+        manager.registerEvents(new FloatingTextUtils(), this);
+        manager.registerEvents(new CraftingPatcher(),this);
+        manager.registerEvents(new TradingStation(),this);
         
-        getServer().getPluginManager().registerEvents(new ItemGlobalListeners(), this);
-        getServer().getPluginManager().registerEvents(new SpawnManager(),this);
-        getServer().getPluginManager().registerEvents(new QOLImprovements(),this);
-        getServer().getPluginManager().registerEvents(new CropsManager(),this);
-        getServer().getPluginManager().registerEvents(new AnimalsManager(), this);
-        getServer().getPluginManager().registerEvents(new PlayerDataManager(), this);
-        getServer().getPluginManager().registerEvents(new PlayerCompassMarker(), this);
-        getServer().getPluginManager().registerEvents(new ExplorationGeneralFeatures(), this);
-        getServer().getPluginManager().registerEvents(new OfflinePlayerManagement(), this);
-        getServer().getPluginManager().registerEvents(new FloatingTextUtils(), this);
-        
-        Objects.requireNonNull(getServer().getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
-        Objects.requireNonNull(getServer().getPluginCommand("tid")).setExecutor(new GetIdCommand());
-        Objects.requireNonNull(getServer().getPluginCommand("ttest")).setExecutor(new TTestCommand());
-        Objects.requireNonNull(getServer().getPluginCommand("kidnap")).setExecutor(new KidnapCommand());
-        Objects.requireNonNull(getServer().getPluginCommand("marker")).setExecutor(new PlayerMarkerCommand());
-        Objects.requireNonNull(getServer().getPluginCommand("tadmin")).setExecutor(new TAdminCommand());
-        Objects.requireNonNull(getServer().getPluginCommand("thelp")).setExecutor(new THelpCommand());
+        Objects.requireNonNull(server.getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
+        Objects.requireNonNull(server.getPluginCommand("tid")).setExecutor(new GetIdCommand());
+        Objects.requireNonNull(server.getPluginCommand("ttest")).setExecutor(new TTestCommand());
+        Objects.requireNonNull(server.getPluginCommand("kidnap")).setExecutor(new KidnapCommand());
+        Objects.requireNonNull(server.getPluginCommand("marker")).setExecutor(new PlayerMarkerCommand());
+        Objects.requireNonNull(server.getPluginCommand("tadmin")).setExecutor(new TAdminCommand());
+        Objects.requireNonNull(server.getPluginCommand("thelp")).setExecutor(new THelpCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
-        Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setExecutor(maincommand);
-        Objects.requireNonNull(getServer().getPluginCommand("tiboise")).setTabCompleter(maincommand);
+        Objects.requireNonNull(server.getPluginCommand("tiboise")).setExecutor(maincommand);
+        Objects.requireNonNull(server.getPluginCommand("tiboise")).setTabCompleter(maincommand);
 
         
         
@@ -168,6 +175,61 @@ public final class Tiboise extends JavaPlugin {
         CropsManager.loadBonemealList();
         
         TiboiseUtils.initialize();
+        
+        
+        /*protocolManager.addPacketListener(new PacketAdapter(
+                this, ListenerPriority.LOWEST,
+                PacketType.Play.Server.SET_SLOT, PacketType.Play.Server.WINDOW_ITEMS) {
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                PacketContainer packet = event.getPacket().deepClone();
+                if (event.getPacketType() == PacketType.Play.Server.SET_SLOT) {
+                    ItemStack content = packet.getItemModifier().readSafely(0);
+                    logAdmin(TiboiseItem.getItemTags(content));
+                    if(content != null && TiboiseItem.getItemTags(content).contains(ItemTag.HIDE_FROM_CLIENT.toString())) {
+                        event.setCancelled(true);
+                        ItemMeta meta = content.getItemMeta();
+                        //event.setCancelled(true);
+                        for(Enchantment ench : meta.getEnchants().keySet()){
+                            meta.removeEnchant(ench);
+                        }
+                        content.setItemMeta(meta);
+                        packet.getItemModifier().writeSafely(0,content);
+                        logAdmin("TRUE - SINGLE");
+                    }
+                } else {
+                    //ItemStack[] content = event.getPacket().getItemArrayModifier().readSafely(0);
+                    List<ItemStack> array = packet.getItemListModifier().readSafely(0);
+                    logAdmin("0",packet.getItemArrayModifier().readSafely(0));
+                    logAdmin("1",packet.getItemArrayModifier().readSafely(1));
+                    logAdmin("2",packet.getItemArrayModifier().readSafely(2));
+                    logAdmin("3",packet.getItemArrayModifier().readSafely(3));
+                    logAdmin("1.0",packet.getItemListModifier().readSafely(0));
+                    logAdmin("1.1",packet.getItemListModifier().readSafely(1));
+                    logAdmin("1.2",packet.getItemListModifier().readSafely(2));
+                    logAdmin("1.3",packet.getItemListModifier().readSafely(3));
+                    if(array != null){
+                        for(ItemStack content : array){
+                            logAdmin(TiboiseItem.getItemTags(content));
+                            if(content != null && TiboiseItem.getItemTags(content).contains(ItemTag.HIDE_FROM_CLIENT.toString())) {
+                                //event.setCancelled(true);
+                                array.remove(content);
+                                logAdmin("HIDE");
+                                ItemMeta meta = content.getItemMeta();
+                                //event.setCancelled(true);
+                                for(Enchantment ench : meta.getEnchants().keySet()){
+                                    meta.removeEnchant(ench);
+                                }
+                                content.setItemMeta(meta);
+                                logAdmin("TRUE - ARRAY");
+                            }
+                        }
+                    }
+                    event.getPacket().getItemListModifier().writeSafely(0,array);
+                }
+                event.setPacket(packet);
+            }
+        });*/
     }
 
     @Override

@@ -67,7 +67,7 @@ public class PortableRadio extends FrequencyItem implements Listener {
         
         
         
-        ItemStack emitter = TiboiseItem.getItemId(player.getInventory().getItemInMainHand()).equals(new PortableRadio().getId()) ? player.getInventory().getItemInMainHand() : TiboiseItem.getItemId(player.getInventory().getItemInOffHand()).equals(new PortableRadio().getId()) ? player.getInventory().getItemInOffHand() : null;
+        ItemStack emitter = TiboiseItem.getItemId(player.getInventory().getItemInMainHand()).equals(getId(PortableRadio.class)) ? player.getInventory().getItemInMainHand() : TiboiseItem.getItemId(player.getInventory().getItemInOffHand()).equals(new PortableRadio().getId()) ? player.getInventory().getItemInOffHand() : null;
         if(emitter == null){
             return;
         }
@@ -85,12 +85,12 @@ public class PortableRadio extends FrequencyItem implements Listener {
             if (onlineplayer.getUniqueId().equals(player.getUniqueId())) {
                 continue;
             }
-            ItemStack receiver = TiboiseItem.getItemId(onlineplayer.getInventory().getItemInMainHand()).equals(new PortableRadio().getId()) ? onlineplayer.getInventory().getItemInMainHand() : TiboiseItem.getItemId(onlineplayer.getInventory().getItemInOffHand()).equals(new PortableRadio().getId()) ? onlineplayer.getInventory().getItemInOffHand() : null;
+            ItemStack receiver = TiboiseItem.getItemId(onlineplayer.getInventory().getItemInMainHand()).equals(getId(PortableRadio.class)) ? onlineplayer.getInventory().getItemInMainHand() : TiboiseItem.getItemId(onlineplayer.getInventory().getItemInOffHand()).equals(new PortableRadio().getId()) ? onlineplayer.getInventory().getItemInOffHand() : null;
             boolean transmit = false;
             if(radiocache.contains(onlineplayer.getUniqueId())){
                 transmit = true;
             } else {
-                if(receiver != null && TiboiseItem.getItemId(receiver).equals(new PortableRadio().getId()) && FrequencyItem.getItemFrequency(receiver) == frequency){
+                if(receiver != null && TiboiseItem.getItemId(receiver).equals(getId(PortableRadio.class)) && FrequencyItem.getItemFrequency(receiver) == frequency){
                     transmit = true;
                     final UUID otherid = onlineplayer.getUniqueId();
                     // add player to cache
@@ -129,7 +129,7 @@ public class PortableRadio extends FrequencyItem implements Listener {
     public static void editFrequencyEvent(PlayerInteractEvent event){
         ItemStack radio = event.getPlayer().getInventory().getItemInMainHand();
         int newfrequency;
-        if(TiboiseItem.getItemId(radio).equals(new PortableRadio().getId())){
+        if(TiboiseItem.getItemId(radio).equals(getId(PortableRadio.class))){
             newfrequency = (Math.min(Math.max(frequmin,FrequencyItem.getItemFrequency(radio)+(event.getAction().isLeftClick() ? -10 : 10)),frequmax));
             setItemFrequency(radio, newfrequency);
             radio.lore(getLoreBuild(newfrequency));

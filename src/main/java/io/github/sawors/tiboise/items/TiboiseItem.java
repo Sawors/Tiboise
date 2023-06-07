@@ -1,10 +1,14 @@
 package io.github.sawors.tiboise.items;
 
+import com.google.common.collect.ImmutableSet;
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.core.ItemTag;
 import io.github.sawors.tiboise.core.ItemVariant;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
+import io.github.sawors.tiboise.items.armor.scuba.DivingBoots;
+import io.github.sawors.tiboise.items.armor.scuba.DivingChestplate;
+import io.github.sawors.tiboise.items.armor.scuba.DivingHelmet;
+import io.github.sawors.tiboise.items.armor.scuba.DivingLeggings;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
 import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
@@ -39,13 +43,16 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
+
 public abstract class TiboiseItem {
     
     //
     //  ITEM REGISTERING
     //
-    private static Map<String, TiboiseItem> itemmap = new HashMap<>();
-    private static Set<Integer> registeredlisteners = new HashSet<>();
+    private static final Map<String, TiboiseItem> itemmap = new HashMap<>();
+    private static final Set<Integer> registeredlisteners = new HashSet<>();
+    private static final Map<Class<? extends TiboiseItem>,String> idClassLink = new HashMap<>();
     
     //
     // Register items here !
@@ -62,6 +69,10 @@ public abstract class TiboiseItem {
         registerItem(new PostEnvelopeClosed());
         registerItem(new PostStamp());
         registerItem(new Flare());
+        registerItem(new DivingHelmet());
+        registerItem(new DivingChestplate());
+        registerItem(new DivingLeggings());
+        registerItem(new DivingBoots());
         
         if(Tiboise.isModuleEnabled(Tiboise.ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
@@ -83,6 +94,8 @@ public abstract class TiboiseItem {
             Recipe variantrecipe = item.getRecipe(var);
             if(variantrecipe != null) Bukkit.addRecipe(variantrecipe);
         }
+        
+        idClassLink.put(item.getClass(),item.getId());
         
         if(item instanceof Listener listener){
             for(Method method : listener.getClass().getMethods()){
@@ -130,6 +143,7 @@ public abstract class TiboiseItem {
     Material basematerial;
     Map<NamespacedKey, String> additionaldata = new HashMap<>();
     String helpText;
+    final static int LORE_RECOMMENDED_LINE_WIDTH = 28;
     // just added this in case we need to create items with durability
     // setting this to true will give the item its durability stat back
     boolean overwriteunbreakable = true;
@@ -168,8 +182,12 @@ public abstract class TiboiseItem {
         return id;
     }
 
-    public String getTypeId(){
+    private String getTypeId(){
         return formatTextToId(getClass().getSimpleName());
+    }
+    
+    public static String getId(Class<? extends TiboiseItem> reference){
+        return idClassLink.getOrDefault(reference,formatTextToId(reference.getSimpleName()));
     }
 
     public void addData(@NotNull NamespacedKey key, String data){
@@ -193,6 +211,41 @@ public abstract class TiboiseItem {
     
     public void setLore(List<Component> lore){
         this.lore = lore;
+    }
+    
+    // TODO : make this work
+    public void overwriteShortLore(String shortLore){
+        List<StringBuilder> splitLore = List.of(new StringBuilder(shortLore));
+        if(shortLore.length() > LORE_RECOMMENDED_LINE_WIDTH){
+            
+            final String[] words = shortLore.split(" ");
+            int index = 0;
+            int line = 0;
+            splitLore = new ArrayList<>();
+            logAdmin((int)(shortLore.length()/28.0)+1);
+            StringBuilder builder = new StringBuilder();
+            for(String w : words){
+                index += w.length();
+                builder.append(w).append(" ");
+                if(splitLore.size()<=line){
+                    splitLore.add(builder);
+                } else {
+                    splitLore.set(line,builder);
+                }
+                if(index >= LORE_RECOMMENDED_LINE_WIDTH){
+                        line++;
+                        index = 0;
+                        builder = new StringBuilder();
+                }
+            }
+        }
+        
+        List<Component> newLore = new ArrayList<>();
+        // there is a better functional way of doing this, but this is simpler
+        for(StringBuilder s : splitLore){
+            newLore.add(Component.text(s.toString()).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        }
+        this.lore = newLore;
     }
     
     public void addLore(List<Component> lore){
@@ -291,16 +344,24 @@ public abstract class TiboiseItem {
         return printed.toString();
     }
 
-    public static NamespacedKey getItemIdKey(){
+    protected static NamespacedKey getItemIdKey(){
         return new NamespacedKey(Tiboise.getPlugin(), "id");
     }
-
-    public static NamespacedKey getItemTagsKey(){
+    
+    protected static NamespacedKey getItemTagsKey(){
         return new NamespacedKey(Tiboise.getPlugin(), "tags");
     }
-
-    public static NamespacedKey getItemVariantKey(){
+    
+    protected static NamespacedKey getItemVariantKey(){
         return new NamespacedKey(Tiboise.getPlugin(), "variant");
+    }
+    
+    /**
+     *
+     * @return The NamespacedKey refering to this item, usefull to register recipes.
+     */
+    public NamespacedKey getItemKey(){
+        return new NamespacedKey(Tiboise.getPlugin(),getId());
     }
 
     public static @NotNull String getItemId(ItemStack item){
@@ -311,23 +372,60 @@ public abstract class TiboiseItem {
         }
         return itemid;
     }
-    public static List<String> getItemTags(ItemStack item){
-        String foundtags = getItemData(item, getItemTagsKey());
-        List<String> tags = List.of();
-        if(foundtags != null && foundtags.length() > 0){
-            if(foundtags.contains(":")){
-                tags = List.of(foundtags.split(":"));
+    
+    public static boolean isTiboiseItem(ItemStack item){
+        if(item == null) return false;
+        String itemId = getItemData(item, getItemIdKey());
+        return !(itemId == null || itemId.length() == 0);
+    }
+    
+    public static Set<String> getItemTags(ItemStack item){
+        return deserializeTags(getItemData(item, getItemTagsKey()));
+    }
+    
+    private static ImmutableSet<String> deserializeTags(String source){
+        ImmutableSet<String> tags = ImmutableSet.of();
+        if(source != null && source.length() > 0){
+            source = source.toLowerCase(Locale.ROOT);
+            if(source.contains(":")){
+                tags = ImmutableSet.copyOf(source.split(":"));
             } else {
-                tags = List.of(foundtags);
+                tags = ImmutableSet.of(source);
             }
         }
-
         return tags;
+    }
+    
+    private static String serializeTags(Set<String> tags){
+        String ser = tags.stream().reduce((c1,c2) -> c1.toLowerCase(Locale.ROOT)+":"+c2.toLowerCase(Locale.ROOT)).orElse("");
+        if(!ser.contains(":")) return ser;
+        return ser.substring(0,ser.lastIndexOf(":"));
+    }
+    
+    public static void addItemTag(ItemStack item,String tag){
+        if(item != null && item.hasItemMeta()){
+            ItemMeta meta = item.getItemMeta();
+            Set<String> tags = new HashSet<>(getItemTags(item));
+            tags.add(tag);
+            meta.getPersistentDataContainer().set(getItemTagsKey(),PersistentDataType.STRING,serializeTags(tags));
+            item.setItemMeta(meta);
+        }
+    }
+    
+    public static void removeItemTag(ItemStack item, String tag){
+        if(item != null && item.hasItemMeta()){
+            ItemMeta meta = item.getItemMeta();
+            Set<String> tags = new HashSet<>(getItemTags(item));
+            tags.remove(tag);
+            meta.getPersistentDataContainer().set(getItemTagsKey(),PersistentDataType.STRING,serializeTags(tags));
+            item.setItemMeta(meta);
+        }
     }
     public static String getItemVariant(ItemStack item){
         String data = getItemData(item, getItemVariantKey());
         return data != null ? data : ItemVariant.DEFAULT.getFormatted();
     }
+    
     private static @Nullable String getItemData(ItemStack item, NamespacedKey key){
         if(item == null){
             return null;
@@ -458,5 +556,8 @@ public abstract class TiboiseItem {
     public void onRegister(){
         // add a way for inherited items to do something when they are initialized
     }
+    
+    
+    
 
 }

@@ -86,7 +86,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
     
     @EventHandler
     public static void openMarkerInventory(PlayerInteractEvent event){
-        if(event.getItem() != null && TiboiseItem.getItemId(event.getItem()).equals(new CopperCompass().getId()) && event.getAction().isRightClick() && Objects.equals(event.getHand(), EquipmentSlot.HAND)){
+        if(event.getItem() != null && TiboiseItem.getItemId(event.getItem()).equals(getId(CopperCompass.class)) && event.getAction().isRightClick() && Objects.equals(event.getHand(), EquipmentSlot.HAND)){
             Player p = event.getPlayer();
             showPlayerMarkerListInventory(p);
         }

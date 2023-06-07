@@ -42,7 +42,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     public static void openEnvelope(PlayerInteractEvent event){
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         final Player p = event.getPlayer();
-        if(event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && TiboiseItem.getItemId(item).equals(new PostEnvelopeClosed().getId())){
+        if(event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && TiboiseItem.getItemId(item).equals(getId(PostEnvelopeClosed.class))){
             // open the envelope
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             final String contentText = container.get(PostEnvelopeClosed.getContentTextKey(), PersistentDataType.STRING);
@@ -94,8 +94,8 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             ItemStack[] grid = inv.getMatrix();
             
             
-            ItemStack envelope = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),new PostEnvelope().getId())).findFirst().orElse(null);
-            ItemStack stamp = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),new PostStamp().getId())).findFirst().orElse(null);
+            ItemStack envelope = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),getId(PostEnvelope.class))).findFirst().orElse(null);
+            ItemStack stamp = Arrays.stream(grid).filter(c -> Objects.equals(TiboiseItem.getItemId(c),getId(PostStamp.class))).findFirst().orElse(null);
             ItemStack book = Arrays.stream(grid).filter(c -> c!=null && (c.getType().equals(Material.WRITABLE_BOOK) || c.getType().equals(Material.WRITTEN_BOOK))).findFirst().orElse(null);
             
             if(
@@ -151,10 +151,10 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 && event.getSlotType().equals(InventoryType.SlotType.RESULT)
                 && event.isLeftClick()
                 && event.getCurrentItem() != null
-                && Objects.equals(TiboiseItem.getItemId(event.getCurrentItem()), new PostEnvelopeClosed().getId())
+                && Objects.equals(TiboiseItem.getItemId(event.getCurrentItem()), getId(PostEnvelopeClosed.class))
                 && Arrays.stream(inv.getMatrix()).anyMatch(i -> i!= null && (i.getType().equals(Material.WRITABLE_BOOK) || i.getType().equals(Material.WRITTEN_BOOK)))
-                && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostStamp().getId()))
-                && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),new PostEnvelope().getId()))
+                && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),getId(PostStamp.class)))
+                && Arrays.stream(inv.getMatrix()).anyMatch(i ->  Objects.equals(TiboiseItem.getItemId(i),getId(PostEnvelope.class)))
                 && (Arrays.stream(inv.getMatrix()).filter(Objects::isNull).count() == 9-3 || Arrays.stream(inv.getMatrix()).filter(Objects::isNull).count() == 4-3)
         ) {
             ItemStack[] grid = inv.getMatrix();

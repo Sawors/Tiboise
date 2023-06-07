@@ -74,7 +74,7 @@ public class Flare extends TiboiseItem implements Listener {
     @EventHandler
     public void trackFlaresCrossbow(EntityShootBowEvent event){
         logAdmin("trigger");
-        if(event.getProjectile() instanceof Firework f && event.getBow() != null && event.getBow().getType().equals(Material.CROSSBOW) && TiboiseItem.getItemId(event.getConsumable()).equals(new Flare().getId())){
+        if(event.getProjectile() instanceof Firework f && event.getBow() != null && event.getBow().getType().equals(Material.CROSSBOW) && TiboiseItem.getItemId(event.getConsumable()).equals(getId(Flare.class))){
             logAdmin("YES!!");
             launchedFlares.put(f.getUniqueId(),2);
         }
@@ -82,7 +82,7 @@ public class Flare extends TiboiseItem implements Listener {
     
     @EventHandler
     public void trackFlaresGround(PlayerLaunchProjectileEvent event){
-        if(event.getProjectile() instanceof Firework f && TiboiseItem.getItemId(event.getItemStack()).equals(new Flare().getId())){
+        if(event.getProjectile() instanceof Firework f && TiboiseItem.getItemId(event.getItemStack()).equals(getId(Flare.class))){
             launchedFlares.put(f.getUniqueId(),1);
         }
     }

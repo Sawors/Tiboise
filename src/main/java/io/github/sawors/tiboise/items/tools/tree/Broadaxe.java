@@ -52,7 +52,7 @@ public class Broadaxe extends TiboiseItem implements Listener {
     @EventHandler
     public static void onPlayerBreakTree(BlockBreakEvent event){
         ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
-        if(filter.contains(event.getBlock().getType()) && TiboiseItem.getItemId(tool).equals(new Broadaxe().getId())){
+        if(filter.contains(event.getBlock().getType()) && TiboiseItem.getItemId(tool).equals(getId(Broadaxe.class))){
             int reach = 0;
             switch(TiboiseItem.getItemVariant(tool)){
                 case "wood" -> reach = 4;

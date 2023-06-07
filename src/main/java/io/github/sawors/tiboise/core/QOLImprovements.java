@@ -541,7 +541,6 @@ public class QOLImprovements implements Listener {
     public void removeAnvilCost(PrepareAnvilEvent event){
         if(event.getView().getTopInventory() instanceof AnvilInventory inv){
             inv.setRepairCost(0);
-            inv.setRepairCostAmount(0);
         }
     }
     

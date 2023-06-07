@@ -1,7 +1,6 @@
 package io.github.sawors.tiboise.gui;
 
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -47,7 +46,7 @@ public class GUIDisplayItem {
         });
         ItemMeta meat = item.getItemMeta();
         meat.getPersistentDataContainer().set(getDisplayIdKey(), PersistentDataType.STRING, uniqueDisplayItemId);
-        meat.getPersistentDataContainer().set(TiboiseItem.getItemIdKey(), PersistentDataType.STRING, TiboiseItem.formatTextToId(TIBOISE_ITEM_ID));
+        //meat.getPersistentDataContainer().set(TiboiseItem.getItemIdKey(), PersistentDataType.STRING, TiboiseItem.formatTextToId(TIBOISE_ITEM_ID));
         meat.getPersistentDataContainer().set(getDisplayTypeKey(), PersistentDataType.STRING, type.toUpperCase(Locale.ROOT));
         meat.getPersistentDataContainer().set(getIconKey(),PersistentDataType.STRING,getIcon());
         item.setItemMeta(meat);

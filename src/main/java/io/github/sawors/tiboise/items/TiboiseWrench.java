@@ -2,7 +2,6 @@ package io.github.sawors.tiboise.items;
 
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
-import io.github.sawors.tiboise.core.ItemTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;

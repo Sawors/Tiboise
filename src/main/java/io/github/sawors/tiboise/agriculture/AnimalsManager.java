@@ -172,8 +172,8 @@ public class AnimalsManager implements Listener {
     
     @EventHandler(priority = EventPriority.HIGH)
     public static void onEnable(PluginEnableEvent event){
-        Tiboise.getProtocolManager().addPacketListener(replaceArthuragornChickens);
-        Tiboise.getProtocolManager().addPacketListener(adapterLocation);
+        //Tiboise.getProtocolManager().addPacketListener(replaceArthuragornChickens);
+        //Tiboise.getProtocolManager().addPacketListener(adapterLocation);
         //Main.getProtocolManager().addPacketListener(adapterLocation2);
         //Main.getProtocolManager().addPacketListener(adapterLocation3);
 //        Main.getProtocolManager().addPacketListener(adapterSpawn);
