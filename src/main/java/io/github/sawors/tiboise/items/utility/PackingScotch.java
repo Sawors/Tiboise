@@ -3,6 +3,7 @@ package io.github.sawors.tiboise.items.utility;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
 import io.github.sawors.tiboise.items.ItemSerializer;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -54,7 +55,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 ItemMeta meta = packedBlockItem.getItemMeta();
                 PersistentDataContainer c = meta.getPersistentDataContainer();
                 c.set(TiboiseItem.getItemIdKey(), PersistentDataType.STRING,packedBlockItemId);
-                c.set(TiboiseItem.getItemTagsKey(), PersistentDataType.STRING,"prevent_use_in_crafting");
+                c.set(TiboiseItem.getItemTagsKey(), PersistentDataType.STRING, ItemTag.PREVENT_USE_IN_CRAFTING.toString());
                 c.set(getStoredMaterialKey(),PersistentDataType.STRING,container.getType().toString());
                 
                 meta.displayName(Component.text("Packed "+TiboiseUtils.capitalizeFirstLetter(clicked.getType().toString())).color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
@@ -140,7 +141,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
     
     @Override
     public @Nullable Recipe getRecipe() {
-        ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(Tiboise.getPlugin(),this.getId()), this.get().asQuantity(4));
+        ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(Tiboise.getPlugin(),this.getId()), this.get());
         recipe.addIngredient(Material.PAPER);
         recipe.addIngredient(Material.SLIME_BALL);
         return recipe;

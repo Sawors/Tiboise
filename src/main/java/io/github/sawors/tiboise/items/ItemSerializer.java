@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ItemSerializer {
     
@@ -50,6 +51,7 @@ public class ItemSerializer {
     
     public String serializeInventory(Inventory inv){
         ItemStack[] content = inv.getContents();
+        if(Arrays.stream(content).noneMatch(Objects::nonNull)) return "";
         StringBuilder contentString = new StringBuilder();
         for(int i = 0; i<content.length; i++){
             ItemStack item = content[i];
