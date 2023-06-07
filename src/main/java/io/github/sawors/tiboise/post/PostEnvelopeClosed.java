@@ -89,6 +89,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     @EventHandler
     public static void transferDataToEnvelope(PrepareItemCraftEvent event){
+        if(event.getRecipe() == null) return;
         try{
             final CraftingInventory inv = event.getInventory();
             ItemStack[] grid = inv.getMatrix();

@@ -122,7 +122,6 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
         );
         recipe.setIngredient('C',Material.COPPER_INGOT);
         recipe.setIngredient('P',Material.PRISMARINE_SHARD);
-        recipe.setIngredient('X',Material.AIR);
         return recipe;
     }
     

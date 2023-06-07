@@ -12,16 +12,12 @@ import org.bukkit.inventory.meta.Damageable;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class CraftingPatcher implements Listener {
     
     @EventHandler(priority = EventPriority.LOWEST)
     public static void preventVanillaExploit(PrepareItemCraftEvent event){
-        logAdmin(event.getRecipe());
-        logAdmin(event.isAsynchronous());
         Recipe r = event.getRecipe();
-        if(event.getInventory().getResult() == null) return;
+        if(event.getInventory().getResult() == null || r == null) return;
         if(Arrays.stream(event.getInventory().getMatrix()).anyMatch(TiboiseItem::isTiboiseItem)){
             final ItemStack result = event.getInventory().getResult();
             final TiboiseItem tiboiseResult = TiboiseItem.getRegisteredItem(TiboiseItem.getItemId(result));

@@ -75,10 +75,9 @@ public class DivingLeggings extends TiboiseItem implements Listener, DurabilityI
                 "PCP",
                 "CXC",
                 "CXC"
-        );
-        recipe.setIngredient('C',Material.COPPER_INGOT);
-        recipe.setIngredient('P',Material.PRISMARINE_SHARD);
-        recipe.setIngredient('X',Material.AIR);
+        )
+            .setIngredient('C',Material.COPPER_INGOT)
+            .setIngredient('P',Material.PRISMARINE_SHARD);
         return recipe;
     }
     

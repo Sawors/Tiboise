@@ -51,7 +51,6 @@ public class DivingChestplate extends TiboiseItem implements Listener, Durabilit
         );
         recipe.setIngredient('C',Material.COPPER_INGOT);
         recipe.setIngredient('N',Material.NAUTILUS_SHELL);
-        recipe.setIngredient('X',Material.AIR);
         return recipe;
     }
     
