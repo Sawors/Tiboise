@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -94,12 +95,10 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
     @EventHandler
     public static void removeEffectsOnExitWater(PlayerMoveEvent event){
         if(event.hasChangedBlock() && playerCheck.containsKey(event.getPlayer().getUniqueId())){
-            final Location oldLoc = event.getFrom();
-            final Material oldMat = oldLoc.getBlock().getType();
             final Location newLoc = event.getTo();
             final Material newMat = newLoc.getBlock().getType();
             final Player p = event.getPlayer();
-            if(newMat != Material.WATER){
+            if(!(newMat == Material.WATER || (newLoc.getBlock().getBlockData() instanceof Waterlogged w && w.isWaterlogged()))){
                 // exits water
                 final org.bukkit.attribute.AttributeInstance attributeInstance = event.getPlayer().getAttribute(org.bukkit.attribute.Attribute.GENERIC_MOVEMENT_SPEED);
                 if(attributeInstance != null){

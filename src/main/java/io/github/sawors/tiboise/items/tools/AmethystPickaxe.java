@@ -58,7 +58,7 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
         return 63;
     }
     
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public static void doSilkTouchReplacement(BlockDropItemEvent event){
         Player p = event.getPlayer();
         BlockState b = event.getBlockState();

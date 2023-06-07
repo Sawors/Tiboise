@@ -300,7 +300,7 @@ public class QOLImprovements implements Listener {
                 switch (mat){
                     case GOLDEN_HOE, GOLDEN_SHOVEL -> enchantmap.put(Enchantment.SILK_TOUCH,1);
                     case GOLDEN_SWORD, GOLDEN_AXE -> enchantmap.put(Enchantment.LOOT_BONUS_MOBS,2);
-                    case GOLDEN_PICKAXE -> enchantmap.put(Enchantment.LOOT_BONUS_BLOCKS,2);
+                    case GOLDEN_PICKAXE -> enchantmap.put(Enchantment.LOOT_BONUS_BLOCKS,3);
                 }
                 for(Recipe r : Bukkit.getRecipesFor(new ItemStack(mat))){
                     if(r instanceof ShapedRecipe sr){
@@ -403,6 +403,24 @@ public class QOLImprovements implements Listener {
                 }
             }
         }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public static void allowGoldenPickaxesToBreakCopper(BlockBreakEvent event){
+        final Set<Material> additionalMinable = Set.of(
+                Material.COPPER_ORE
+        );
+        try{
+            final Block block = event.getBlock();
+            final ItemStack ref = event.getPlayer().getInventory().getItemInMainHand();
+            if(ref.getType().equals(Material.GOLDEN_PICKAXE) && additionalMinable.contains(block.getType())){
+                event.setCancelled(true);
+                ItemStack fakePickaxe = new ItemStack(Material.IRON_PICKAXE);
+                fakePickaxe.addEnchantments(ref.getEnchantments());
+                block.breakNaturally(fakePickaxe, false);
+                ref.damage(1,event.getPlayer());
+            }
+        } catch (NullPointerException ignored){}
     }
     
     //

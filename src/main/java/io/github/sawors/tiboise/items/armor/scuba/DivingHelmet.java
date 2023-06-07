@@ -59,7 +59,7 @@ public class DivingHelmet extends TiboiseItem implements Listener, DurabilityIte
                     }
                 }
             };
-            check.runTaskTimer(Tiboise.getPlugin(),0,2);
+            check.runTaskTimer(Tiboise.getPlugin(),0,period*20);
             playerCheck.put(pid,check);
         }
     }
