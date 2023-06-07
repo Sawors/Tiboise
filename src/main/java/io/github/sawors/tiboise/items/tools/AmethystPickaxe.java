@@ -26,9 +26,11 @@ import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, Listener {
     
+    final static private Material pickaxeMaterial = Material.IRON_PICKAXE;
+    
     public AmethystPickaxe(){
-        setMaterial(Material.IRON_PICKAXE);
-        setShortLore("Breaks blocks without destroying them. This pickaxe acts like the Silk Touch enchantement");
+        setMaterial(pickaxeMaterial);
+        setHelpText("This pickaxe behaves like an iron pickaxe enchanted with Silk Touch");
     }
     
     @Override
@@ -64,9 +66,9 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
         if(getItemId(handItem).equals(getId(AmethystPickaxe.class))){
             logAdmin("YES");
             List<Item> drops = event.getItems();
-            drops.removeIf(i -> b.getDrops(new ItemStack(Material.IRON_PICKAXE)).stream().map(ItemStack::getType).anyMatch(m -> m.equals(i.getItemStack().getType())));
+            drops.removeIf(i -> b.getDrops(new ItemStack(pickaxeMaterial)).stream().map(ItemStack::getType).anyMatch(m -> m.equals(i.getItemStack().getType())));
             drops.clear();
-            ItemStack fakeSilkTouch = new ItemStack(Material.IRON_PICKAXE);
+            ItemStack fakeSilkTouch = new ItemStack(pickaxeMaterial);
             fakeSilkTouch.addEnchantment(Enchantment.SILK_TOUCH,1);
             Set<Item> newDrops = new HashSet<>();
             logAdmin(b.getDrops(fakeSilkTouch));
@@ -91,7 +93,7 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
             event.setCancelled(true);
             final ItemStack fakeSilkTouch = new ItemStack(Material.IRON_PICKAXE);
             fakeSilkTouch.addEnchantment(Enchantment.SILK_TOUCH,1);
-            b.breakNaturally(fakeSilkTouch,true);
+            b.breakNaturally(fakeSilkTouch,false);
         }
     }
 }

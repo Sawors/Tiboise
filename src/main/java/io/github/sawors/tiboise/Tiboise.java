@@ -15,7 +15,6 @@ import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
 import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
-import io.github.sawors.tiboise.items.CraftingPatcher;
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.TiboiseItem;

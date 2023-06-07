@@ -1,5 +1,10 @@
-package io.github.sawors.tiboise.items;
+package io.github.sawors.tiboise;
 
+import io.github.sawors.tiboise.items.DurabilityItem;
+import io.github.sawors.tiboise.items.ItemTag;
+import io.github.sawors.tiboise.items.TiboiseItem;
+import net.kyori.adventure.sound.Sound;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -80,6 +85,7 @@ public class CraftingPatcher implements Listener {
         final TiboiseItem item = TiboiseItem.getRegisteredItem(TiboiseItem.getItemId(inventory.getFirstItem()));
         
         if(inventory.getFirstItem() != null && item instanceof DurabilityItem dura){
+            if(second == null && event.getInventory().getRenameText() != null && event.getInventory().getRenameText().length() >= 1) return;
             if(second != null && dura.getRepairMaterialId().equals(TiboiseItem.getItemId(second))) {
                 LivingEntity e = event.getViewers().get(0);
                 if(e != null){
@@ -101,6 +107,9 @@ public class CraftingPatcher implements Listener {
                         dmg.setDamage(Math.max(dmg.getDamage()-(repairPoints*available),0));
                         repairable.setItemMeta(dmg);
                         event.setResult(repairable);
+                        for(HumanEntity viewer : event.getViewers()){
+                            viewer.playSound(Sound.sound(org.bukkit.Sound.BLOCK_ANVIL_USE, Sound.Source.PLAYER,1,1));
+                        }
                     }
                     
                 }
