@@ -74,6 +74,38 @@ public class PostStamp extends TiboiseItem implements Listener {
         return recipe;
     }
     
+    @Override
+    public ItemStack get() {
+        ItemStack base = super.get();
+        ItemMeta meta = base.getItemMeta();
+        if(getDestination() != null){
+            meta.getPersistentDataContainer().set(getDestinationKey(),PersistentDataType.STRING,getDestination().toString());
+        }
+        base.setItemMeta(meta);
+        return base;
+    }
+    
+    public static @Nullable PostLetterBox getDestination(ItemStack item){
+        if(item != null && item.hasItemMeta()){
+            final String from = item.getItemMeta().getPersistentDataContainer().get(getDestinationKey(),PersistentDataType.STRING);
+            if(from != null){
+                return PostLetterBox.deserialize(from);
+            }
+        }
+        return null;
+    }
+    
+    public static void transferDestination(ItemStack stamp, ItemStack to){
+        if(stamp != null && stamp.hasItemMeta() && to != null && !to.getType().isAir()){
+            final String from = stamp.getItemMeta().getPersistentDataContainer().get(getDestinationKey(),PersistentDataType.STRING);
+            if(from != null){
+                ItemMeta meta = to.getItemMeta();
+                meta.getPersistentDataContainer().set(getDestinationKey(),PersistentDataType.STRING,from);
+                to.setItemMeta(meta);
+            }
+        }
+    }
+    
     public static NamespacedKey getDestinationKey(){
         return new NamespacedKey(Tiboise.getPlugin(),"post-destination");
     }

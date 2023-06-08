@@ -353,6 +353,23 @@ public class PostLetterBox implements Listener {
     
     @Override
     public int hashCode() {
-        return (owner+":"+name+"@"+sign).hashCode();
+        return this.toString().hashCode();
+    }
+    
+    @Override
+    public String toString() {
+        return owner+":"+name+"@"+serializeLocation(sign);
+    }
+    
+    public static PostLetterBox deserialize(String serialized){
+        if(!serialized.contains(":") || !serialized.contains("@")) throw new IllegalArgumentException("The provided String is not a serialized letter box");
+        final String owner = serialized.substring(0,serialized.indexOf(":"));
+        final String serializedLocation = serialized.substring(serialized.indexOf("@"+1));
+        final UUID ownerId = UUID.fromString(owner);
+        Location location = deserializeLocation(serializedLocation);
+        if(location!=null){
+            return new PostLetterBox(ownerId, location.getBlock());
+        }
+        return null;
     }
 }

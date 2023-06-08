@@ -11,6 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
+import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -58,7 +59,13 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     public static void openEnvelope(PlayerInteractEvent event){
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         final Player p = event.getPlayer();
-        if(event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && getItemId(item).equals(getId(PostEnvelopeClosed.class)) && event.getAction().isRightClick()){
+        if(
+                event.getHand() != null
+                && event.getHand().equals(EquipmentSlot.HAND)
+                && getItemId(item).equals(getId(PostEnvelopeClosed.class))
+                && event.getAction().isRightClick()
+                && (event.getClickedBlock() == null || !(event.getClickedBlock().getState() instanceof TileState))
+        ){
             event.setCancelled(true);
             // open the envelope
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
