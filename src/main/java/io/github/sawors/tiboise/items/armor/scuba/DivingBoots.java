@@ -14,6 +14,7 @@ import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -37,7 +38,7 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
     // COPY ARMOR EFFECT START
     private static final Map<UUID, BukkitRunnable> playerCheck = new HashMap<>();
     private static final String modifierName = "scuba swim speed bonus";
-    private final static int period = 4;
+    private final static int period = 3;
     @EventHandler
     public static void scubaBootsEffect(PlayerArmorChangeEvent event){
         // EDIT
@@ -70,7 +71,7 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
                     if(getItemId(item).equals(refId)){
                         // HERE FOR THE EFFECTS
                         
-                        if(p.isUnderWater()){
+                        if(p.isInWater()){
                             item.damage(1,p);
                             final AttributeModifier modifier = new AttributeModifier(modifierName,.03, AttributeModifier.Operation.ADD_NUMBER);
                             if(attributeInstance != null && !attributeInstance.getModifiers().contains(modifier)){
@@ -120,6 +121,18 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
         }
     }
     // COPY ARMOR EFFECT END
+    
+    @EventHandler
+    public static void removeSpeedOnConnection(PlayerJoinEvent event){
+        final org.bukkit.attribute.AttributeInstance attributeInstance = event.getPlayer().getAttribute(org.bukkit.attribute.Attribute.GENERIC_MOVEMENT_SPEED);
+        if(attributeInstance != null && attributeInstance.getModifiers().stream().anyMatch(m -> m.getName().equals(modifierName))){
+            attributeInstance.getModifiers().forEach(m -> {
+                if(m.getName().equals(modifierName)){
+                    attributeInstance.removeModifier(m);
+                }
+            });
+        }
+    }
     
     @Override
     public @Nullable Recipe getRecipe() {
