@@ -61,22 +61,35 @@ public class PostLetterBox implements Listener {
         final Block b = event.getBlock();
         final Player p = event.getPlayer();
         if(!event.isCancelled() && b.getState() instanceof Sign sign && b.getBlockData() instanceof Directional wallSign){
+            final String ownerId = sign.getPersistentDataContainer().get(getOwnerKey(),PersistentDataType.STRING);
+            // prevents other people from editing the sign (but not destroying it however)
+            if(ownerId != null && !ownerId.equals(p.getUniqueId().toString())) {
+                event.setCancelled(true);
+                return;
+            }
             if(event.lines().size() >= 1){
                 final Component identifier = event.line(0);
                 if(((TextComponent) Objects.requireNonNull(identifier)).content().equals(signIdentifier)){
                     // sign is recognised as a post sign
                     final Block relative = b.getRelative(wallSign.getFacing().getOppositeFace());
-                    if(allowedContainer.contains(relative.getType()) && relative.getState() instanceof Container container && sign.lines().size() >= 3 && event.line(1) != null){
-                        final String owner = p.getName();
-                        event.line(1,Component.text(owner));
-                        final String houseName = ((TextComponent) Objects.requireNonNull(event.line(2))).content();
-                        p.sendActionBar(Component.text("House ").append(Component.text(houseName).decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)).append(Component.text(" successfully registered for "+owner+"!")).color(NamedTextColor.GOLD));
+                    if(allowedContainer.contains(relative.getType()) && sign.lines().size() >= 3 && event.line(1) != null){
+                        
+                        PostLetterBox letterBox = new PostLetterBox(p.getUniqueId(),((TextComponent) Objects.requireNonNull(event.line(2))).content(),sign.getBlock());
+                        letterBox.save();
+                        Set<Location> locs = loadedLetterboxes.getOrDefault(p.getUniqueId(),new HashSet<>());
+                        locs.add(sign.getLocation());
+                        loadedLetterboxes.put(p.getUniqueId(),locs);
+                        sign.getPersistentDataContainer().set(getOwnerKey(), PersistentDataType.STRING,p.getUniqueId().toString());
+                        sign.update();
+                        
+                        event.line(1,Component.text(p.getName()));
+                        p.sendActionBar(Component.text("House ").append(Component.text(letterBox.getName()).decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)).append(Component.text(" successfully registered !")).color(NamedTextColor.GOLD));
                         final BlockFace face = wallSign.getFacing();
                         final Vector facing = face.getDirection();
                         b.getWorld().spawnParticle(Particle.WAX_ON,b.getLocation().add(.5,.5,.5).add(face.getDirection().multiply(-.30)),6,facing.getZ()/4,.20,facing.getX()/4,.1);
                         
                         
-                        try {
+                        /*try {
                             final File saveFile = new File(b.getWorld().getWorldFolder().getCanonicalFile()+File.separator+"mailboxes"+File.separator+p.getUniqueId()+".yml");
                             if(!saveFile.exists()){
                                 saveFile.getParentFile().mkdirs();
@@ -95,15 +108,11 @@ public class PostLetterBox implements Listener {
                             houseSection.set(LetterBoxDataField.CONTAINER_TYPE.toString(), container.getType().toString());
                             
                             saveData.save(saveFile);
-                            Set<Location> locs = loadedLetterboxes.getOrDefault(p.getUniqueId(),new HashSet<>());
-                            locs.add(sign.getLocation());
-                            loadedLetterboxes.put(p.getUniqueId(),locs);
-                            sign.getPersistentDataContainer().set(getOwnerKey(), PersistentDataType.STRING,p.getUniqueId().toString());
-                            sign.update();
+                            
                         } catch (
                                 IOException e) {
                             throw new RuntimeException(e);
-                        }
+                        }*/
                         
                         
                     }
@@ -245,18 +254,14 @@ public class PostLetterBox implements Listener {
     private Location sign;
     private Location container;
     private Material containerMaterial;
-    private Location platformLocation;
+    private Location platformLocation = null;
+    private UUID owner;
     
-    /**
-     * DO NOT USE THIS !! IT IS ONLY FOR EVENT REGISTRATION
-     */
-    public PostLetterBox(){}
-    
-    
-    public PostLetterBox(String name, Block sign, Location platformLocation) throws IllegalStateException{
+    public PostLetterBox(UUID owner, String name, Block sign, Location platformLocation) throws IllegalStateException{
         if(sign instanceof WallSign wallSign){
             this.name = name;
             this.sign = sign.getLocation();
+            this.owner = owner;
             final Block checkCont = sign.getRelative(wallSign.getFacing().getOppositeFace());
             if(!(checkCont.getBlockData() instanceof Container)) {
                 throw new IllegalStateException("The sign you provided cannot be used as a post sign (missing container)");
@@ -269,8 +274,72 @@ public class PostLetterBox implements Listener {
             throw new IllegalStateException("The block provided is not a sign");
         }
     }
-    public PostLetterBox(String name, Block sign){
     
+    /**
+     * DO NOT USE THIS !! IT IS ONLY FOR EVENT REGISTRATION
+     */
+    public PostLetterBox(){}
+    
+    public PostLetterBox(UUID owner,String name, Block sign){
+        this(owner,name,sign,null);
     }
     
+    public String getName() {
+        return name;
+    }
+    
+    public Location getSign() {
+        return sign;
+    }
+    
+    public Location getContainer() {
+        return container;
+    }
+    
+    public Material getContainerMaterial() {
+        return containerMaterial;
+    }
+    
+    public @Nullable Location getPlatformLocation() {
+        return platformLocation;
+    }
+    
+    public UUID getOwner() {
+        return owner;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setPlatformLocation(Location platformLocation) {
+        this.platformLocation = platformLocation;
+    }
+    
+    protected void save(){
+        try {
+            final File saveFile = new File(sign.getWorld().getWorldFolder().getCanonicalFile()+File.separator+"mailboxes"+File.separator+owner+".yml");
+            if(!saveFile.exists()){
+                saveFile.getParentFile().mkdirs();
+                saveFile.createNewFile();
+            }
+            
+            
+            YamlConfiguration saveData = new YamlConfiguration();
+            if(saveFile.exists()){
+                saveData = YamlConfiguration.loadConfiguration(saveFile);
+            }
+            
+            ConfigurationSection houseSection = saveData.createSection(name);
+            
+            houseSection.set(LetterBoxDataField.SIGN_LOCATION.toString(), serializeLocation(sign));
+            houseSection.set(LetterBoxDataField.CONTAINER_LOCATION.toString(), serializeLocation(container));
+            houseSection.set(LetterBoxDataField.CONTAINER_TYPE.toString(), containerMaterial.toString());
+            
+            saveData.save(saveFile);
+        } catch (
+                IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
