@@ -1,48 +1,54 @@
 package io.github.sawors.tiboise.post;
 
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.TiboiseUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.entity.HumanEntity;
+import org.bukkit.block.Block;
+import org.bukkit.block.Lectern;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.LecternInventory;
 import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     //private final static Component emptyItemMessage = Component.text("Drag and drop item to add (1 max)").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE);
     
+    private String content;
+    
     public PostEnvelopeClosed(){
         setMaterial(Material.PAPER);
         setDisplayName(Component.text("Letter").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        setContent("");
+    }
+    
+    @Override
+    public ItemStack get() {
+        addData(getContentTextKey(),content);
+        return super.get();
     }
     
     @EventHandler
     public static void openEnvelope(PlayerInteractEvent event){
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         final Player p = event.getPlayer();
-        if(event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && TiboiseItem.getItemId(item).equals(getId(PostEnvelopeClosed.class))){
+        if(event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && getItemId(item).equals(getId(PostEnvelopeClosed.class))){
+            event.setCancelled(true);
             // open the envelope
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             final String contentText = container.get(PostEnvelopeClosed.getContentTextKey(), PersistentDataType.STRING);
@@ -63,7 +69,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             // removing the envelope and replacing it with an opened variant
             final int baseAmount = item.getAmount();
             PostEnvelope envelope = new PostEnvelope();
-            envelope.setVariant(TiboiseItem.getItemVariant(item));
+            envelope.setVariant(getItemVariant(item));
             final ItemStack emptyEnvelope = envelope.get();
             if(baseAmount > 1){
                 item.setAmount(item.getAmount()-1);
@@ -74,7 +80,48 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
         }
     }
     
-    @Override
+    @EventHandler
+    public static void transferData(PlayerInteractEvent event){
+        final Player p = event.getPlayer();
+        final Block clickedBlock = event.getClickedBlock();
+        final ItemStack item = p.getInventory().getItemInMainHand();
+        if(clickedBlock != null && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)
+            && clickedBlock.getState() instanceof Lectern lectern
+            && getItemId(item).equals(getId(PostEnvelope.class))
+        ) {
+            final Inventory inv = lectern.getSnapshotInventory();
+            if(inv instanceof LecternInventory lectInv && lectInv.getBook() != null){
+                event.setCancelled(true);
+                final BookMeta meta = (BookMeta) lectInv.getBook().getItemMeta();
+                Component content = Component.text("");
+                for(int i = 1; i<=meta.getPageCount(); i++){
+                    content = content.append(meta.page(i).append(Component.text(" ")));
+                }
+                String text = TiboiseUtils.extractContent(content);
+                String preview;
+                if(text.contains("\n")){
+                     preview = text.substring(0,Math.min(text.indexOf("\n"),24))+"...";
+                } else {
+                     preview = text.substring(0,Math.min(text.length(),24))+"...";
+                }
+                
+                preview = preview.replaceAll("\n","");
+                text = text.replaceAll("\n","\n ");
+                PostEnvelopeClosed envelope = new PostEnvelopeClosed();
+                final String variant = getItemVariant(item);
+                if(variant.length() > 0) envelope.setVariant(variant);
+                envelope.setContent(text);
+                envelope.addLore(List.of(Component.text("This letter has no stamp.").color(NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),Component.text(preview).color(NamedTextColor.GRAY)));
+                
+                item.setAmount(item.getAmount()-1);
+                for(Map.Entry<Integer,ItemStack> overflow : p.getInventory().addItem(envelope.get()).entrySet()){
+                    p.getWorld().dropItem(p.getLocation(),overflow.getValue());
+                }
+            }
+        }
+    }
+    
+    /*@Override
     public @Nullable Recipe getRecipe() {
         
         PostEnvelopeClosed closedEnvelope = new PostEnvelopeClosed();
@@ -205,7 +252,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 }
             }.runTaskLater(Tiboise.getPlugin(),1);
         }
-    }
+    }*/
     
     /*@EventHandler
     public static void addItemToEnvelope(InventoryClickEvent event){
@@ -259,6 +306,10 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     public static NamespacedKey getContentTextKey(){
         return new NamespacedKey(Tiboise.getPlugin(),"post-content-text");
+    }
+    
+    public void setContent(String content){
+        this.content = content;
     }
     
 //    public static NamespacedKey getContentItemKey(){

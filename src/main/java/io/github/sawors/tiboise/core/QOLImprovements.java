@@ -44,7 +44,7 @@ import static io.github.sawors.tiboise.Tiboise.logAdmin;
 public class QOLImprovements implements Listener {
     
     private final static boolean DO_CHAT_BUBBLES = true;
-    private static Map<UUID, TextDisplay> playerChatBubbles = new  HashMap<>();
+    private static Map<UUID, UUID> playerChatBubbles = new  HashMap<>();
     
     
     //
@@ -583,14 +583,16 @@ public class QOLImprovements implements Listener {
                 new BukkitRunnable(){
                     @Override
                     public void run() {
-                        // TODO : set back to 2
                         if(p.getLocation().getNearbyEntitiesByType(Player.class,16).size() < 2) return;
                         final int lineWidth = 78*2;
                         final int lineAmount = Math.min(1,content.length()/lineWidth);
                         final Vector displacement = new Vector(0,2+(lineAmount*.1),0);
                         TextDisplay bubble = (TextDisplay) p.getWorld().spawnEntity(p.getLocation().add(displacement),EntityType.TEXT_DISPLAY);
-                        if(playerChatBubbles.containsKey(p.getUniqueId())) playerChatBubbles.get(p.getUniqueId()).remove();
-                        playerChatBubbles.put(p.getUniqueId(), bubble);
+                        if(playerChatBubbles.containsKey(p.getUniqueId())){
+                            Entity e = p.getWorld().getEntity(playerChatBubbles.get(p.getUniqueId()));
+                            if(e != null) e.remove();
+                        }
+                        playerChatBubbles.put(p.getUniqueId(), bubble.getUniqueId());
                         bubble.setLineWidth(lineWidth);
                         bubble.text(message);
                         bubble.setBillboard(Display.Billboard.CENTER);
@@ -605,16 +607,18 @@ public class QOLImprovements implements Listener {
                             
                             @Override
                             public void run() {
+                                count++;
                                 if(!bubble.isValid()){
                                     this.cancel();
+                                    bubble.remove();
                                     return;
                                 }
                                 if(count >= max){
                                     this.cancel();
-                                    if(bubble.isValid()){
-                                        bubble.remove();
-                                    }
-                                    if(playerChatBubbles.containsKey(p.getUniqueId()) && playerChatBubbles.get(p.getUniqueId()).getUniqueId().equals(bubble.getUniqueId())){
+                                    bubble.remove();
+                                    if(playerChatBubbles.containsKey(p.getUniqueId()) && playerChatBubbles.get(p.getUniqueId()).equals(bubble.getUniqueId())){
+                                        Entity e = p.getWorld().getEntity(playerChatBubbles.get(p.getUniqueId()));
+                                        if(e != null) e.remove();
                                         playerChatBubbles.remove(p.getUniqueId());
                                     }
                                     return;
@@ -626,7 +630,7 @@ public class QOLImprovements implements Listener {
                                 /*bubble.getLocation().setYaw(pLoc.getYaw());
                                 bubble.getLocation().setPitch(pLoc.getPitch());*/
                                 
-                                count++;
+                                
                             }
                         }.runTaskTimer(Tiboise.getPlugin(),0,period);
                     }

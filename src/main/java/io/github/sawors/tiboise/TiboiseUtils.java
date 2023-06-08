@@ -3,6 +3,8 @@ package io.github.sawors.tiboise;
 import com.comphenix.protocol.events.InternalStructure;
 import com.comphenix.protocol.events.PacketContainer;
 import io.github.sawors.tiboise.items.TiboiseItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -95,5 +97,11 @@ public class TiboiseUtils {
         return text.substring(0,1).toUpperCase(Locale.ROOT)+text.substring(1).toLowerCase(Locale.ROOT);
     }
     
-    
+    public static String extractContent(Component source){
+        StringBuilder builder = new StringBuilder(((TextComponent) source).content());
+        for(Component c : source.children()){
+            builder.append(((TextComponent) c).content());
+        }
+        return builder.toString();
+    }
 }
