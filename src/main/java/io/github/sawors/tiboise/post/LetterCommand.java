@@ -14,7 +14,7 @@ public class LetterCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if(sender instanceof Player p){
             final Component letter = PostEnvelopeClosed.getLastLetter(p.getUniqueId());
-            p.sendMessage(Component.text("Your last letter :\n").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(letter.decorate(TextDecoration.ITALIC).decoration(TextDecoration.BOLD, TextDecoration.State.FALSE)));
+            p.sendMessage(Component.text("Your last letter :\n").color(NamedTextColor.YELLOW).decorate(TextDecoration.BOLD).append(letter.decoration(TextDecoration.BOLD, TextDecoration.State.FALSE)));
             return true;
         }
         return false;

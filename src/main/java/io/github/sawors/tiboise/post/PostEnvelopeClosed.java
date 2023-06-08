@@ -32,7 +32,9 @@ import java.util.UUID;
 public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     protected static Map<UUID, Component> lastLetters = new HashMap<>();
-    
+    private final static Sound openingSound = Sound.ENTITY_VILLAGER_WORK_LIBRARIAN;
+    private final static Sound closingSound = Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER;
+    private final static Sound postClosingSound = Sound.ITEM_HONEYCOMB_WAX_ON;
     //private final static Component emptyItemMessage = Component.text("Drag and drop item to add (1 max)").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE);
     
     private String content;
@@ -77,7 +79,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             p.sendMessage(message);
             lastLetters.put(p.getUniqueId(),message);
             
-            p.playSound(p.getLocation(), Sound.ITEM_AXE_WAX_OFF,.75f,1.25f);
+            p.playSound(p.getLocation(), openingSound,.75f,1.25f);
             
             // removing the envelope and replacing it with an opened variant
             final int baseAmount = item.getAmount();
@@ -128,8 +130,13 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 envelope.setAuthor(author);
                 envelope.addLore(List.of(Component.text("From "+author+" :").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),Component.text(preview).color(NamedTextColor.GRAY)));
                 
-                p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER,.75f,1.25f);
-                p.playSound(p.getLocation(), Sound.ITEM_HONEYCOMB_WAX_ON,.75f,1.25f);
+                p.playSound(p.getLocation(), closingSound,.75f,1.25f);
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        p.playSound(p.getLocation(), postClosingSound,.75f,1.25f);
+                    }
+                }.runTaskLater(Tiboise.getPlugin(),10);
                 
                 item.setAmount(item.getAmount()-1);
                 // putting it in a runnable since there is a bug where the event is triggered twice
