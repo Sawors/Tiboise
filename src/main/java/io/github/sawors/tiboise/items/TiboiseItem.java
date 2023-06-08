@@ -14,6 +14,7 @@ import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
 import io.github.sawors.tiboise.items.tools.tree.Broadaxe;
 import io.github.sawors.tiboise.items.utility.Flare;
+import io.github.sawors.tiboise.items.utility.InkQuill;
 import io.github.sawors.tiboise.items.utility.PackingScotch;
 import io.github.sawors.tiboise.items.utility.PortableCraftingTable;
 import io.github.sawors.tiboise.items.utility.coppercompass.CopperCompass;
@@ -75,6 +76,7 @@ public abstract class TiboiseItem {
         registerItem(new DivingLeggings());
         registerItem(new DivingBoots());
         registerItem(new AmethystPickaxe());
+        registerItem(new InkQuill());
         
         if(Tiboise.isModuleEnabled(Tiboise.ConfigModules.ECONOMY)){
             registerItem(new CoinItem());

@@ -20,6 +20,7 @@ import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerCompassMarker;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerMarkerCommand;
+import io.github.sawors.tiboise.post.LetterBoxManager;
 import io.github.sawors.tiboise.post.LetterCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -128,6 +129,7 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new FloatingTextUtils(), this);
         manager.registerEvents(new CraftingPatcher(),this);
         manager.registerEvents(new TradingStation(),this);
+        manager.registerEvents(new LetterBoxManager(),this);
         
         Objects.requireNonNull(server.getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(server.getPluginCommand("tid")).setExecutor(new GetIdCommand());

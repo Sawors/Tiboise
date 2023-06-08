@@ -123,15 +123,19 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 if(variant.length() > 0) envelope.setVariant(variant);
                 envelope.setContent(text);
                 envelope.setAuthor(author);
-                envelope.addLore(List.of(Component.text(preview).color(NamedTextColor.GRAY)));
+                envelope.addLore(List.of(Component.text("From "+author+" :").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),Component.text(preview).color(NamedTextColor.GRAY)));
                 
                 item.setAmount(item.getAmount()-1);
                 // putting it in a runnable since there is a bug where the event is triggered twice
                 new BukkitRunnable(){
                     @Override
                     public void run() {
-                        for(Map.Entry<Integer,ItemStack> overflow : p.getInventory().addItem(envelope.get()).entrySet()){
-                            p.getWorld().dropItem(p.getLocation(),overflow.getValue());
+                        if(p.getInventory().getItemInMainHand().getType().isAir()){
+                            p.getInventory().setItemInMainHand(envelope.get());
+                        } else {
+                            for(Map.Entry<Integer,ItemStack> overflow : p.getInventory().addItem(envelope.get()).entrySet()){
+                                p.getWorld().dropItem(p.getLocation(),overflow.getValue());
+                            }
                         }
                     }
                 }.runTask(Tiboise.getPlugin());
