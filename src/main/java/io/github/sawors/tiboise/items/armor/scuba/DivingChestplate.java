@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.items.armor.scuba;
 
 import io.github.sawors.tiboise.items.DurabilityItem;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.Damageable;
 
 import javax.annotation.Nullable;
 
@@ -22,6 +24,8 @@ public class DivingChestplate extends TiboiseItem implements Listener, Durabilit
         setMaterial(Material.CHAINMAIL_CHESTPLATE);
         setDisplayName(Component.text("Diving Chestplate").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setShortLore("Grants you better protection against underwater menaces");
+        addTag(ItemTag.PREVENT_BREAKING);
+        
     }
     
     
@@ -30,7 +34,7 @@ public class DivingChestplate extends TiboiseItem implements Listener, Durabilit
         final String refId = getId(DivingChestplate.class);
         final Entity e = event.getEntity();
         final Entity attacker = event.getDamager();
-        if (e instanceof LivingEntity livingEntity && livingEntity.getEquipment() != null && getItemId(livingEntity.getEquipment().getChestplate()).equals(refId)) {
+        if (e instanceof LivingEntity livingEntity && livingEntity.getEquipment() != null && getItemId(livingEntity.getEquipment().getChestplate()).equals(refId) && livingEntity.getEquipment().getChestplate().getItemMeta() instanceof Damageable dmg && dmg.getDamage() < livingEntity.getEquipment().getChestplate().getType().getMaxDurability()-1) {
             if(attacker instanceof Drowned || attacker instanceof Guardian){
                 final double damage = event.getDamage()/2.0;
                 event.setDamage(event.getDamage());

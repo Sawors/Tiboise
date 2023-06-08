@@ -3,6 +3,7 @@ package io.github.sawors.tiboise.items.armor.scuba;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.DurabilityItem;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -19,6 +20,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -33,6 +35,7 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
         setMaterial(Material.CHAINMAIL_BOOTS);
         setDisplayName(Component.text("Diving Leggings").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setShortLore("Make you swim faster");
+        addTag(ItemTag.PREVENT_BREAKING);
     }
     
     // COPY ARMOR EFFECT START
@@ -68,7 +71,7 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
                     
                     final ItemStack item = event.getPlayer().getInventory().getItem(slot);
                     final org.bukkit.attribute.AttributeInstance attributeInstance = p.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MOVEMENT_SPEED);
-                    if(getItemId(item).equals(refId)){
+                    if(getItemId(item).equals(refId) && item.getItemMeta() instanceof Damageable dmg && dmg.getDamage() < item.getType().getMaxDurability()-1){
                         // HERE FOR THE EFFECTS
                         
                         if(p.isInWater()){

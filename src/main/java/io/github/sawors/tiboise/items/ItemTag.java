@@ -6,7 +6,9 @@ public enum ItemTag {
     PREVENT_USE_IN_CRAFTING,
     INGREDIENT,
     HIDE_FROM_CLIENT,
-    HIDE_GLINT;
+    HIDE_GLINT,
+    PREVENT_BREAKING
+    ;
     
     
     @Override

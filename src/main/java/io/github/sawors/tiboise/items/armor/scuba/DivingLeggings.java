@@ -3,6 +3,7 @@ package io.github.sawors.tiboise.items.armor.scuba;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.DurabilityItem;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -29,6 +31,7 @@ public class DivingLeggings extends TiboiseItem implements Listener, DurabilityI
         setMaterial(Material.CHAINMAIL_LEGGINGS);
         setDisplayName(Component.text("Diving Leggings").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setShortLore("Makes mining underwater faster");
+        addTag(ItemTag.PREVENT_BREAKING);
     }
     
     // COPY ARMOR EFFECT START
@@ -52,7 +55,7 @@ public class DivingLeggings extends TiboiseItem implements Listener, DurabilityI
                     final EquipmentSlot slot = EquipmentSlot.LEGS;
                     
                     final ItemStack item = event.getPlayer().getInventory().getItem(slot);
-                    if(getItemId(item).equals(refId)){
+                    if(getItemId(item).equals(refId) && item.getItemMeta() instanceof Damageable dmg && dmg.getDamage() < item.getType().getMaxDurability()-1){
                         if(p.isUnderWater()){
                             p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING,20*(period+1),3,true,false,false));
                         }

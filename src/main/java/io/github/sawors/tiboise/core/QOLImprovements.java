@@ -4,6 +4,8 @@ import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
@@ -13,6 +15,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -32,6 +35,8 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -667,6 +672,36 @@ public class QOLImprovements implements Listener {
                 )
         ;
         p.sendMessage(message);
+    }
+    
+    @EventHandler
+    public static void manageLowDurabilityItem(PlayerItemDamageEvent event){
+        final Player p = event.getPlayer();
+        final ItemStack item = event.getItem();
+        final int maxDamage = item.getType().getMaxDurability();
+        final int baseDamage = ((Damageable) item.getItemMeta()).getDamage();
+        final int damage = event.getDamage();
+        // the percentage of the items durability at which a warning should be sent
+        final int warningThreshold = 15;
+        final int threshold = (int) (maxDamage*((100-warningThreshold)/100.0));
+        if(baseDamage+damage >= threshold && baseDamage < threshold){
+            final ItemMeta meta = item.getItemMeta();
+            Component name = meta != null && meta.displayName() != null ? meta.displayName() : Component.text(TiboiseUtils.capitalizeFirstLetter(item.getType().toString().replaceAll("_"," ").toLowerCase(Locale.ROOT))).color(NamedTextColor.GREEN);
+            name = name != null ? name : item.displayName();
+            p.showTitle(Title.title(Component.text(""),Component.text("Your ").append(name).append(Component.text(" will break soon")).color(NamedTextColor.GOLD)));
+            p.playSound(p.getLocation(),Sound.ENTITY_EXPERIENCE_ORB_PICKUP,1,1.5f);
+        }
+        if(baseDamage+damage >= maxDamage){
+            if(TiboiseItem.getItemTags(item).contains(ItemTag.PREVENT_BREAKING.toString())){
+                event.setCancelled(true);
+                p.playSound(p.getLocation(),Sound.ENTITY_ITEM_BREAK,1,1);
+                final ItemStack copy = item.clone();
+                item.setAmount(0);
+                for(ItemStack overflow : p.getInventory().addItem(copy).values()){
+                    p.getWorld().dropItem(p.getLocation(),overflow);
+                }
+            }
+        }
     }
     
     

@@ -3,6 +3,7 @@ package io.github.sawors.tiboise.items.armor.scuba;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.DurabilityItem;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -30,6 +32,7 @@ public class DivingHelmet extends TiboiseItem implements Listener, DurabilityIte
         setMaterial(Material.CHAINMAIL_HELMET);
         setDisplayName(Component.text("Diving Helmet").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setShortLore("Helps you breath underwater");
+        addTag(ItemTag.PREVENT_BREAKING);
     }
     
     private static Map<UUID, BukkitRunnable> playerCheck = new HashMap<>();
@@ -48,7 +51,7 @@ public class DivingHelmet extends TiboiseItem implements Listener, DurabilityIte
                 public void run() {
                     final EquipmentSlot slot = EquipmentSlot.HEAD;
                     final ItemStack item = event.getPlayer().getInventory().getItem(slot);
-                    if(getItemId(item).equals(refId)){
+                    if(getItemId(item).equals(refId) && item.getItemMeta() instanceof Damageable dmg && dmg.getDamage() < item.getType().getMaxDurability()-1){
                         p.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING,20*(period+1),0,true,false,false));
                         if(p.isUnderWater()){
                             p.damageItemStack(slot,1);
