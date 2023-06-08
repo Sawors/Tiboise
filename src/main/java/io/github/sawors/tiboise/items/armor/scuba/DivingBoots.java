@@ -7,14 +7,13 @@ import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -56,6 +55,13 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
             BukkitRunnable check = new BukkitRunnable(){
                 @Override
                 public void run() {
+                    
+                    if(!p.isOnline()){
+                        this.cancel();
+                        playerCheck.remove(p.getUniqueId());
+                        return;
+                    }
+                    
                     // EDIT
                     final EquipmentSlot slot = EquipmentSlot.FEET;
                     
@@ -88,29 +94,32 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
             };
             check.runTaskTimer(Tiboise.getPlugin(),0,period*20);
             playerCheck.put(pid,check);
+            
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    final Player p = event.getPlayer();
+                    if(!p.isOnline() || !playerCheck.containsKey(p.getUniqueId())) {
+                        this.cancel();
+                        return;
+                    }
+                    final Block ref = p.getLocation().getBlock();
+                    if(!(ref.getType() == Material.WATER || (ref.getBlockData() instanceof Waterlogged w && w.isWaterlogged()))){
+                        // exits water
+                        final org.bukkit.attribute.AttributeInstance attributeInstance = event.getPlayer().getAttribute(org.bukkit.attribute.Attribute.GENERIC_MOVEMENT_SPEED);
+                        if(attributeInstance != null){
+                            attributeInstance.getModifiers().forEach(m -> {
+                                if(m.getName().equals(modifierName)){
+                                    attributeInstance.removeModifier(m);
+                                }
+                            });
+                        }
+                    }
+                }
+            }.runTaskTimer(Tiboise.getPlugin(),1,10);
         }
     }
     // COPY ARMOR EFFECT END
-    
-    @EventHandler
-    public static void removeEffectsOnExitWater(PlayerMoveEvent event){
-        if(event.hasChangedBlock() && playerCheck.containsKey(event.getPlayer().getUniqueId())){
-            final Location newLoc = event.getTo();
-            final Material newMat = newLoc.getBlock().getType();
-            final Player p = event.getPlayer();
-            if(!(newMat == Material.WATER || (newLoc.getBlock().getBlockData() instanceof Waterlogged w && w.isWaterlogged()))){
-                // exits water
-                final org.bukkit.attribute.AttributeInstance attributeInstance = event.getPlayer().getAttribute(org.bukkit.attribute.Attribute.GENERIC_MOVEMENT_SPEED);
-                if(attributeInstance != null){
-                    attributeInstance.getModifiers().forEach(m -> {
-                        if(m.getName().equals(modifierName)){
-                            attributeInstance.removeModifier(m);
-                        }
-                    });
-                }
-            }
-        }
-    }
     
     @Override
     public @Nullable Recipe getRecipe() {
