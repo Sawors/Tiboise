@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     protected static Map<UUID, Component> lastLetters = new HashMap<>();
@@ -94,7 +92,6 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     @EventHandler
     public static void transferData(PlayerInteractEvent event){
-        logAdmin("TRIG");
         final Player p = event.getPlayer();
         final Block clickedBlock = event.getClickedBlock();
         final ItemStack item = p.getInventory().getItemInMainHand();
