@@ -39,7 +39,7 @@ import static io.github.sawors.tiboise.Tiboise.logAdmin;
 public class PostLetterBox implements Listener {
     
     private final static String signIdentifier = "- Poste -";
-    private final static Map<UUID, Set<Location>> loadedLetterboxes = new HashMap<>();
+    private final static Map<UUID, Set<PostLetterBox>> loadedLetterboxes = new HashMap<>();
     private final static Set<Material> allowedContainer = Set.of(
             Material.CHEST,
             Material.TRAPPED_CHEST,
@@ -76,8 +76,8 @@ public class PostLetterBox implements Listener {
                         
                         PostLetterBox letterBox = new PostLetterBox(p.getUniqueId(),((TextComponent) Objects.requireNonNull(event.line(2))).content(),sign.getBlock());
                         letterBox.save();
-                        Set<Location> locs = loadedLetterboxes.getOrDefault(p.getUniqueId(),new HashSet<>());
-                        locs.add(sign.getLocation());
+                        Set<PostLetterBox> locs = loadedLetterboxes.getOrDefault(p.getUniqueId(),new HashSet<>());
+                        locs.add(letterBox);
                         loadedLetterboxes.put(p.getUniqueId(),locs);
                         sign.getPersistentDataContainer().set(getOwnerKey(), PersistentDataType.STRING,p.getUniqueId().toString());
                         sign.update();
@@ -168,8 +168,8 @@ public class PostLetterBox implements Listener {
                                 config.save(dataFile);
                                 
                                 if(loadedLetterboxes.containsKey(id)){
-                                    Set<Location> locs = loadedLetterboxes.getOrDefault(id,new HashSet<>());
-                                    locs.remove(sign.getLocation());
+                                    Set<PostLetterBox> locs = loadedLetterboxes.getOrDefault(id,new HashSet<>());
+                                    locs.remove(new PostLetterBox(id,houseName,sign.getBlock()));
                                     if(locs.size() > 0){
                                         loadedLetterboxes.put(id,locs);
                                     } else {
@@ -202,13 +202,13 @@ public class PostLetterBox implements Listener {
                 final File data = new File(world.getWorldFolder().getCanonicalFile() + File.separator + "mailboxes" + File.separator + playerId + ".yml");
                 if(data.exists()){
                     YamlConfiguration config = YamlConfiguration.loadConfiguration(data);
-                    HashSet<Location> boxes = new HashSet<>();
+                    HashSet<PostLetterBox> boxes = new HashSet<>();
                     for(String s : config.getKeys(false)){
                         ConfigurationSection section = config.getConfigurationSection(s);
                         if(section != null){
                             final String serializes = section.getString(LetterBoxDataField.SIGN_LOCATION.toString());
                             if(serializes != null){
-                                boxes.add(deserializeLocation(serializes));
+                                boxes.add(new PostLetterBox(playerId,section.getName(), Objects.requireNonNull(deserializeLocation(serializes)).getBlock()));
                             }
                         }
                     }
