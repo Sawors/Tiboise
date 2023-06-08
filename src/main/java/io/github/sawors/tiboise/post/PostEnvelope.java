@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 public class PostEnvelope extends TiboiseItem {
     public PostEnvelope(){
         setMaterial(Material.PAPER);
-        setHelpText("To fill this envelope, put it in a crafting grid with a completed stamp and a written book. \n Write your message in the book. You can use as many pages as you want.");
+        setHelpText("Right click on a lectern containing a book to transfer the content of the book to this envelope.");
     }
     
     @Override

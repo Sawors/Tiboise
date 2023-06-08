@@ -3,11 +3,11 @@ package io.github.sawors.tiboise.post;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
 import org.bukkit.entity.Player;
@@ -21,25 +21,35 @@ import org.bukkit.inventory.LecternInventory;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class PostEnvelopeClosed extends SendableItem implements Listener {
+    
+    protected static Map<UUID, Component> lastLetters = new HashMap<>();
     
     //private final static Component emptyItemMessage = Component.text("Drag and drop item to add (1 max)").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE);
     
     private String content;
+    private String author;
     
     public PostEnvelopeClosed(){
         setMaterial(Material.PAPER);
         setDisplayName(Component.text("Letter").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setContent("");
+        setAuthor("?????");
     }
     
     @Override
     public ItemStack get() {
         addData(getContentTextKey(),content);
+        addData(getAuthorKey(),author);
         return super.get();
     }
     
@@ -47,7 +57,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     public static void openEnvelope(PlayerInteractEvent event){
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         final Player p = event.getPlayer();
-        if(event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && getItemId(item).equals(getId(PostEnvelopeClosed.class))){
+        if(event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && getItemId(item).equals(getId(PostEnvelopeClosed.class)) && event.getAction().isRightClick()){
             event.setCancelled(true);
             // open the envelope
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
@@ -60,11 +70,13 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
 //            }
             
             // sending the contained message
-            final OfflinePlayer sender = PostStamp.getSender(item);
-            final String senderName = sender != null && sender.getName() != null ? sender.getName() : "?????";
-            Component message = Component.text("A letter from "+senderName+" :\n").color(NamedTextColor.GOLD)
+            final String sender = getAuthor(item);
+            Component message = Component.text("A letter from "+sender+" :\n")
+                    .color(NamedTextColor.GOLD)
+                    .clickEvent(ClickEvent.suggestCommand("/letter"))
                     .append(Component.text(contentText != null ? " "+contentText : "This letter is empty...").color(NamedTextColor.GRAY));
             p.sendMessage(message);
+            lastLetters.put(p.getUniqueId(),message);
             
             // removing the envelope and replacing it with an opened variant
             final int baseAmount = item.getAmount();
@@ -82,6 +94,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     
     @EventHandler
     public static void transferData(PlayerInteractEvent event){
+        logAdmin("TRIG");
         final Player p = event.getPlayer();
         final Block clickedBlock = event.getClickedBlock();
         final ItemStack item = p.getInventory().getItemInMainHand();
@@ -109,16 +122,28 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 text = text.replaceAll("\n","\n ");
                 PostEnvelopeClosed envelope = new PostEnvelopeClosed();
                 final String variant = getItemVariant(item);
+                final String author = p.getName();
                 if(variant.length() > 0) envelope.setVariant(variant);
                 envelope.setContent(text);
-                envelope.addLore(List.of(Component.text("This letter has no stamp.").color(NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),Component.text(preview).color(NamedTextColor.GRAY)));
+                envelope.setAuthor(author);
+                envelope.addLore(List.of(Component.text(preview).color(NamedTextColor.GRAY)));
                 
                 item.setAmount(item.getAmount()-1);
-                for(Map.Entry<Integer,ItemStack> overflow : p.getInventory().addItem(envelope.get()).entrySet()){
-                    p.getWorld().dropItem(p.getLocation(),overflow.getValue());
-                }
+                // putting it in a runnable since there is a bug where the event is triggered twice
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        for(Map.Entry<Integer,ItemStack> overflow : p.getInventory().addItem(envelope.get()).entrySet()){
+                            p.getWorld().dropItem(p.getLocation(),overflow.getValue());
+                        }
+                    }
+                }.runTask(Tiboise.getPlugin());
             }
         }
+    }
+    
+    public static Component getLastLetter(UUID player){
+        return lastLetters.getOrDefault(player,Component.text("You have no recent letter.").color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC));
     }
     
     /*@Override
@@ -308,10 +333,33 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
         return new NamespacedKey(Tiboise.getPlugin(),"post-content-text");
     }
     
+    public static NamespacedKey getAuthorKey(){
+        return new NamespacedKey(Tiboise.getPlugin(),"post-content-author");
+    }
+    
     public void setContent(String content){
         this.content = content;
     }
     
+    public static String getContent(ItemStack itemStack){
+        if(itemStack != null && itemStack.hasItemMeta()){
+            final String content = itemStack.getItemMeta().getPersistentDataContainer().get(getContentTextKey(),PersistentDataType.STRING);
+            return content != null ? content : "";
+        }
+        return "";
+    }
+    
+    public static String getAuthor(ItemStack itemStack){
+        if(itemStack != null && itemStack.hasItemMeta()){
+            final String content = itemStack.getItemMeta().getPersistentDataContainer().get(getAuthorKey(),PersistentDataType.STRING);
+            return content != null ? content : "";
+        }
+        return "";
+    }
+    
+    public void setAuthor(String author){
+        this.author = author;
+    }
 //    public static NamespacedKey getContentItemKey(){
 //        return new NamespacedKey(Tiboise.getPlugin(),"post-content-item");
 //    }

@@ -20,6 +20,7 @@ import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerCompassMarker;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerMarkerCommand;
+import io.github.sawors.tiboise.post.LetterCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
@@ -135,6 +136,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(server.getPluginCommand("marker")).setExecutor(new PlayerMarkerCommand());
         Objects.requireNonNull(server.getPluginCommand("tadmin")).setExecutor(new TAdminCommand());
         Objects.requireNonNull(server.getPluginCommand("thelp")).setExecutor(new THelpCommand());
+        Objects.requireNonNull(server.getPluginCommand("letter")).setExecutor(new LetterCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setTabCompleter(maincommand);

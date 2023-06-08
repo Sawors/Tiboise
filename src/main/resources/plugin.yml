@@ -31,6 +31,8 @@ commands:
     permission: tiboise.admin
   thelp:
     usage: /thelp gives you indication on the usage of the item you have in hand.
+  letter:
+    usage: /letter allows you to read again the last letter you opened this session.
 softdepend:
   - voicechat
 depend:
