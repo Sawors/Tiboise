@@ -13,7 +13,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -74,7 +73,7 @@ public class PostLetterBox implements Listener {
                     final Block relative = b.getRelative(wallSign.getFacing().getOppositeFace());
                     if(allowedContainer.contains(relative.getType()) && sign.lines().size() >= 3 && event.line(1) != null){
                         
-                        PostLetterBox letterBox = new PostLetterBox(p.getUniqueId(),((TextComponent) Objects.requireNonNull(event.line(2))).content(),sign.getBlock());
+                        PostLetterBox letterBox = new PostLetterBox(p.getUniqueId(),sign.getBlock());
                         letterBox.save();
                         Set<PostLetterBox> locs = loadedLetterboxes.getOrDefault(p.getUniqueId(),new HashSet<>());
                         locs.add(letterBox);
@@ -119,6 +118,10 @@ public class PostLetterBox implements Listener {
                 }
             }
         }
+    }
+    
+    public static String getLetterBoxIdentifier() {
+        return signIdentifier;
     }
     
     enum LetterBoxDataField {
@@ -169,7 +172,7 @@ public class PostLetterBox implements Listener {
                                 
                                 if(loadedLetterboxes.containsKey(id)){
                                     Set<PostLetterBox> locs = loadedLetterboxes.getOrDefault(id,new HashSet<>());
-                                    locs.remove(new PostLetterBox(id,houseName,sign.getBlock()));
+                                    locs.remove(new PostLetterBox(id,sign.getBlock()));
                                     if(locs.size() > 0){
                                         loadedLetterboxes.put(id,locs);
                                     } else {
@@ -208,7 +211,7 @@ public class PostLetterBox implements Listener {
                         if(section != null){
                             final String serializes = section.getString(LetterBoxDataField.SIGN_LOCATION.toString());
                             if(serializes != null){
-                                boxes.add(new PostLetterBox(playerId,section.getName(), Objects.requireNonNull(deserializeLocation(serializes)).getBlock()));
+                                boxes.add(new PostLetterBox(playerId,Objects.requireNonNull(deserializeLocation(serializes)).getBlock()));
                             }
                         }
                     }
@@ -257,13 +260,13 @@ public class PostLetterBox implements Listener {
     private Location platformLocation = null;
     private UUID owner;
     
-    public PostLetterBox(UUID owner, String name, Block sign, Location platformLocation) throws IllegalStateException{
-        if(sign instanceof WallSign wallSign){
-            this.name = name;
+    public PostLetterBox(UUID owner, Block sign, Location platformLocation) throws IllegalStateException, IndexOutOfBoundsException{
+        if(sign.getState() instanceof Sign wallSign && sign.getBlockData() instanceof Directional directional){
+            this.name = ((TextComponent)wallSign.line(2)).content();
             this.sign = sign.getLocation();
             this.owner = owner;
-            final Block checkCont = sign.getRelative(wallSign.getFacing().getOppositeFace());
-            if(!(checkCont.getBlockData() instanceof Container)) {
+            final Block checkCont = sign.getRelative(directional.getFacing().getOppositeFace());
+            if(!(checkCont.getState() instanceof Container)) {
                 throw new IllegalStateException("The sign you provided cannot be used as a post sign (missing container)");
             }
             this.container = checkCont.getLocation();
@@ -280,8 +283,8 @@ public class PostLetterBox implements Listener {
      */
     public PostLetterBox(){}
     
-    public PostLetterBox(UUID owner,String name, Block sign){
-        this(owner,name,sign,null);
+    public PostLetterBox(UUID owner, Block sign){
+        this(owner,sign,null);
     }
     
     public String getName() {
@@ -341,5 +344,15 @@ public class PostLetterBox implements Listener {
                 IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof PostLetterBox box && this.sign.equals(box.sign) && this.name.equals(box.name) && this.owner.equals(box.owner);
+    }
+    
+    @Override
+    public int hashCode() {
+        return (owner+":"+name+"@"+sign).hashCode();
     }
 }

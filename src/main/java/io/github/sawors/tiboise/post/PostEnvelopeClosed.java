@@ -8,6 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
 import org.bukkit.entity.Player;
@@ -76,6 +77,8 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
             p.sendMessage(message);
             lastLetters.put(p.getUniqueId(),message);
             
+            p.playSound(p.getLocation(), Sound.ITEM_AXE_WAX_OFF,.75f,1.25f);
+            
             // removing the envelope and replacing it with an opened variant
             final int baseAmount = item.getAmount();
             PostEnvelope envelope = new PostEnvelope();
@@ -124,6 +127,9 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 envelope.setContent(text);
                 envelope.setAuthor(author);
                 envelope.addLore(List.of(Component.text("From "+author+" :").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),Component.text(preview).color(NamedTextColor.GRAY)));
+                
+                p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_WORK_CARTOGRAPHER,.75f,1.25f);
+                p.playSound(p.getLocation(), Sound.ITEM_HONEYCOMB_WAX_ON,.75f,1.25f);
                 
                 item.setAmount(item.getAmount()-1);
                 // putting it in a runnable since there is a bug where the event is triggered twice
