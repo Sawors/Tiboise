@@ -88,7 +88,7 @@ public class SittingManager extends UtilityEntity implements Listener {
                 : axis.equals(Axis.X) ? 0 : 90;
         logAdmin(yaw);
         ArmorStand seatEntity = (ArmorStand) seat.getWorld().spawnEntity(
-                seat.getLocation().add(.5,seat.getBoundingBox().getHeight()-1,.5).add(offset),
+                seat.getLocation().add(.5,seat.getBoundingBox().getHeight()-0.95,.5).add(offset),
                 EntityType.ARMOR_STAND,
                 CreatureSpawnEvent.SpawnReason.CUSTOM,
                 e -> {

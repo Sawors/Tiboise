@@ -9,6 +9,7 @@ import io.github.sawors.tiboise.items.armor.scuba.DivingBoots;
 import io.github.sawors.tiboise.items.armor.scuba.DivingChestplate;
 import io.github.sawors.tiboise.items.armor.scuba.DivingHelmet;
 import io.github.sawors.tiboise.items.armor.scuba.DivingLeggings;
+import io.github.sawors.tiboise.items.hats.*;
 import io.github.sawors.tiboise.items.tools.AmethystPickaxe;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
@@ -78,12 +79,25 @@ public abstract class TiboiseItem {
         registerItem(new AmethystPickaxe());
         registerItem(new InkQuill());
         
+        //HATS
+        registerItem(new StrawHat());
+        registerItem(new Kirby());
+        registerItem(new Sombrero());
+        registerItem(new Monocle());
+        registerItem(new Fez());
+        
         if(Tiboise.isModuleEnabled(Tiboise.ConfigModules.ECONOMY)){
             registerItem(new CoinItem());
         }
         if(Tiboise.isVoiceChatEnabled()){
             registerItem(new PortableRadio());
         }
+        
+        
+       
+       
+        // to avoid data piling
+        registeredlisteners.clear();
     }
     
     private static void registerItem(TiboiseItem item){

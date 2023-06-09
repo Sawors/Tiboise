@@ -7,7 +7,9 @@ public enum ItemTag {
     INGREDIENT,
     HIDE_FROM_CLIENT,
     HIDE_GLINT,
-    PREVENT_BREAKING
+    PREVENT_BREAKING,
+    HAT,
+    UNMOVABLE
     ;
     
     
