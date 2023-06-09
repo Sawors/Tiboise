@@ -22,12 +22,11 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
 import java.util.Objects;
-
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class SittingManager extends UtilityEntity implements Listener {
     
@@ -86,9 +85,13 @@ public class SittingManager extends UtilityEntity implements Listener {
                         ? -(float) Math.toDegrees(stairs.getFacing().getOppositeFace().getDirection().angle(reference))
                         : (float) Math.toDegrees(stairs.getFacing().getOppositeFace().getDirection().angle(reference)))
                 : axis.equals(Axis.X) ? 0 : 90;
-        logAdmin(yaw);
+        //seat.getBoundingBox().getHeight()-0.95
+        Location sitLoc = seat.getLocation();
+        BoundingBox box = seat.getBoundingBox();
+        sitLoc.setY(box.getCenterY());
+        sitLoc.add(.5,(box.getHeight()/2)-0.95,.5);
         ArmorStand seatEntity = (ArmorStand) seat.getWorld().spawnEntity(
-                seat.getLocation().add(.5,seat.getBoundingBox().getHeight()-0.95,.5).add(offset),
+                sitLoc.add(offset),
                 EntityType.ARMOR_STAND,
                 CreatureSpawnEvent.SpawnReason.CUSTOM,
                 e -> {
