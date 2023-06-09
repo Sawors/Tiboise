@@ -24,7 +24,7 @@ public class Sombrero extends TiboiseHat {
                 .setIngredient('C',new ItemStack(Material.CACTUS))
                 .setIngredient('L',new ItemStack(Material.RABBIT_HIDE))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

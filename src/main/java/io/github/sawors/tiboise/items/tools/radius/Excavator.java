@@ -49,7 +49,6 @@ public class Excavator extends RadiusBreakingTool implements Listener {
                 case IRON -> {setMaterial(Material.IRON_SHOVEL);}
                 case GOLD -> {setMaterial(Material.GOLDEN_SHOVEL);}
                 case DIAMOND -> {setMaterial(Material.DIAMOND_SHOVEL);}
-                case NETHERITE, STEEL -> {setMaterial(Material.NETHERITE_SHOVEL);}
             }
         } catch (IllegalArgumentException e){
             setMaterial(Material.WOODEN_SHOVEL);
@@ -87,7 +86,6 @@ public class Excavator extends RadiusBreakingTool implements Listener {
             case IRON -> mat = Material.IRON_INGOT;
             case GOLD -> mat = Material.GOLD_INGOT;
             case DIAMOND -> mat = Material.DIAMOND;
-            case NETHERITE, STEEL -> mat = Material.NETHERITE_INGOT;
         }
         recipe.setIngredient('S', Material.STICK);
         recipe.setIngredient('X', Material.AIR);
@@ -105,8 +103,7 @@ public class Excavator extends RadiusBreakingTool implements Listener {
                 ItemVariant.STONE,
                 ItemVariant.IRON,
                 ItemVariant.GOLD,
-                ItemVariant.DIAMOND,
-                ItemVariant.NETHERITE
+                ItemVariant.DIAMOND
         );
     }
 }

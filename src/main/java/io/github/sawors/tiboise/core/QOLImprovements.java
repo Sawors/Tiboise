@@ -37,6 +37,7 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -293,11 +294,13 @@ public class QOLImprovements implements Listener {
                             .setIngredient('N', Material.GOLD_NUGGET)
                             .setIngredient('B',Material.BLACKSTONE)
             );
+            // GUNPOWDER
             vanillabonusrecipes.add(
                     new ShapelessRecipe(Material.GUNPOWDER.getKey(), new ItemStack(Material.GUNPOWDER).asQuantity(1))
                             .addIngredient(2, Material.FLINT)
                             .addIngredient(1,Material.COAL)
             );
+            
             // MAKE GOLD ITEM ENCHANTED BY DEFAULT
             List<Material> goldtoedit = List.of(Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, Material.GOLDEN_AXE, Material.GOLDEN_SWORD);
             for (Material mat : goldtoedit){
@@ -328,6 +331,7 @@ public class QOLImprovements implements Listener {
                         ShapedRecipe ench = new ShapedRecipe(sr.getKey(),ref);
                         ench.setGroup(sr.getGroup());
                         ench.shape(sr.getShape());
+                        ench.setCategory(CraftingBookCategory.EQUIPMENT);
                         for(Map.Entry<Character, RecipeChoice> entry : sr.getChoiceMap().entrySet()){
                             ench.setIngredient(entry.getKey(),entry.getValue());
                         }
@@ -341,6 +345,7 @@ public class QOLImprovements implements Listener {
             Bukkit.removeRecipe(trapKey);
             ShapedRecipe trapRecipe = new ShapedRecipe(trapKey, new ItemStack(Material.IRON_TRAPDOOR).asQuantity(2))
                     .shape("II","II").setIngredient('I',Material.IRON_INGOT);
+            trapRecipe.setCategory(CraftingBookCategory.BUILDING);
             Bukkit.addRecipe(trapRecipe);
             
             for(Recipe r : vanillabonusrecipes){
@@ -350,6 +355,20 @@ public class QOLImprovements implements Listener {
                     logAdmin("ERROR", "Error in adding recipe for "+r.getResult().getType());
                 }
             }
+            
+            // LODESTONE WITH IRON INSTEAD OF NETHERITE
+            final NamespacedKey lodeKey = Material.LODESTONE.getKey();
+            Bukkit.removeRecipe(lodeKey);
+            ShapedRecipe lodeRecipe = new ShapedRecipe(Material.LODESTONE.getKey(),new ItemStack(Material.LODESTONE))
+                    .shape(
+                            "SSS",
+                            "SIS",
+                            "SSS"
+                    )
+                    .setIngredient('S', Material.SMOOTH_STONE)
+                    .setIngredient('I',Material.IRON_INGOT);
+            lodeRecipe.setCategory(CraftingBookCategory.BUILDING);
+            Bukkit.addRecipe(lodeRecipe);
     
             // CRAFT FOR SPRUCE GLASS DOOR
             // cast to Keyed, not clean but should not break in future updates

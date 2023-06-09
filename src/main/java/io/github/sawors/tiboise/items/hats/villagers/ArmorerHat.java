@@ -25,7 +25,7 @@ public class ArmorerHat extends TiboiseHat {
                 .setIngredient('L',new ItemStack(Material.RABBIT_HIDE))
                 .setIngredient('I',new ItemStack(Material.IRON_INGOT))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

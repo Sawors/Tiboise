@@ -25,7 +25,7 @@ public class WeaponsmithHat extends TiboiseHat {
                 .setIngredient('S',new ItemStack(Material.STRING))
                 .setIngredient('H',new ItemStack(Material.RABBIT_HIDE))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

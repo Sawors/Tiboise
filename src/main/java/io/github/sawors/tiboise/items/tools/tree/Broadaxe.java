@@ -109,8 +109,7 @@ public class Broadaxe extends TiboiseItem implements Listener {
                 ItemVariant.STONE,
                 ItemVariant.IRON,
                 ItemVariant.GOLD,
-                ItemVariant.DIAMOND,
-                ItemVariant.NETHERITE
+                ItemVariant.DIAMOND
         );
     }
     
@@ -136,7 +135,6 @@ public class Broadaxe extends TiboiseItem implements Listener {
             case IRON -> mat = Material.IRON_INGOT;
             case GOLD -> mat = Material.GOLD_INGOT;
             case DIAMOND -> mat = Material.DIAMOND;
-            case NETHERITE, STEEL -> mat = Material.NETHERITE_INGOT;
         }
         recipe.setIngredient('S', Material.STICK);
         recipe.setIngredient('X', Material.AIR);
@@ -161,7 +159,6 @@ public class Broadaxe extends TiboiseItem implements Listener {
                 case IRON -> {setMaterial(Material.IRON_AXE);}
                 case GOLD -> {setMaterial(Material.GOLDEN_AXE);}
                 case DIAMOND -> {setMaterial(Material.DIAMOND_AXE);}
-                case NETHERITE, STEEL -> {setMaterial(Material.NETHERITE_AXE);}
             }
         } catch (IllegalArgumentException e){
             setMaterial(Material.WOODEN_AXE);

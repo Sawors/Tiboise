@@ -25,7 +25,7 @@ public class FletcherHat extends TiboiseHat {
                 .setIngredient('W',new ItemStack(Material.RABBIT_HIDE))
                 .setIngredient('F',new ItemStack(Material.FEATHER))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

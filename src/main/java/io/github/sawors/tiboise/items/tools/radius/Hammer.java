@@ -50,7 +50,6 @@ public class Hammer extends RadiusBreakingTool implements Listener, DurabilityIt
                 case IRON -> {setMaterial(Material.IRON_PICKAXE);}
                 case GOLD -> {setMaterial(Material.GOLDEN_PICKAXE);}
                 case DIAMOND -> {setMaterial(Material.DIAMOND_PICKAXE);}
-                case NETHERITE, STEEL -> {setMaterial(Material.NETHERITE_PICKAXE);}
             }
         } catch (IllegalArgumentException e){
             setMaterial(Material.WOODEN_PICKAXE);
@@ -88,7 +87,6 @@ public class Hammer extends RadiusBreakingTool implements Listener, DurabilityIt
             case IRON -> mat = Material.IRON_INGOT;
             case GOLD -> mat = Material.GOLD_INGOT;
             case DIAMOND -> mat = Material.DIAMOND;
-            case NETHERITE, STEEL -> mat = Material.NETHERITE_INGOT;
         }
         recipe.setIngredient('S', Material.STICK);
         recipe.setIngredient('X', Material.AIR);
@@ -106,8 +104,7 @@ public class Hammer extends RadiusBreakingTool implements Listener, DurabilityIt
                 ItemVariant.STONE,
                 ItemVariant.IRON,
                 ItemVariant.GOLD,
-                ItemVariant.DIAMOND,
-                ItemVariant.NETHERITE
+                ItemVariant.DIAMOND
         );
     }
     

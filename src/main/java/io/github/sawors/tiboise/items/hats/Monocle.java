@@ -25,7 +25,7 @@ public class Monocle extends TiboiseHat {
                 .setIngredient('G',new ItemStack(Material.GOLD_BLOCK))
                 .setIngredient('P',new ItemStack(Material.GLASS_PANE))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

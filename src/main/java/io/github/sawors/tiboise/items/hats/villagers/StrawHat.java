@@ -24,7 +24,7 @@ public class StrawHat extends TiboiseHat {
                 )
                 .setIngredient('W',new ItemStack(Material.WHEAT))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

@@ -25,7 +25,7 @@ public class Fez extends TiboiseHat {
                 .setIngredient('L',new ItemStack(Material.RABBIT_HIDE))
                 .setIngredient('R',new ItemStack(Material.RED_DYE))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

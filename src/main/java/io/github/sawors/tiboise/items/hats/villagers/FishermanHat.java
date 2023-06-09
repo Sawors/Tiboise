@@ -24,7 +24,7 @@ public class FishermanHat extends TiboiseHat {
                 )
                 .setIngredient('W',new ItemStack(Material.RABBIT_HIDE))
                 ;
-        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }
