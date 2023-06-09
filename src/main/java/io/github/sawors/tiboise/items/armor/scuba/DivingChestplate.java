@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 
 import javax.annotation.Nullable;
 
@@ -55,6 +56,7 @@ public class DivingChestplate extends TiboiseItem implements Listener, Durabilit
         );
         recipe.setIngredient('C',Material.COPPER_INGOT);
         recipe.setIngredient('N',Material.NAUTILUS_SHELL);
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
     

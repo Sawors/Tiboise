@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,6 +72,7 @@ public class PostStamp extends TiboiseItem implements Listener {
         ShapelessRecipe recipe = new ShapelessRecipe(getItemReference(),new PostStamp().get());
         recipe.addIngredient(Material.PAPER);
         recipe.addIngredient(Material.HONEYCOMB);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
     

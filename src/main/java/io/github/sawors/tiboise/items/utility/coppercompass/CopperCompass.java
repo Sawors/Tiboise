@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -337,6 +338,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
     public @Nullable Recipe getRecipe() {
         ShapedRecipe recipe = new ShapedRecipe(getIdAsKey(),this.get());
         recipe.shape("CRC","RBR","CRC").setIngredient('C', Material.COPPER_INGOT).setIngredient('R',Material.REDSTONE).setIngredient('B',new ItemStack(Material.COMPASS));
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
 

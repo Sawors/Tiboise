@@ -16,6 +16,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -77,6 +78,7 @@ public class Hammer extends RadiusBreakingTool implements Listener, DurabilityIt
                 "MMM",
                 "XSX"
         );
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         
         Material mat = Material.AIR;
         RecipeChoice choices = null;

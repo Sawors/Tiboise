@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -80,6 +81,7 @@ public class DivingHelmet extends TiboiseItem implements Listener, DurabilityIte
         recipe.setIngredient('G',Material.TINTED_GLASS);
         recipe.setIngredient('H',Material.HEART_OF_THE_SEA);
         recipe.setIngredient('S',Material.PRISMARINE_CRYSTALS);
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
     

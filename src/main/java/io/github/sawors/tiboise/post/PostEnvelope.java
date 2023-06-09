@@ -4,6 +4,7 @@ import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 public class PostEnvelope extends TiboiseItem {
@@ -17,6 +18,7 @@ public class PostEnvelope extends TiboiseItem {
         ShapelessRecipe recipe = new ShapelessRecipe(getItemReference(),new PostEnvelope().get());
         recipe.addIngredient(3,Material.PAPER);
         recipe.addIngredient(Material.INK_SAC);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
@@ -152,6 +153,7 @@ public class PortableRadio extends FrequencyItem implements Listener {
         recipe.setIngredient('R', Material.REDSTONE);
         recipe.setIngredient('L', Material.LIGHTNING_ROD);
         recipe.setIngredient('X', Material.AIR);
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
 }

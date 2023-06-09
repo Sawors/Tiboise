@@ -9,7 +9,11 @@ import io.github.sawors.tiboise.items.armor.scuba.DivingBoots;
 import io.github.sawors.tiboise.items.armor.scuba.DivingChestplate;
 import io.github.sawors.tiboise.items.armor.scuba.DivingHelmet;
 import io.github.sawors.tiboise.items.armor.scuba.DivingLeggings;
-import io.github.sawors.tiboise.items.hats.*;
+import io.github.sawors.tiboise.items.hats.Fez;
+import io.github.sawors.tiboise.items.hats.Kirby;
+import io.github.sawors.tiboise.items.hats.Monocle;
+import io.github.sawors.tiboise.items.hats.Sombrero;
+import io.github.sawors.tiboise.items.hats.villagers.*;
 import io.github.sawors.tiboise.items.tools.AmethystPickaxe;
 import io.github.sawors.tiboise.items.tools.radius.Excavator;
 import io.github.sawors.tiboise.items.tools.radius.Hammer;
@@ -85,6 +89,10 @@ public abstract class TiboiseItem {
         registerItem(new Sombrero());
         registerItem(new Monocle());
         registerItem(new Fez());
+        registerItem(new ArmorerHat());
+        registerItem(new FishermanHat());
+        registerItem(new FletcherHat());
+        registerItem(new WeaponsmithHat());
         
         if(Tiboise.isModuleEnabled(Tiboise.ConfigModules.ECONOMY)){
             registerItem(new CoinItem());

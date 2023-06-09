@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
@@ -144,6 +145,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
         ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(Tiboise.getPlugin(),this.getId()), this.get());
         recipe.addIngredient(Material.PAPER);
         recipe.addIngredient(Material.SLIME_BALL);
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
 }

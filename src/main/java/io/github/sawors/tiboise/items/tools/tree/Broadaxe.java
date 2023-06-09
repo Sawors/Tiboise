@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
@@ -125,6 +126,7 @@ public class Broadaxe extends TiboiseItem implements Listener {
                 "MSX",
                 "XSX"
         );
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         
         Material mat = Material.AIR;
         RecipeChoice choices = null;

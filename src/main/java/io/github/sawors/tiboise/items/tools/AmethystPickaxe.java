@@ -16,6 +16,7 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
                 .setIngredient('A', Material.AMETHYST_SHARD)
                 .setIngredient('I', Material.IRON_INGOT)
                 .setIngredient('S',Material.STICK);
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
         
     }

@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 public class Monocle extends TiboiseHat {
@@ -24,6 +25,7 @@ public class Monocle extends TiboiseHat {
                 .setIngredient('G',new ItemStack(Material.GOLD_BLOCK))
                 .setIngredient('P',new ItemStack(Material.GLASS_PANE))
                 ;
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
 }

@@ -1,15 +1,16 @@
-package io.github.sawors.tiboise.items.hats;
+package io.github.sawors.tiboise.items.hats.villagers;
 
 import io.github.sawors.tiboise.items.TiboiseHat;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
-public class StrawHat extends TiboiseHat {
+public class ArmorerHat extends TiboiseHat {
     
-    public StrawHat(){
+    public ArmorerHat(){
         setDefaultHatData();
         setMaterial(Material.WHEAT);
     }
@@ -18,11 +19,13 @@ public class StrawHat extends TiboiseHat {
     public @Nullable Recipe getRecipe() {
         ShapedRecipe recipe = new ShapedRecipe(getItemKey(),this.get())
                 .shape(
-                        "XWX",
-                        "WWW"
+                        "III",
+                        "LIL"
                 )
-                .setIngredient('W',new ItemStack(Material.WHEAT))
+                .setIngredient('L',new ItemStack(Material.RABBIT_HIDE))
+                .setIngredient('I',new ItemStack(Material.IRON_INGOT))
                 ;
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
 }

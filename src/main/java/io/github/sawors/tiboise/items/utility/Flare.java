@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -68,6 +69,7 @@ public class Flare extends TiboiseItem implements Listener {
         recipe.addIngredient(Material.RED_DYE);
         recipe.addIngredient(Material.GUNPOWDER);
         recipe.addIngredient(Material.GLOWSTONE_DUST);
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
     

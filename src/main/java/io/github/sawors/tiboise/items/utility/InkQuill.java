@@ -14,6 +14,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 public class InkQuill extends TiboiseItem implements Listener {
@@ -27,6 +28,7 @@ public class InkQuill extends TiboiseItem implements Listener {
         ShapelessRecipe recipe = new ShapelessRecipe(getItemKey(),this.get());
         recipe.addIngredient(new ItemStack(Material.FEATHER));
         recipe.addIngredient(new ItemStack(Material.INK_SAC));
+        recipe.setCategory(CraftingBookCategory.MISC);
         return recipe;
     }
     

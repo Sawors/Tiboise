@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -146,6 +147,7 @@ public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem
         );
         recipe.setIngredient('C',Material.COPPER_INGOT);
         recipe.setIngredient('P',Material.PRISMARINE_SHARD);
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
     

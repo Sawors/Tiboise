@@ -15,6 +15,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -76,6 +77,7 @@ public class Excavator extends RadiusBreakingTool implements Listener {
                 "MSM",
                 "XSX"
         );
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         
         Material mat = Material.AIR;
         RecipeChoice choices = null;

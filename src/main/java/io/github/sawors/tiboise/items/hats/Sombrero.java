@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 public class Sombrero extends TiboiseHat {
@@ -21,8 +22,9 @@ public class Sombrero extends TiboiseHat {
                         "LLL"
                 )
                 .setIngredient('C',new ItemStack(Material.CACTUS))
-                .setIngredient('L',new ItemStack(Material.LEATHER))
+                .setIngredient('L',new ItemStack(Material.RABBIT_HIDE))
                 ;
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
 }

@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -51,6 +52,7 @@ public class PortableCraftingTable extends TiboiseItem implements Listener {
         recipe.setIngredient('C', Material.CRAFTING_TABLE);
         recipe.setIngredient('L', Material.LEATHER);
         recipe.setIngredient('X', Material.AIR);
+        recipe.setCategory(CraftingBookCategory.EQUIPMENT);
         return recipe;
     }
 }
