@@ -6,6 +6,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,16 +31,20 @@ public class AdminMessageCommand implements CommandExecutor {
                 if(jda != null){
                     try{
                         jda.openPrivateChannelById(315237447065927691L).queue(s -> s.sendMessage(formattedMessage).queue());
+                        sender.sendMessage(Component.text("You -> Server : message sent"));
                     } catch (UnsupportedOperationException e){
                         logAdmin("Message couldn't be sent to Sawors (Discord)");
                     }
                 } else {
                     if(Bukkit.getOnlinePlayers().stream().anyMatch(ServerOperator::isOp)){
-                        Bukkit.getOnlinePlayers().forEach(op -> op.sendMessage(
-                                Component.text("Message from "+player.getName()+" :\n ").color(NamedTextColor.GOLD)
-                                        .append(Component.text(message).color(NamedTextColor.WHITE))
-                                        .clickEvent(ClickEvent.suggestCommand("/mp "+player.getName()+" "))
-                        ));
+                        Bukkit.getOnlinePlayers().forEach(op -> {
+                            op.sendMessage(
+                                    Component.text("Message from "+player.getName()+" : ").color(NamedTextColor.LIGHT_PURPLE)
+                                            .append(Component.text(message).color(NamedTextColor.WHITE))
+                                            .clickEvent(ClickEvent.suggestCommand("/mp "+player.getName()+" "))
+                            );
+                            op.playSound(op.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,1,1);
+                        });
                     } else {
                         Bukkit.getLogger().log(Level.INFO,formattedMessage.replaceAll("`","").replaceAll("\\*",""));
                     }
@@ -48,10 +53,13 @@ public class AdminMessageCommand implements CommandExecutor {
             } else {
                 OfflinePlayer p = Bukkit.getOfflinePlayerIfCached(destination);
                 if(sender.isOp() && p != null && p.isOnline()){
-                    ((Player) p).sendMessage(Component.text("Message from the server :\n ").color(NamedTextColor.GOLD).append(Component.text(message).color(NamedTextColor.WHITE))
+                    final Player onlinePlayer = ((Player) p);
+                    sender.sendMessage(Component.text("Server -> "+onlinePlayer.getName()+" : message sent"));
+                    onlinePlayer.sendMessage(Component.text("Server :").color(NamedTextColor.LIGHT_PURPLE).append(Component.text(message).color(NamedTextColor.WHITE))
                             .clickEvent(ClickEvent.suggestCommand("/mp server "))
                             .hoverEvent(Component.text("> click to respond <"))
                     );
+                    onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,1,1);
                 } else {
                     sender.sendMessage(Component.text("You can't send messages to this user"));
                 }

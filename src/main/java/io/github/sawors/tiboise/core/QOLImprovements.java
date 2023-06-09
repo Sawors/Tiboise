@@ -1,6 +1,5 @@
 package io.github.sawors.tiboise.core;
 
-import com.destroystokyo.paper.MaterialSetTag;
 import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Tiboise;
@@ -19,7 +18,6 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Jukebox;
 import org.bukkit.block.data.type.Chain;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.enchantments.Enchantment;
@@ -492,85 +490,6 @@ public class QOLImprovements implements Listener {
     public void placedArmorStandsWithArms(CreatureSpawnEvent event){
         if(event.getEntity() instanceof ArmorStand armst){
             armst.setArms(true);
-        }
-    }
-    
-    @EventHandler
-    public void onPlayerUsesJukebox(PlayerInteractEvent event){
-        if(event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.JUKEBOX && event.getAction().isRightClick() && event.getClickedBlock().getState() instanceof Jukebox j){
-            final int DISK_ROTATION_PERIOD = 1;
-            Block b = event.getClickedBlock();
-            Location uploc = b.getLocation().clone().add(0.5,2,0.5);
-            Player p = event.getPlayer();
-            
-            ItemStack disk = null;
-            
-            PlayerInventory pinv = p.getInventory();
-            if(MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(pinv.getItemInMainHand().getType())){
-                disk = pinv.getItemInMainHand().clone();
-            } else if(MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(pinv.getItemInOffHand().getType())){
-                disk = pinv.getItemInOffHand().clone();
-            }
-            
-            if(j.isPlaying()){
-                if((p.isSneaking() && p.getInventory().getItemInMainHand().getType().equals(Material.AIR)) || (!p.isSneaking())){
-                    for(Entity e : uploc.add(0,0.1,0).getNearbyEntities(0.1,0.25,0.1)){
-                        if(e instanceof ArmorStand && ((ArmorStand) e).getEquipment().getHelmet() != null && ((ArmorStand) e).getEquipment().getHelmet().getType().toString().contains("MUSIC_DISC")){
-                            e.remove();
-                        }
-                    }
-                }
-                
-            } else if(disk != null && MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(disk.getType())){
-                ArmorStand display = (ArmorStand) uploc.getWorld().spawnEntity(uploc.subtract(0,17/16f,0), EntityType.ARMOR_STAND, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                display.setVisible(false);
-                display.setInvulnerable(true);
-                display.setGravity(false);
-                display.setDisabledSlots(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND, EquipmentSlot.OFF_HAND);
-                display.getEquipment().setHelmet(disk);
-                display.setCustomNameVisible(false);
-                display.customName(Component.text("_display"));
-                display.setSmall(true);
-                
-                new BukkitRunnable(){
-                    
-                    final int MAX_MUSIC_DURATION = 3600;
-                    int timer = MAX_MUSIC_DURATION;
-                    final Location blockloc = b.getLocation().clone();
-                    final float step = (40f/(20*DISK_ROTATION_PERIOD));
-                    @Override
-                    public void run(){
-                        
-                        if(timer <= 0){
-                            this.cancel();
-                        } else{
-                            if(blockloc.getBlock().getType() != Material.JUKEBOX){
-                                display.remove();
-                                this.cancel();
-                            }
-                            display.setRotation(display.getLocation().getYaw()+step, 0);
-                            timer--;
-                            
-                        }
-                    }
-                    
-                }.runTaskTimer(Tiboise.getPlugin(), 0, DISK_ROTATION_PERIOD);
-            }
-            
-            
-            
-            
-        }
-    }
-    
-    @EventHandler
-    public void onPlayerBreakJukebox(BlockBreakEvent event){
-        if(event.getBlock().getType() == Material.JUKEBOX){
-            for(Entity e : event.getBlock().getLocation().add(0.5,1.1,0.5).getNearbyEntities(0.1,0.25,0.1)){
-                if(e instanceof ArmorStand armst && armst.getEquipment().getHelmet() != null && MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(armst.getEquipment().getHelmet().getType())){
-                    e.remove();
-                }
-            }
         }
     }
     

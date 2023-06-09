@@ -17,6 +17,7 @@ import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugi
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.items.discs.MusicManager;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerCompassMarker;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerMarkerCommand;
 import io.github.sawors.tiboise.post.LetterCommand;
@@ -151,6 +152,7 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new TradingStation(),this);
         manager.registerEvents(new PostLetterBox(),this);
         manager.registerEvents(new SittingManager(),this);
+        manager.registerEvents(new MusicManager(), this);
         
         Objects.requireNonNull(server.getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(server.getPluginCommand("tid")).setExecutor(new GetIdCommand());
