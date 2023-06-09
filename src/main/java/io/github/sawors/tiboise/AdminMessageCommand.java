@@ -16,21 +16,27 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.logging.Level;
 
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
+
 public class AdminMessageCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if(args.length > 1){
             final String destination = args[0];
-            final String message = Arrays.stream(args).reduce((c1,c2) -> c1+c2).get();
-            if((destination.equalsIgnoreCase("admin") || destination.equalsIgnoreCase("server") || destination.equalsIgnoreCase("serveur")) && sender instanceof Player player){
+            final String message = Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(destination,"");
+            if((destination.equalsIgnoreCase("admin") || destination.equalsIgnoreCase("server") || destination.equalsIgnoreCase("serveur")) && sender instanceof Player player) {
                 final JDA jda = Tiboise.getJdaInstance();
                 final String formattedMessage = "Message from **"+player.getName()+"** :\n```"+message+"```";
                 if(jda != null){
-                    jda.openPrivateChannelById("315237447065927691").queue(s -> s.sendMessage(formattedMessage).queue());
+                    try{
+                        jda.openPrivateChannelById(315237447065927691L).queue(s -> s.sendMessage(formattedMessage).queue());
+                    } catch (UnsupportedOperationException e){
+                        logAdmin("Message couldn't be sent to Sawors (Discord)");
+                    }
                 } else {
                     if(Bukkit.getOnlinePlayers().stream().anyMatch(ServerOperator::isOp)){
                         Bukkit.getOnlinePlayers().forEach(op -> op.sendMessage(
-                                Component.text("Message from "+player.getName()+" :\n").color(NamedTextColor.GOLD)
+                                Component.text("Message from "+player.getName()+" :\n ").color(NamedTextColor.GOLD)
                                         .append(Component.text(message).color(NamedTextColor.WHITE))
                                         .clickEvent(ClickEvent.suggestCommand("/mp "+player.getName()+" "))
                         ));
@@ -38,14 +44,18 @@ public class AdminMessageCommand implements CommandExecutor {
                         Bukkit.getLogger().log(Level.INFO,formattedMessage.replaceAll("`","").replaceAll("\\*",""));
                     }
                 }
+                return true;
             } else {
                 OfflinePlayer p = Bukkit.getOfflinePlayerIfCached(destination);
-                if(p != null && p.isOnline()){
-                    ((Player) p).sendMessage(Component.text("Message from the server :\n").color(NamedTextColor.GOLD).append(Component.text(message).color(NamedTextColor.WHITE))
+                if(sender.isOp() && p != null && p.isOnline()){
+                    ((Player) p).sendMessage(Component.text("Message from the server :\n ").color(NamedTextColor.GOLD).append(Component.text(message).color(NamedTextColor.WHITE))
                             .clickEvent(ClickEvent.suggestCommand("/mp server "))
                             .hoverEvent(Component.text("> click to respond <"))
                     );
+                } else {
+                    sender.sendMessage(Component.text("You can't send messages to this user"));
                 }
+                return true;
             }
         }
         return false;

@@ -116,6 +116,9 @@ public final class Tiboise extends JavaPlugin {
                         ))
                         .setActivity(Activity.playing("Tiboise 1.19.4"))
                 .build();
+                logAdmin("Discord bot enabled !");
+            } else {
+                Bukkit.getLogger().log(Level.WARNING,"[Tiboise] Discord features disabled, please add your bot token to config.yml in the field token:\"\"");
             }
         }
         
@@ -264,7 +267,7 @@ public final class Tiboise extends JavaPlugin {
     }
 
 
-    static JavaPlugin getPlugin(){
+    public static JavaPlugin getPlugin(){
         return instance;
     }
     
