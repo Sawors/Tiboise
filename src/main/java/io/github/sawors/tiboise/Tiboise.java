@@ -130,6 +130,7 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new CraftingPatcher(),this);
         manager.registerEvents(new TradingStation(),this);
         manager.registerEvents(new PostLetterBox(),this);
+        manager.registerEvents(new SittingManager(),this);
         
         Objects.requireNonNull(server.getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(server.getPluginCommand("tid")).setExecutor(new GetIdCommand());
@@ -139,6 +140,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(server.getPluginCommand("tadmin")).setExecutor(new TAdminCommand());
         Objects.requireNonNull(server.getPluginCommand("thelp")).setExecutor(new THelpCommand());
         Objects.requireNonNull(server.getPluginCommand("letter")).setExecutor(new LetterCommand());
+        Objects.requireNonNull(server.getPluginCommand("sit")).setExecutor(new SitCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setTabCompleter(maincommand);

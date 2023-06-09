@@ -33,6 +33,8 @@ commands:
     usage: /thelp gives you indication on the usage of the item you have in hand.
   letter:
     usage: /letter allows you to read again the last letter you opened this session.
+  sit:
+    usage: /sit to sit on the block you're standing
 softdepend:
   - voicechat
 depend:
