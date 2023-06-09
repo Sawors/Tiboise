@@ -1,4 +1,5 @@
 test-mode: false
+token: ""
 modules:
   bettervanilla:
     enabled: true

@@ -35,6 +35,8 @@ commands:
     usage: /letter allows you to read again the last letter you opened this session.
   sit:
     usage: /sit to sit on the block you're standing
+  mp:
+    usage: /mp to receive messages from admins or to respond
 softdepend:
   - voicechat
 depend:

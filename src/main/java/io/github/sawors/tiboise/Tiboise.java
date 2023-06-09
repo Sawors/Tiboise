@@ -8,7 +8,6 @@ import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
 import io.github.sawors.tiboise.core.*;
 import io.github.sawors.tiboise.core.commands.*;
-import io.github.sawors.tiboise.core.database.DatabaseLink;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.economy.trade.TradingStation;
 import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
@@ -22,6 +21,10 @@ import io.github.sawors.tiboise.items.utility.coppercompass.PlayerCompassMarker;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerMarkerCommand;
 import io.github.sawors.tiboise.post.LetterCommand;
 import io.github.sawors.tiboise.post.PostLetterBox;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
@@ -43,10 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Level;
 
 public final class Tiboise extends JavaPlugin {
@@ -69,6 +69,8 @@ public final class Tiboise extends JavaPlugin {
     private static File dbfile;
     // versions and patchnote
     private static final String version = "1.2";
+    // discord
+    private static JDA jdaInstance = null;
     
 
     @Override
@@ -102,8 +104,23 @@ public final class Tiboise extends JavaPlugin {
         //getServer().getMessenger().registerIncomingPluginChannel(this, getVanillaRebootChannel(), new BungeeListener());
     
         logAdmin( "BungeeCord features enabled !");
+        
+        // DISCORD BOT
+        if(configfile != null){
+            YamlConfiguration configuration = YamlConfiguration.loadConfiguration(configfile);
+            final String token = configuration.getString("token");
+            if(token != null){
+                jdaInstance = JDABuilder.createDefault(token)
+                        .enableIntents(Set.of(
+                                GatewayIntent.DIRECT_MESSAGES
+                        ))
+                        .setActivity(Activity.playing("Tiboise 1.19.4"))
+                .build();
+            }
+        }
+        
     
-        dbfile = new File(getPlugin().getDataFolder()+File.separator+"database.db");
+        /*dbfile = new File(getPlugin().getDataFolder()+File.separator+"database.db");
         try{
             Tiboise.logAdmin("Database located at "+dbfile);
             dbfile.createNewFile();
@@ -112,7 +129,7 @@ public final class Tiboise extends JavaPlugin {
             e.printStackTrace();
             Tiboise.logAdmin("database creation failed, could not access the file");
         }
-        DatabaseLink.connectInit();
+        DatabaseLink.connectInit();*/
         
         PlayerDataManager.reloadPackData();
         final Server server = getServer();
@@ -141,6 +158,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(server.getPluginCommand("thelp")).setExecutor(new THelpCommand());
         Objects.requireNonNull(server.getPluginCommand("letter")).setExecutor(new LetterCommand());
         Objects.requireNonNull(server.getPluginCommand("sit")).setExecutor(new SitCommand());
+        Objects.requireNonNull(server.getPluginCommand("mp")).setExecutor(new AdminMessageCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setTabCompleter(maincommand);
@@ -246,12 +264,16 @@ public final class Tiboise extends JavaPlugin {
     }
 
 
-    public static JavaPlugin getPlugin(){
+    static JavaPlugin getPlugin(){
         return instance;
     }
     
     public static String getVersion(){
         return version;
+    }
+    
+    static JDA getJdaInstance(){
+        return jdaInstance;
     }
 
     public static boolean isModuleEnabled(ConfigModules module){
