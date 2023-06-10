@@ -24,8 +24,10 @@ import io.github.sawors.tiboise.items.utility.InkQuill;
 import io.github.sawors.tiboise.items.utility.PackingScotch;
 import io.github.sawors.tiboise.items.utility.PortableCraftingTable;
 import io.github.sawors.tiboise.items.utility.coppercompass.CopperCompass;
+import io.github.sawors.tiboise.items.utility.security.KeyItem;
+import io.github.sawors.tiboise.items.utility.security.LockItem;
 import io.github.sawors.tiboise.post.PostEnvelope;
-import io.github.sawors.tiboise.post.PostEnvelopeClosed;
+import io.github.sawors.tiboise.post.PostLetter;
 import io.github.sawors.tiboise.post.PostStamp;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -74,7 +76,7 @@ public abstract class TiboiseItem {
         registerItem(new PortableCraftingTable());
         registerItem(new PackingScotch());
         registerItem(new PostEnvelope());
-        registerItem(new PostEnvelopeClosed());
+        registerItem(new PostLetter());
         registerItem(new PostStamp());
         registerItem(new Flare());
         registerItem(new DivingHelmet());
@@ -84,6 +86,10 @@ public abstract class TiboiseItem {
         registerItem(new AmethystPickaxe());
         registerItem(new InkQuill());
         registerItem(new MusicDisc());
+        // TODO : <1.3>
+        registerItem(new LockItem());
+        registerItem(new KeyItem());
+        // TODO : <1.3>
         
         //HATS
         registerItem(new StrawHat());

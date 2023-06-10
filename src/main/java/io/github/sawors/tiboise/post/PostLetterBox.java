@@ -2,6 +2,9 @@ package io.github.sawors.tiboise.post;
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent;
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.TiboiseStartEvent;
+import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -12,6 +15,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.type.Bell;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -20,8 +24,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONObject;
@@ -30,17 +37,27 @@ import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class PostLetterBox implements Listener {
     
     private final static String signIdentifier = "- Poste -";
+    private final static String senderIdentifier = "- Envoi -";
     private final static Map<UUID, Set<PostLetterBox>> loadedLetterboxes = new HashMap<>();
     private final static Set<Material> allowedContainer = Set.of(
             Material.CHEST,
             Material.TRAPPED_CHEST,
             Material.BARREL
     );
+    
+    // time (in seconds) it takes for the letter to travel 1000 blocks
+    protected final static int travelTime = 60;
+    protected final static Map<UUID, PostTransitPackage> travellingLetters = new HashMap<>();
     // Format :
     //    - Poste -
     //      owner
@@ -356,12 +373,137 @@ public class PostLetterBox implements Listener {
     public static PostLetterBox deserialize(String serialized){
         if(!serialized.contains(":") || !serialized.contains("@")) throw new IllegalArgumentException("The provided String is not a serialized letter box");
         final String owner = serialized.substring(0,serialized.indexOf(":"));
-        final String serializedLocation = serialized.substring(serialized.indexOf("@"+1));
+        final String serializedLocation = serialized.substring(serialized.indexOf("@")+1);
         final UUID ownerId = UUID.fromString(owner);
         Location location = deserializeLocation(serializedLocation);
         if(location!=null){
             return new PostLetterBox(ownerId, location.getBlock());
         }
         return null;
+    }
+    
+    
+    // UGLY ASS CODE ! PLEASE DO NOT LOOK AT IT !!!!
+    @EventHandler
+    public static void sendLetter(PlayerInteractEvent event){
+        final Block block = event.getClickedBlock();
+        final Player p = event.getPlayer();
+        if(block != null && block.getBlockData() instanceof org.bukkit.block.data.type.Bell bell){
+            final Bell.Attachment attachment = bell.getAttachment();
+            final BlockFace face = bell.getFacing();
+            if(attachment.equals(Bell.Attachment.SINGLE_WALL)){
+                // try to detect the barrel
+                final Vector leftVector = face.getDirection().rotateAroundY(Math.toRadians(90));
+                final Vector rightVector = face.getDirection().rotateAroundY(Math.toRadians(-90));
+                final Block left = block.getRelative(leftVector.getBlockX(),leftVector.getBlockY(),leftVector.getBlockZ());
+                final Block right = block.getRelative(rightVector.getBlockX(),rightVector.getBlockY(),rightVector.getBlockZ());
+                final Block supporting = allowedContainer.contains(left.getType()) ? left : allowedContainer.contains(right.getType()) ? right : null;
+                if(supporting != null && supporting.getState() instanceof Container container){
+                    Vector checkBlock = new Vector(1,0,0);
+                    for(int i = 0; i<4; i++){
+                        final Vector rotated = checkBlock.rotateAroundY(Math.toRadians(90)*i);
+                        final Block relative = supporting.getRelative(rotated.getBlockX(),rotated.getBlockY(),rotated.getBlockZ());
+                        logAdmin(relative.getType());
+                        if(relative.getState() instanceof Sign sign){
+                            for(Component component : sign.lines()){
+                                final String content = TiboiseUtils.extractContent(component);
+                                if(content.equals(senderIdentifier)){
+                                    // barrel is validated
+                                    ItemStack[] senderContent = container.getInventory().getContents();
+                                    ItemStack stampItem = null;
+                                    PostLetterBox checkDestination = null;
+                                    List<ItemStack> envelopes = new ArrayList<>();
+                                    for (final ItemStack item : senderContent) {
+                                        if (TiboiseItem.getItemId(item).equals(TiboiseItem.getId(PostStamp.class)) && PostStamp.getDestination(item) != null) {
+                                            stampItem = item;
+                                            stampItem.setAmount(stampItem.getAmount()-1);
+                                            checkDestination = PostStamp.getDestination(item);
+                                            break;
+                                        }
+                                    }
+                                    
+                                    for (final ItemStack item : senderContent) {
+                                        if (TiboiseItem.getItemId(item).equals(TiboiseItem.getId(PostLetter.class))) {
+                                            envelopes.add(item);
+                                        }
+                                    }
+                                    final PostLetterBox destination = checkDestination;
+                                    // inventory scanned
+                                    if(destination != null) {
+                                        Location from = block.getLocation();
+                                        Location to = destination.getContainer();
+                                        Block toBlock = to.getBlock();
+                                        if(allowedContainer.contains(toBlock.getType()) && toBlock.getState() instanceof Container receiver){
+                                            final long distance = (long) from.distance(to);
+                                            final long tickTravelTime = (distance/travelTime)*20;
+                                            UUID letterId = UUID.randomUUID();
+                                            final PostTransitPackage savePackage = new PostTransitPackage(letterId, envelopes.toArray(new ItemStack[]{}),destination, LocalDateTime.now(),distance);
+                                            savePackage.save();
+                                            travellingLetters.put(letterId,savePackage);
+                                            new BukkitRunnable(){
+                                                @Override
+                                                public void run() {
+                                                    // deliver letters
+                                                    final Block refreshedTarget = to.getBlock();
+                                                    final Block refreshedSource = from.getBlock();
+                                                    if(allowedContainer.contains(refreshedTarget.getType()) && refreshedTarget.getState() instanceof Container c2){
+                                                        for(ItemStack overflow : c2.getInventory().addItem(savePackage.content).values()){
+                                                            c2.getWorld().dropItemNaturally(destination.getSign(),overflow);
+                                                        }
+                                                    } else if(allowedContainer.contains(refreshedSource.getType()) && refreshedSource.getState() instanceof Container c2){
+                                                        for(ItemStack overflow : c2.getInventory().addItem(savePackage.content).values()){
+                                                            c2.getWorld().dropItemNaturally(destination.getSign(),overflow);
+                                                        }
+                                                    }
+                                                    travellingLetters.remove(savePackage.packageId);
+                                                }
+                                            }.runTaskLater(Tiboise.getPlugin(),tickTravelTime);
+                                        } else {
+                                            p.sendActionBar(Component.text(destination.name+" is not available").color(NamedTextColor.RED));
+                                            container.getInventory().addItem(stampItem.asOne());
+                                        }
+                                    } else {
+                                        p.sendActionBar(Component.text("You need to provide a stamp with a valid destination to send letters").color(NamedTextColor.RED));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @EventHandler
+    public static void loadUndeliveredPackages(TiboiseStartEvent event){
+        for(World w : Bukkit.getWorlds()){
+            File saveDir = PostTransitPackage.getPackageSaveDirectory(w);
+            for(File f : Objects.requireNonNull(saveDir.listFiles())){
+                try{
+                    final String content = Files.readString(f.toPath());
+                    PostTransitPackage pack = PostTransitPackage.deserialize(content);
+                    if(pack != null){
+                        LocalDateTime now = LocalDateTime.now();
+                        long timeDiff = ChronoUnit.SECONDS.between(now,pack.timeStamp);
+                        long deliverTime = (long) Math.max((pack.distance/travelTime)-timeDiff,0);
+                        
+                        new BukkitRunnable(){
+                            @Override
+                            public void run() {
+                                final Block destinationBlock = pack.destination.container.getBlock();
+                                if(allowedContainer.contains(destinationBlock.getType()) && destinationBlock.getState() instanceof Container container){
+                                    for(ItemStack overflow : container.getInventory().addItem(pack.content).values()){
+                                        pack.destination.getSign().getWorld().dropItem(pack.destination.getSign(),overflow);
+                                    }
+                                }
+                            }
+                        }.runTaskLater(Tiboise.getPlugin(),Math.max(deliverTime,40));
+                    }
+                    f.delete();
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

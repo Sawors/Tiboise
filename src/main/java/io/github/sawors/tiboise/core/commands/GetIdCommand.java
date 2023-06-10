@@ -1,7 +1,7 @@
 package io.github.sawors.tiboise.core.commands;
 
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.items.IdentifiedItem;
+import io.github.sawors.tiboise.items.utility.security.IdentifiedItem;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

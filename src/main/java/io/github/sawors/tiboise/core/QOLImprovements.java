@@ -631,7 +631,7 @@ public class QOLImprovements implements Listener {
         // the percentage of the items durability at which a warning should be sent
         final int warningThreshold = 15;
         final int threshold = (int) (maxDamage*((100-warningThreshold)/100.0));
-        if(baseDamage+damage >= threshold && baseDamage < threshold){
+        if(baseDamage+damage >= threshold && baseDamage < threshold) {
             final ItemMeta meta = item.getItemMeta();
             Component name = meta != null && meta.displayName() != null ? meta.displayName() : Component.text(TiboiseUtils.capitalizeFirstLetter(item.getType().toString().replaceAll("_"," ").toLowerCase(Locale.ROOT))).color(NamedTextColor.GREEN);
             name = name != null ? name : item.displayName();
@@ -650,6 +650,7 @@ public class QOLImprovements implements Listener {
             }
         }
     }
+    
     
     
     /**

@@ -60,9 +60,9 @@ public class SittingManager extends UtilityEntity implements Listener {
                 final Block sideZ1 = b.getRelative(0,0,1);
                 final Block sideZ2 = b.getRelative(0,0,-1);
                 Axis axis = null;
-                if((sideX1.getBlockData() instanceof WallSign && sideX2.getBlockData() instanceof WallSign)){
+                if((sideX1.getBlockData() instanceof WallSign || sideX2.getBlockData() instanceof WallSign)){
                     axis = Axis.X;
-                } else if ((sideZ1.getBlockData() instanceof WallSign && sideZ2.getBlockData() instanceof WallSign)){
+                } else if ((sideZ1.getBlockData() instanceof WallSign || sideZ2.getBlockData() instanceof WallSign)){
                     axis = Axis.Z;
                 }
                 if(axis != null){
@@ -73,6 +73,8 @@ public class SittingManager extends UtilityEntity implements Listener {
             
         }
     }
+    
+    
     
     public static void sitPlayerOnBlock(Player p, Block seat, Axis axis){
         if(!seat.getType().isSolid()) return;

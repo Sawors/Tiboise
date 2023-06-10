@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -15,19 +16,22 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class PostStamp extends TiboiseItem implements Listener {
     
@@ -82,6 +86,8 @@ public class PostStamp extends TiboiseItem implements Listener {
         ItemMeta meta = base.getItemMeta();
         if(getDestination() != null){
             meta.getPersistentDataContainer().set(getDestinationKey(),PersistentDataType.STRING,getDestination().toString());
+            meta.lore(buildLore(Bukkit.getOfflinePlayer(destination.getOwner()).getName(), destination.getName()));
+            meta.displayName(Component.text("Post Stamp").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
         base.setItemMeta(meta);
         return base;
@@ -90,7 +96,7 @@ public class PostStamp extends TiboiseItem implements Listener {
     public static @Nullable PostLetterBox getDestination(ItemStack item){
         if(item != null && item.hasItemMeta()){
             final String from = item.getItemMeta().getPersistentDataContainer().get(getDestinationKey(),PersistentDataType.STRING);
-            if(from != null){
+            if(from != null && from.length() > 1 && from.contains(":") && from.contains("@")){
                 return PostLetterBox.deserialize(from);
             }
         }
@@ -150,6 +156,43 @@ public class PostStamp extends TiboiseItem implements Listener {
                } catch (IllegalArgumentException e){
                    e.printStackTrace();
                }
+        }
+    }
+    
+    @EventHandler
+    public static void duplicateStamp(PrepareAnvilEvent event){
+        final AnvilInventory inventory = event.getInventory();
+        final ItemStack first = inventory.getFirstItem();
+        final ItemStack second = inventory.getSecondItem();
+        
+        if(first != null && second != null && getItemId(first).equals(getId(PostStamp.class)) && getItemId(second).equals(getId(PostStamp.class))){
+            PostLetterBox toClone = getDestination(first);
+            PostLetterBox reference = getDestination(second);
+            logAdmin("1");
+            if(toClone == null && reference != null){
+                logAdmin("2");
+                event.setResult(second.asQuantity(first.getAmount()));
+                //inventory.setResult(second);
+            }
+        }
+        
+    }
+    
+    @EventHandler
+    public static void finishStampDuplication(InventoryClickEvent event){
+        if(event.getClickedInventory() instanceof AnvilInventory inv && event.getSlotType().equals(InventoryType.SlotType.RESULT)){
+            final ItemStack first = inv.getFirstItem();
+            final ItemStack second = inv.getSecondItem();
+            
+            if(getItemId(first).equals(getId(PostStamp.class)) && getItemId(second).equals(getId(PostStamp.class)) && getItemId(inv.getResult()).equals(getId(PostStamp.class))){
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        inv.setFirstItem(null);
+                        inv.setSecondItem(second);
+                    }
+                }.runTask(Tiboise.getPlugin());
+            }
         }
     }
     

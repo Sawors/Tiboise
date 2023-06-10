@@ -263,6 +263,8 @@ public final class Tiboise extends JavaPlugin {
                 event.setPacket(packet);
             }
         });*/
+        
+        Bukkit.getServer().getPluginManager().callEvent(new TiboiseStartEvent(getPlugin()));
     }
 
     @Override

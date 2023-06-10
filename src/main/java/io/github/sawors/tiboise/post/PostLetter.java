@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class PostEnvelopeClosed extends SendableItem implements Listener {
+public class PostLetter extends SendableItem implements Listener {
     
     protected static Map<UUID, Component> lastLetters = new HashMap<>();
     private final static Sound openingSound = Sound.ENTITY_VILLAGER_WORK_LIBRARIAN;
@@ -41,7 +41,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
     private String content;
     private String author;
     
-    public PostEnvelopeClosed(){
+    public PostLetter(){
         setMaterial(Material.PAPER);
         setDisplayName(Component.text("Letter").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setContent("");
@@ -62,14 +62,14 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
         if(
                 event.getHand() != null
                 && event.getHand().equals(EquipmentSlot.HAND)
-                && getItemId(item).equals(getId(PostEnvelopeClosed.class))
+                && getItemId(item).equals(getId(PostLetter.class))
                 && event.getAction().isRightClick()
                 && (event.getClickedBlock() == null || !(event.getClickedBlock().getState() instanceof TileState))
         ){
             event.setCancelled(true);
             // open the envelope
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-            final String contentText = container.get(PostEnvelopeClosed.getContentTextKey(), PersistentDataType.STRING);
+            final String contentText = container.get(PostLetter.getContentTextKey(), PersistentDataType.STRING);
             //final String contentItem = container.get(PostEnvelopeClosed.getContentItemKey(), PersistentDataType.STRING);
             
 //            if(contentItem != null && contentItem.length() >= 1){
@@ -129,7 +129,7 @@ public class PostEnvelopeClosed extends SendableItem implements Listener {
                 
                 preview = preview.replaceAll("\n","");
                 text = text.replaceAll("\n","\n ");
-                PostEnvelopeClosed envelope = new PostEnvelopeClosed();
+                PostLetter envelope = new PostLetter();
                 final String variant = getItemVariant(item);
                 final String author = p.getName();
                 if(variant.length() > 0) envelope.setVariant(variant);
