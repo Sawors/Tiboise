@@ -1,11 +1,14 @@
 package io.github.sawors.tiboise.items;
 
+import io.github.sawors.tiboise.items.discs.MusicDisc;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 public class GiveItemCommand implements CommandExecutor {
     @Override
@@ -20,9 +23,13 @@ public class GiveItemCommand implements CommandExecutor {
             
             
             if(args.length >= 2){
-                String variant = args[1];
-                
-                item.setVariant(variant);
+                if(item instanceof MusicDisc){
+                    item = new MusicDisc(Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(args[0]+" ",""));
+                } else {
+                    String variant = args[1];
+                    
+                    item.setVariant(variant);
+                }
             }
             p.getInventory().addItem(item.get());
             return true;

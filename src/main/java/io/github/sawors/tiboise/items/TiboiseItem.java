@@ -9,6 +9,7 @@ import io.github.sawors.tiboise.items.armor.scuba.DivingBoots;
 import io.github.sawors.tiboise.items.armor.scuba.DivingChestplate;
 import io.github.sawors.tiboise.items.armor.scuba.DivingHelmet;
 import io.github.sawors.tiboise.items.armor.scuba.DivingLeggings;
+import io.github.sawors.tiboise.items.discs.MusicDisc;
 import io.github.sawors.tiboise.items.hats.Fez;
 import io.github.sawors.tiboise.items.hats.Kirby;
 import io.github.sawors.tiboise.items.hats.Monocle;
@@ -82,6 +83,7 @@ public abstract class TiboiseItem {
         registerItem(new DivingBoots());
         registerItem(new AmethystPickaxe());
         registerItem(new InkQuill());
+        registerItem(new MusicDisc());
         
         //HATS
         registerItem(new StrawHat());
@@ -239,7 +241,6 @@ public abstract class TiboiseItem {
         this.lore = lore;
     }
     
-    // TODO : make this work
     public void setShortLore(String shortLore){
         List<StringBuilder> splitLore = List.of(new StringBuilder(shortLore));
         if(shortLore.length() > LORE_RECOMMENDED_LINE_WIDTH){
@@ -331,7 +332,7 @@ public abstract class TiboiseItem {
         container.set(getHelpTextKey(),PersistentDataType.STRING,helpText);
         
         meta.setCustomModelData(this.id.hashCode());
-
+        
         item.setItemMeta(meta);
 
         return item;

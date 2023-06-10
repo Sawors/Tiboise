@@ -75,6 +75,7 @@ public class SittingManager extends UtilityEntity implements Listener {
     }
     
     public static void sitPlayerOnBlock(Player p, Block seat, Axis axis){
+        if(!seat.getType().isSolid()) return;
         final Vector reference = new Vector(0,0,1);
         final Vector offset = seat.getBlockData() instanceof Stairs stairs ?
                 stairs.getFacing().getDirection().multiply(-.20).add(new Vector(0,-0.5,0))

@@ -424,6 +424,13 @@ public class QOLImprovements implements Listener {
                     Bukkit.addRecipe(doorcraft);
                 }
             }
+            
+            // REMOVE DUPLICATE MAP RECIPE, NOW PLAYERS ARE REQUIRED TO USE THE CARTOGRAPHY TABLE
+            for(Recipe r : Bukkit.getRecipesFor(new ItemStack(Material.FILLED_MAP))){
+                if(r instanceof ShapedRecipe sr){
+                    Bukkit.removeRecipe(sr.getKey());
+                }
+            }
         }
     }
     

@@ -3,10 +3,13 @@ package io.github.sawors.tiboise.items.discs;
 import com.destroystokyo.paper.MaterialSetTag;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.UtilityEntity;
+import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.Jukebox;
 import org.bukkit.entity.Entity;
@@ -14,6 +17,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -31,39 +35,36 @@ public class MusicManager extends UtilityEntity implements Listener {
     
     private static final Map<ItemDisplay, Sound> discsPlaying = new HashMap<>();
     
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerUsesJukebox(PlayerInteractEvent event){
         if(event.getClickedBlock() != null && event.getAction().isRightClick() && event.getClickedBlock().getState() instanceof Jukebox jukebox){
             final int DISK_ROTATION_PERIOD = 1;
             Block b = event.getClickedBlock();
-            Location uploc = b.getLocation().clone().add(0.5,2,0.5);
             Player p = event.getPlayer();
             
             ItemStack disc;
             
             PlayerInventory pinv = p.getInventory();
-            if(MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(pinv.getItemInMainHand().getType())){
-                disc = pinv.getItemInMainHand().clone();
-            } else if(MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(pinv.getItemInOffHand().getType())){
-                disc = pinv.getItemInOffHand().clone();
-            } else {
-                disc = null;
-            }
+            disc = pinv.getItemInMainHand();
+            
+            final boolean isTiboiseDisc = TiboiseItem.getItemId(disc).equals(TiboiseItem.getId(MusicDisc.class));
             
             // remove previous playing disc
             if(jukebox.isPlaying()){
-                if((p.isSneaking() && p.getInventory().getItemInMainHand().getType().equals(Material.AIR)) || (!p.isSneaking())){
-                    for(ItemDisplay e : b.getLocation().add(.5,1,.5).getNearbyEntitiesByType(ItemDisplay.class,.5)){
+                if((p.isSneaking() && disc.getType().equals(Material.AIR)) || (!p.isSneaking())){
+                    for(ItemDisplay e : b.getLocation().add(.5,1,.5).getNearbyEntitiesByType(ItemDisplay.class,.1)){
                         if(Objects.equals(e.getPersistentDataContainer().get(getUtilityEntityKey(), PersistentDataType.STRING),getEntityIdentifier())){
                             e.remove();
+                            if(discsPlaying.containsKey(e)){
+                                for(Player p0 : e.getLocation().getNearbyEntitiesByType(Player.class,16*2)){
+                                    p0.stopSound(discsPlaying.get(e).asStop());
+                                }
+                            }
                         }
-                        /*if(e instanceof ArmorStand && ((ArmorStand) e).getEquipment().getHelmet() != null && ((ArmorStand) e).getEquipment().getHelmet().getType().toString().contains("MUSIC_DISC")){
-                            e.remove();
-                        }*/
                     }
                 }
                 
-            } else if(disc != null && MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(disc.getType())){
+            } else if(MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(disc.getType()) ||isTiboiseDisc ){
                 // play curent disc
                 ItemDisplay display = (ItemDisplay) b.getWorld().spawnEntity(b.getLocation().add(.5,1+(.5/16),.5),EntityType.ITEM_DISPLAY, CreatureSpawnEvent.SpawnReason.CUSTOM,
                         entity -> {
@@ -75,30 +76,58 @@ public class MusicManager extends UtilityEntity implements Listener {
                         }
                 );
                 
-                //final String musicName = disk.getType().getKey()
                 event.setCancelled(true);
                 
                 final String baseKey = disc.getType().getKey().getKey();
                 final int separatorIndex = disc.getType().getKey().getKey().lastIndexOf("_");
                 
-                NamespacedKey key = new NamespacedKey(disc.getType().getKey().namespace(),baseKey.substring(0,separatorIndex)+"."+baseKey.substring(separatorIndex+1));
-                final Sound music = Sound.sound(key, Sound.Source.RECORD,2,1);
-                display.getWorld().playSound(music, display);
+                String musicData = null;
+                if(isTiboiseDisc){
+                    musicData = disc.getItemMeta().getPersistentDataContainer().get(MusicDisc.getMusicDataKey(),PersistentDataType.STRING);
+                }
                 
-                jukebox.getInventory().setRecord(disc);
-                jukebox.stopPlaying();
-                /*ArmorStand display = (ArmorStand) uploc.getWorld().spawnEntity(uploc.subtract(0,17/16f,0), EntityType.ARMOR_STAND, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                display.setVisible(false);
-                display.setInvulnerable(true);
-                display.setGravity(false);
-                display.setDisabledSlots(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND, EquipmentSlot.OFF_HAND);
-                display.getEquipment().setHelmet(disk);
-                display.setCustomNameVisible(false);
-                display.customName(Component.text("_display"));
-                display.setSmall(true);*/
+                final NamespacedKey originalKey = new NamespacedKey(disc.getType().getKey().namespace(),baseKey.substring(0,separatorIndex)+"."+baseKey.substring(separatorIndex+1));
+                NamespacedKey key = musicData != null ?  NamespacedKey.fromString(musicData) : originalKey;
+                if(key == null) return;
+                // difference of .5 in volume only to differentiate it from a vanilla sound
+                final Sound music = Sound.sound(key, Sound.Source.RECORD,1.5f,1);
+                final Sound baseSound = Sound.sound(originalKey, Sound.Source.RECORD,1,1);
+                
+                jukebox.setRecord(disc);
+                jukebox.update();
+                for(Player p2 : display.getLocation().getNearbyEntitiesByType(Player.class,32)){
+                    p2.sendActionBar(Component.text(""));
+                }
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        for(Player p2 : display.getLocation().getNearbyEntitiesByType(Player.class,32)){
+                            p2.stopSound(baseSound);
+                        }
+                        display.getWorld().playSound(music, display);
+                        discsPlaying.put(display,music);
+                        
+                    }
+                }.runTaskLater(Tiboise.getPlugin(),2);
+                
+                // the maximum duration of the rotating animation. The first number is the minutes, the rest () are for the conversion in ticks
+                final int MAX_MUSIC_DURATION = 5 *(20*60);
+                
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        if(display.isValid()){
+                            display.getWorld().spawnParticle(Particle.NOTE,display.getLocation().add(0,0.2,0),1,.1,.1,.1,Math.random());
+                        } else {
+                            this.cancel();
+                            return;
+                        }
+                    }
+                }.runTaskTimer(Tiboise.getPlugin(),1,10);
+                
                 new BukkitRunnable(){
                     
-                    final int MAX_MUSIC_DURATION = 5 *(20*60);
+                    
                     int timer = MAX_MUSIC_DURATION;
                     final Location blockloc = b.getLocation().clone();
                     final float step = (40f/(20*DISK_ROTATION_PERIOD));

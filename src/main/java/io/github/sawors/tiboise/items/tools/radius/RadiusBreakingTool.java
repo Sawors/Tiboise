@@ -50,7 +50,7 @@ public abstract class RadiusBreakingTool extends TiboiseItem {
             v.rotateAroundY((Math.PI/2)*direction.getX());
             // we ignore Z here because by default Z is the direction
             Block b = center.getWorld().getBlockAt((int) (origin.getX()+v.getX()), (int) (origin.getY()+v.getY()), (int) (origin.getZ()+v.getZ()));
-            if(b.getDestroySpeed(tool,false) > 1){
+            if(b.getDestroySpeed(tool,false) > 1 && b.getType().equals(origin.getType())){
                 b.breakNaturally(tool,true);
                 damage++;
                 /*new BukkitRunnable(){
