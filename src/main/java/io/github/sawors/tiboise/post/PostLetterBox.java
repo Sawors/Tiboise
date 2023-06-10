@@ -2,7 +2,6 @@ package io.github.sawors.tiboise.post;
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent;
 import io.github.sawors.tiboise.Tiboise;
-import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -33,8 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class PostLetterBox implements Listener {
     
     private final static String signIdentifier = "- Poste -";
@@ -49,11 +46,6 @@ public class PostLetterBox implements Listener {
     //      owner
     //   house_name
     
-    
-    @EventHandler
-    public static void plel(AsyncChatEvent event){
-        logAdmin(loadedLetterboxes);
-    }
     
     @EventHandler(priority = EventPriority.HIGH)
     public static void recogniseLetterBox(SignChangeEvent event){

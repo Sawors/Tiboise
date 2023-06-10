@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.items;
 
 import io.github.sawors.tiboise.items.discs.MusicDisc;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,7 +25,8 @@ public class GiveItemCommand implements CommandExecutor {
             
             if(args.length >= 2){
                 if(item instanceof MusicDisc){
-                    item = new MusicDisc(Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(args[0]+" ",""));
+                    Pair<String,String> musicData = MusicDisc.parseTitleString(Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(args[0]+" ",""));
+                    item = new MusicDisc(musicData.getKey(),musicData.getValue());
                 } else {
                     String variant = args[1];
                     

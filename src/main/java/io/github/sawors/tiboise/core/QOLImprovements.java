@@ -590,6 +590,8 @@ public class QOLImprovements implements Listener {
         
     }
     
+    
+    
     @EventHandler
     public static void welcomeMessage(PlayerJoinEvent event){
         final Player p = event.getPlayer();

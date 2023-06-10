@@ -72,6 +72,8 @@ public final class Tiboise extends JavaPlugin {
     private static final String version = "1.2";
     // discord
     private static JDA jdaInstance = null;
+    // resource pack
+    private static File resourceDirectory = null;
     
 
     @Override
@@ -123,7 +125,7 @@ public final class Tiboise extends JavaPlugin {
             }
         }
         
-    
+        TiboiseUtils.initialize();
         /*dbfile = new File(getPlugin().getDataFolder()+File.separator+"database.db");
         try{
             Tiboise.logAdmin("Database located at "+dbfile);
@@ -134,6 +136,11 @@ public final class Tiboise extends JavaPlugin {
             Tiboise.logAdmin("database creation failed, could not access the file");
         }
         DatabaseLink.connectInit();*/
+        
+        resourceDirectory = new File(getPlugin().getDataFolder().getPath()+File.separator+"resources");
+        resourceDirectory.mkdirs();
+        // TODO : Implement server-side resourcepack management
+        
         
         PlayerDataManager.reloadPackData();
         final Server server = getServer();
@@ -153,6 +160,7 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new PostLetterBox(),this);
         manager.registerEvents(new SittingManager(),this);
         manager.registerEvents(new MusicManager(), this);
+        manager.registerEvents(new VillagerManager(), this);
         
         Objects.requireNonNull(server.getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(server.getPluginCommand("tid")).setExecutor(new GetIdCommand());
@@ -201,9 +209,6 @@ public final class Tiboise extends JavaPlugin {
         TiboiseItem.loadItems();
         
         CropsManager.loadBonemealList();
-        
-        TiboiseUtils.initialize();
-        
         
         /*protocolManager.addPacketListener(new PacketAdapter(
                 this, ListenerPriority.LOWEST,
@@ -280,7 +285,11 @@ public final class Tiboise extends JavaPlugin {
     static JDA getJdaInstance(){
         return jdaInstance;
     }
-
+    
+    public static File getResourceDirectory() {
+        return resourceDirectory;
+    }
+    
     public static boolean isModuleEnabled(ConfigModules module){
         switch(module){
             case FISHING -> {return fishing;}
