@@ -5,6 +5,8 @@ import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.items.discs.MusicDisc;
 import io.github.sawors.tiboise.items.utility.security.IdentifiedItem;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -40,7 +42,8 @@ public class GetIdCommand implements CommandExecutor {
             }
             
             if(TiboiseItem.getItemId(item).equals(TiboiseItem.getId(MusicDisc.class))){
-                p.sendMessage(Component.text(Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(Tiboise.getPlugin(), "music-disc-hash"), PersistentDataType.STRING)).replaceAll("","")));
+                String hash = Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(Tiboise.getPlugin(), "music-disc-hash"), PersistentDataType.STRING)).replaceAll("minecraft:tiboise.music_disc.","");
+                p.sendMessage(Component.text("Hash of the disc : "+hash).color(NamedTextColor.GRAY).clickEvent(ClickEvent.copyToClipboard(hash)));
             }
             return true;
         }
