@@ -22,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataType;
@@ -38,6 +39,10 @@ public class MusicManager extends UtilityEntity implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerUsesJukebox(PlayerInteractEvent event){
         if(event.getClickedBlock() != null && event.getAction().isRightClick() && event.getClickedBlock().getState() instanceof Jukebox jukebox){
+            if(event.getHand() != null && event.getHand().equals(EquipmentSlot.OFF_HAND)) {
+                event.setCancelled(true);
+                return;
+            }
             final int DISK_ROTATION_PERIOD = 1;
             Block b = event.getClickedBlock();
             Player p = event.getPlayer();
@@ -77,6 +82,8 @@ public class MusicManager extends UtilityEntity implements Listener {
                 );
                 
                 event.setCancelled(true);
+                
+                p.getInventory().setItemInMainHand(disc.asQuantity(disc.getAmount()-1));
                 
                 final String baseKey = disc.getType().getKey().getKey();
                 final int separatorIndex = disc.getType().getKey().getKey().lastIndexOf("_");
