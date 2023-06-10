@@ -300,7 +300,7 @@ public class QOLImprovements implements Listener {
             );
             
             vanillabonusrecipes.add(
-                    new ShapelessRecipe(Material.QUARTZ.getKey(), new ItemStack(Material.QUARTZ).asQuantity(2))
+                    new ShapelessRecipe(new NamespacedKey(Tiboise.getPlugin(),"calcite_quartz"), new ItemStack(Material.QUARTZ).asQuantity(2))
                             .addIngredient(1, Material.CALCITE)
             );
             

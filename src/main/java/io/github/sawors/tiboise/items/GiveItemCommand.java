@@ -25,7 +25,9 @@ public class GiveItemCommand implements CommandExecutor {
             
             if(args.length >= 2){
                 if(item instanceof MusicDisc){
-                    Pair<String,String> musicData = MusicDisc.parseTitleString(Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(args[0]+" ",""));
+                    final String name = Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(args[0]+" ","");
+                    final String lookup = MusicDisc.lookupMusicName(name);
+                    Pair<String,String> musicData = MusicDisc.parseTitleString(lookup != null ? lookup : name);
                     item = new MusicDisc(musicData.getKey(),musicData.getValue());
                 } else {
                     String variant = args[1];

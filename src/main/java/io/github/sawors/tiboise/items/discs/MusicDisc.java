@@ -14,14 +14,31 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MusicDisc extends TiboiseItem {
+    
+    //TODO : proper lookup and registering in an index file in the resource pack
+    private final static Map<String,String> hashLookup = Map.of(
+            "2137740449","benoit - tourne toi",
+            "1571894733","led zeppelin - stairway to heaven",
+            "1186386219","yes - roundabout",
+            "1070507883","magoyond - le pudding à l'arsenic",
+            "468158623","captainsparklez - revenge",
+            "-385336390","captainsparklez - fallen kingdom",
+            "135761661","elo - mr. blue sky"
+    );
+    
     String music;
     String author;
     NamespacedKey musicKey;
     
     public MusicDisc(String musicName){
         this("unknown",musicName);
+    }
+    
+    public static String lookupMusicName(String hash){
+        return hashLookup.get(hash);
     }
     
     public MusicDisc(String author, String musicName){
