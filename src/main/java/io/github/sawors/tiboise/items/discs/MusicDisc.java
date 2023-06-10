@@ -9,6 +9,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
@@ -110,5 +112,11 @@ public class MusicDisc extends TiboiseItem {
     
     public int getTitleHash(){
         return getTitle().toLowerCase(Locale.ROOT).hashCode();
+    }
+    
+    // TODO : find a way to send the index to the server
+    @EventHandler
+    public void loadMusicIndex(PluginEnableEvent event){
+    
     }
 }
