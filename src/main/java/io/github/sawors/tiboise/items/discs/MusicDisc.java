@@ -31,8 +31,7 @@ public class MusicDisc extends TiboiseItem {
         this.author = author;
         this.musicKey = new NamespacedKey(NamespacedKey.MINECRAFT,getKey());
         setLore(List.of(
-                Component.text(getTitle()).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),
-                Component.text(getTitleHash()).color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+                Component.text(getTitle()).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
         ));
         addData(getMusicDataKey(),musicKey.asString());
         addData(getAuthorKey(),author);
@@ -68,7 +67,7 @@ public class MusicDisc extends TiboiseItem {
     }
     
     String getTitle() {
-        return  author+" - "+music;
+        return  (author+" - "+music).toLowerCase(Locale.ROOT);
     }
     
     public static Pair<String,String> parseTitleString(String title){
@@ -82,8 +81,8 @@ public class MusicDisc extends TiboiseItem {
             if(editableTitle.charAt(editableTitle.indexOf("-")+1) == ' ') editableTitle = editableTitle.replaceFirst("- ","-");
             logAdmin(editableTitle);
             separator = editableTitle.indexOf("-");
-            author = editableTitle.substring(0,separator);
-            name = editableTitle.substring(separator+1);
+            author = editableTitle.substring(0,separator).toLowerCase(Locale.ROOT);
+            name = editableTitle.substring(separator+1).toLowerCase(Locale.ROOT);
             
             return Pair.of(author,name);
         } else {

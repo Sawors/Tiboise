@@ -42,8 +42,13 @@ public class GetIdCommand implements CommandExecutor {
             }
             
             if(TiboiseItem.getItemId(item).equals(TiboiseItem.getId(MusicDisc.class))){
-                String hash = Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(Tiboise.getPlugin(), "music-disc-hash"), PersistentDataType.STRING)).replaceAll("minecraft:tiboise.music_disc.","");
-                p.sendMessage(Component.text("Hash of the disc : "+hash).color(NamedTextColor.GRAY).clickEvent(ClickEvent.copyToClipboard(hash)));
+                String hash = Objects.requireNonNull(item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(Tiboise.getPlugin(), "music-disc-data"), PersistentDataType.STRING)).replaceAll("minecraft:tiboise.music_disc.","");
+                p.sendMessage(
+                        Component.text("Hash of the disc : "+hash)
+                                .color(NamedTextColor.GRAY)
+                                .clickEvent(ClickEvent.copyToClipboard(hash))
+                                .hoverEvent(Component.text("click to copy"))
+                );
             }
             return true;
         }
