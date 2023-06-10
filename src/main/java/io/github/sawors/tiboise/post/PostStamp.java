@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class PostStamp extends TiboiseItem implements Listener {
     
     private PostLetterBox destination;
@@ -168,9 +166,7 @@ public class PostStamp extends TiboiseItem implements Listener {
         if(first != null && second != null && getItemId(first).equals(getId(PostStamp.class)) && getItemId(second).equals(getId(PostStamp.class))){
             PostLetterBox toClone = getDestination(first);
             PostLetterBox reference = getDestination(second);
-            logAdmin("1");
             if(toClone == null && reference != null){
-                logAdmin("2");
                 event.setResult(second.asQuantity(first.getAmount()));
                 //inventory.setResult(second);
             }

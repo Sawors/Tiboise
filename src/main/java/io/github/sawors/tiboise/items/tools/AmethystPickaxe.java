@@ -23,8 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, Listener {
     
     final static private Material pickaxeMaterial = Material.IRON_PICKAXE;
@@ -66,16 +64,12 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
         BlockState b = event.getBlockState();
         ItemStack handItem = p.getInventory().getItemInMainHand();
         if(getItemId(handItem).equals(getId(AmethystPickaxe.class))){
-            logAdmin("YES");
             List<Item> drops = event.getItems();
             drops.removeIf(i -> b.getDrops(new ItemStack(pickaxeMaterial)).stream().map(ItemStack::getType).anyMatch(m -> m.equals(i.getItemStack().getType())));
             drops.clear();
             ItemStack fakeSilkTouch = new ItemStack(pickaxeMaterial);
             fakeSilkTouch.addEnchantment(Enchantment.SILK_TOUCH,1);
             Set<Item> newDrops = new HashSet<>();
-            logAdmin(b.getDrops(fakeSilkTouch));
-            logAdmin(fakeSilkTouch);
-            logAdmin(b.getType());
             for(ItemStack i : b.getDrops(fakeSilkTouch)){
                 newDrops.add(b.getWorld().dropItem(b.getLocation().add(.5,.5,.5),i));
             }

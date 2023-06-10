@@ -15,8 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.Locale;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class MusicDisc extends TiboiseItem {
     String music;
     String author;
@@ -79,7 +77,6 @@ public class MusicDisc extends TiboiseItem {
         if(separator > -1 && separator+1<=editableTitle.length()) {
             if(editableTitle.charAt(separator-1) == ' ') editableTitle = editableTitle.replaceFirst(" -","-");
             if(editableTitle.charAt(editableTitle.indexOf("-")+1) == ' ') editableTitle = editableTitle.replaceFirst("- ","-");
-            logAdmin(editableTitle);
             separator = editableTitle.indexOf("-");
             author = editableTitle.substring(0,separator).toLowerCase(Locale.ROOT);
             name = editableTitle.substring(separator+1).toLowerCase(Locale.ROOT);

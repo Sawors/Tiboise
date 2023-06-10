@@ -43,8 +43,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class PostLetterBox implements Listener {
     
     private final static String signIdentifier = "- Poste -";
@@ -396,27 +394,19 @@ public class PostLetterBox implements Listener {
                 && event.getHand().equals(EquipmentSlot.HAND)
                 && event.getAction().isRightClick()
         ){
-            logAdmin("1");
             final Bell.Attachment attachment = bell.getAttachment();
             final BlockFace face = bell.getFacing();
             if(attachment.equals(Bell.Attachment.SINGLE_WALL)){
-                logAdmin("2");
                 // try to detect the barrel
                 final Block left = block.getLocation().add(.5,.5,.5).add(face.getDirection()).getBlock();
                 final Block right = block.getLocation().add(.5,.5,.5).add(face.getDirection().multiply(-1)).getBlock();
                 final Block supporting = allowedContainer.contains(left.getType()) ? left : allowedContainer.contains(right.getType()) ? right : null;
-                logAdmin(left);
-                logAdmin(right);
-                logAdmin(supporting);
                 if(supporting != null && supporting.getState() instanceof Container container){
-                    logAdmin("3");
                     Vector checkBlock = new Vector(1,0,0);
                     for(int i = 0; i<4; i++){
                         final Vector rotated = checkBlock.rotateAroundY(Math.toRadians(90)*i);
                         final Block relative = supporting.getLocation().add(.5,.5,.5).add(rotated).getBlock();
-                        logAdmin(relative.getType());
                         if(relative.getState() instanceof Sign sign){
-                            logAdmin("4");
                             for(Component component : sign.lines()){
                                 final String content = TiboiseUtils.extractContent(component);
                                 if(content.equals(senderIdentifier)){
@@ -432,18 +422,15 @@ public class PostLetterBox implements Listener {
                                             break;
                                         }
                                     }
-                                    logAdmin("5");
                                     for (ItemStack item : container.getInventory().getContents()) {
                                         if (item != null && TiboiseItem.getItemId(item).equals(TiboiseItem.getId(PostLetter.class))) {
                                             tempEnvelopes.add(item);
                                             sentEnvelopes.add(item.clone());
-                                            logAdmin(item.getType());
                                         }
                                     }
                                     final PostLetterBox destination = checkDestination;
                                     // inventory scanned
                                     if(destination != null) {
-                                        logAdmin("7");
                                         Location from = block.getLocation();
                                         Location to = destination.getContainer();
                                         Block toBlock = to.getBlock();
@@ -451,20 +438,13 @@ public class PostLetterBox implements Listener {
                                             //
                                             // FROM HERE THE LETTER IS ACTUALLY SENT !!!!
                                             //
-                                            logAdmin("8");
                                             final long distance = (long) from.distance(to);
                                             final long tickTravelTime = (long) ((distance/1000.0)*20.0*travelTime);
-                                            logAdmin(distance);
-                                            logAdmin(tickTravelTime);
-                                            logAdmin("seconds : ",tickTravelTime/20);
                                             UUID letterId = UUID.randomUUID();
                                             stampItem.setAmount(stampItem.getAmount()-1);
                                             for(ItemStack remove : tempEnvelopes){
                                                 remove.setAmount(0);
                                             }
-                                            logAdmin(sentEnvelopes);
-                                            logAdmin("size",sentEnvelopes.size());
-                                            logAdmin(sentEnvelopes.toArray(new ItemStack[]{}));
                                             final PostTransitPackage savePackage = new PostTransitPackage(letterId, sentEnvelopes.toArray(new ItemStack[]{}),destination, LocalDateTime.now(),distance);
                                             savePackage.save();
                                             travellingLetters.put(letterId,savePackage);
@@ -474,7 +454,6 @@ public class PostLetterBox implements Listener {
                                                     // deliver letters
                                                     final Block refreshedTarget = to.getBlock();
                                                     final Block refreshedSource = from.getBlock();
-                                                    logAdmin("9");
                                                     if(allowedContainer.contains(refreshedTarget.getType()) && refreshedTarget.getState() instanceof Container c2){
                                                         for(ItemStack overflow : c2.getInventory().addItem(savePackage.content).values()){
                                                             c2.getWorld().dropItemNaturally(destination.getSign(),overflow);

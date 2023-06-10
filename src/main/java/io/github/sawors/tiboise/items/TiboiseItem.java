@@ -53,8 +53,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public abstract class TiboiseItem {
     
     //
@@ -255,7 +253,6 @@ public abstract class TiboiseItem {
             int index = 0;
             int line = 0;
             splitLore = new ArrayList<>();
-            logAdmin((int)(shortLore.length()/28.0)+1);
             StringBuilder builder = new StringBuilder();
             for(String w : words){
                 index += w.length();

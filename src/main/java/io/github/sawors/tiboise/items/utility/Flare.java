@@ -32,8 +32,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class Flare extends TiboiseItem implements Listener {
     
     private static final Map<UUID,Integer> launchedFlares = new HashMap<>();
@@ -75,9 +73,7 @@ public class Flare extends TiboiseItem implements Listener {
     
     @EventHandler
     public void trackFlaresCrossbow(EntityShootBowEvent event){
-        logAdmin("trigger");
         if(event.getProjectile() instanceof Firework f && event.getBow() != null && event.getBow().getType().equals(Material.CROSSBOW) && TiboiseItem.getItemId(event.getConsumable()).equals(getId(Flare.class))){
-            logAdmin("YES!!");
             launchedFlares.put(f.getUniqueId(),2);
         }
     }
