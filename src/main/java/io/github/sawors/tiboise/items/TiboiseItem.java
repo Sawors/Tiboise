@@ -86,6 +86,7 @@ public abstract class TiboiseItem {
         registerItem(new InkQuill());
         registerItem(new MusicDisc());
         registerItem(new PostPackage());
+        registerItem(new TransparentItemFrame());
         // TODO : <1.3>
         registerItem(new LockItem());
         registerItem(new KeyItem());

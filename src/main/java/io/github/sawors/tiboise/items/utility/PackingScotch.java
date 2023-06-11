@@ -23,6 +23,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -49,6 +50,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
         if(TiboiseItem.getItemId(src).equals(getId(PackingScotch.class)) && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)){
             //event.setCancelled(true);
             // packing the block
+            if(event.getPlayer().getCooldown(Material.SLIME_BALL) > 0) return;
             if(clicked != null && (clicked.getType().equals(Material.CHEST) || clicked.getType().equals(Material.BARREL)) && !(clicked.getState() instanceof DoubleChest)){
                 Container container = (Container) clicked.getState();
                 
@@ -119,41 +121,50 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 clicked.setType(Material.AIR);
                 
                 src.setAmount(src.getAmount()-1);
-                
+                event.getPlayer().setCooldown(Material.SLIME_BALL,10);
             }
         } else if(TiboiseItem.getItemId(src).equals(packedBlockItemId) && clicked != null && clicked.isSolid() && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)){
             //event.setCancelled(true);
+            if(event.getPlayer().getCooldown(Material.PAPER) > 0) return;
             // placing back the packed block
             final BlockFace face = event.getBlockFace();
             Block toReplace = clicked.getRelative(face);
-            try{
-                
-                Map<Integer,ItemStack> content = new ItemSerializer().deserialize(Objects.requireNonNull(src.getItemMeta().getPersistentDataContainer().get(getStorageKey(), PersistentDataType.STRING)));
-                
-                toReplace.setType(Material.valueOf(src.getItemMeta().getPersistentDataContainer().get(getStoredMaterialKey(),PersistentDataType.STRING)));
-                if(toReplace.getBlockData() instanceof Directional directional){
-                    
-                    BlockFace facing = event.getPlayer().getFacing().getOppositeFace();
-                    if(directional.getFaces().contains(facing)) directional.setFacing(facing);
-                    toReplace.setBlockData(directional);
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    event.getPlayer().closeInventory();
+                    try{
+                        
+                        Map<Integer,ItemStack> content = new ItemSerializer().deserialize(Objects.requireNonNull(src.getItemMeta().getPersistentDataContainer().get(getStorageKey(), PersistentDataType.STRING)));
+                        
+                        toReplace.setType(Material.valueOf(src.getItemMeta().getPersistentDataContainer().get(getStoredMaterialKey(),PersistentDataType.STRING)));
+                        if(toReplace.getBlockData() instanceof Directional directional){
+                            
+                            BlockFace facing = event.getPlayer().getFacing().getOppositeFace();
+                            if(directional.getFaces().contains(facing)) directional.setFacing(facing);
+                            toReplace.setBlockData(directional);
+                        }
+                        Inventory inv = ((Container) toReplace.getState()).getInventory();
+                        for(Map.Entry<Integer,ItemStack> entry : content.entrySet()){
+                            int slot = entry.getKey();
+                            if(slot >= inv.getSize()) break;
+                            inv.setItem(slot,entry.getValue());
+                        }
+                        
+                        final Location center = toReplace.getLocation().add(.5,.5,.5);
+                        center.getWorld().playSound(center,toReplace.getBlockSoundGroup().getPlaceSound(),1,1);
+                        center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_BREAK,.5f,1);
+                        center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,12,.45,.45,.45,.05,Bukkit.createBlockData(Material.SLIME_BLOCK));
+                        center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,8,.45,.45,.45,.05,Bukkit.createBlockData(Material.WHITE_CONCRETE));
+                        
+                        src.setAmount(src.getAmount()-1);
+                        
+                        
+                    } catch (IllegalArgumentException | NullPointerException exception){exception.printStackTrace();}
+                    event.getPlayer().closeInventory();
+                    event.getPlayer().setCooldown(Material.PAPER,10);
                 }
-                Inventory inv = ((Container) toReplace.getState()).getInventory();
-                for(Map.Entry<Integer,ItemStack> entry : content.entrySet()){
-                    int slot = entry.getKey();
-                    if(slot >= inv.getSize()) break;
-                    inv.setItem(slot,entry.getValue());
-                }
-                
-                final Location center = toReplace.getLocation().add(.5,.5,.5);
-                center.getWorld().playSound(center,toReplace.getBlockSoundGroup().getPlaceSound(),1,1);
-                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_BREAK,.5f,1);
-                center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,12,.45,.45,.45,.05,Bukkit.createBlockData(Material.SLIME_BLOCK));
-                center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,8,.45,.45,.45,.05,Bukkit.createBlockData(Material.WHITE_CONCRETE));
-                
-                src.setAmount(src.getAmount()-1);
-                
-                
-            } catch (IllegalArgumentException | NullPointerException exception){exception.printStackTrace();}
+            }.runTask(Tiboise.getPlugin());
         }
     }
     

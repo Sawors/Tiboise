@@ -10,7 +10,8 @@ public enum ItemTag {
     PREVENT_BREAKING,
     HAT,
     UNMOVABLE,
-    PREVENT_PACKING
+    PREVENT_PACKING,
+    POST_SENDABLE
     ;
     
     

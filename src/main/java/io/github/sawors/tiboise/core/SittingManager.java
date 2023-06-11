@@ -28,7 +28,7 @@ import org.spigotmc.event.entity.EntityDismountEvent;
 
 import java.util.Objects;
 
-public class SittingManager extends UtilityEntity implements Listener {
+public class SittingManager implements Listener, UtilityEntity {
     
     @EventHandler
     public static void playerSit(PlayerInteractEvent event){
@@ -109,7 +109,7 @@ public class SittingManager extends UtilityEntity implements Listener {
                         armorStand.addEquipmentLock(EquipmentSlot.FEET, ArmorStand.LockType.ADDING_OR_CHANGING);
                         armorStand.addEquipmentLock(EquipmentSlot.HAND, ArmorStand.LockType.ADDING_OR_CHANGING);
                         armorStand.addEquipmentLock(EquipmentSlot.OFF_HAND, ArmorStand.LockType.ADDING_OR_CHANGING);
-                        armorStand.getPersistentDataContainer().set(getUtilityEntityKey(), PersistentDataType.STRING, new SittingManager().getEntityIdentifier());
+                        armorStand.getPersistentDataContainer().set(utilityKey, PersistentDataType.STRING, new SittingManager().getEntityIdentifier());
                         final Location location = armorStand.getLocation();
                         location.setYaw(yaw);
                         armorStand.teleport(location);
@@ -133,7 +133,7 @@ public class SittingManager extends UtilityEntity implements Listener {
     public static void removeSeatEntityOnDismount(EntityDismountEvent event){
         if(event.getEntity() instanceof Player player
                 && event.getDismounted() instanceof ArmorStand stand
-                && Objects.equals(stand.getPersistentDataContainer().get(getUtilityEntityKey(),PersistentDataType.STRING),new SittingManager().getEntityIdentifier())
+                && Objects.equals(stand.getPersistentDataContainer().get(utilityKey,PersistentDataType.STRING),new SittingManager().getEntityIdentifier())
         ){
             stand.remove();
             player.teleport(player.getLocation().add(0,1,0));
@@ -146,7 +146,7 @@ public class SittingManager extends UtilityEntity implements Listener {
         if(event.getPlugin().equals(Tiboise.getPlugin())){
             for(World world : Bukkit.getWorlds()){
                 for(Entity e : world.getEntitiesByClass(ArmorStand.class)){
-                    if(Objects.equals(e.getPersistentDataContainer().get(getUtilityEntityKey(),PersistentDataType.STRING),identitfier)){
+                    if(Objects.equals(e.getPersistentDataContainer().get(utilityKey,PersistentDataType.STRING),identitfier)){
                         e.remove();
                     }
                 }

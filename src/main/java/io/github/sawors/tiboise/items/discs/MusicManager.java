@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class MusicManager extends UtilityEntity implements Listener {
+public class MusicManager implements Listener, UtilityEntity {
     
     private static final Map<ItemDisplay, Sound> discsPlaying = new HashMap<>();
     
@@ -58,7 +58,7 @@ public class MusicManager extends UtilityEntity implements Listener {
             if(jukebox.isPlaying()){
                 if((p.isSneaking() && disc.getType().equals(Material.AIR)) || (!p.isSneaking())){
                     for(ItemDisplay e : b.getLocation().add(.5,1,.5).getNearbyEntitiesByType(ItemDisplay.class,.1)){
-                        if(Objects.equals(e.getPersistentDataContainer().get(getUtilityEntityKey(), PersistentDataType.STRING),getEntityIdentifier())){
+                        if(Objects.equals(e.getPersistentDataContainer().get(utilityKey, PersistentDataType.STRING),getEntityIdentifier())){
                             e.remove();
                             if(discsPlaying.containsKey(e)){
                                 for(Player p0 : e.getLocation().getNearbyEntitiesByType(Player.class,16*2)){
@@ -89,7 +89,7 @@ public class MusicManager extends UtilityEntity implements Listener {
                             if(entity instanceof ItemDisplay itemDisplay){
                                 itemDisplay.setItemStack(disc);
                                 itemDisplay.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.HEAD);
-                                itemDisplay.getPersistentDataContainer().set(getUtilityEntityKey(),PersistentDataType.STRING,getEntityIdentifier());
+                                itemDisplay.getPersistentDataContainer().set(utilityKey,PersistentDataType.STRING,getEntityIdentifier());
                             }
                         }
                 );
@@ -192,8 +192,8 @@ public class MusicManager extends UtilityEntity implements Listener {
                         e instanceof ItemDisplay display
                         && display.getItemStack() != null
                         && MaterialSetTag.ITEMS_MUSIC_DISCS.isTagged(display.getItemStack().getType())
-                        && display.getPersistentDataContainer().has(getUtilityEntityKey())
-                        && Objects.equals(display.getPersistentDataContainer().get(getUtilityEntityKey(), PersistentDataType.STRING), getEntityIdentifier())
+                        && display.getPersistentDataContainer().has(utilityKey)
+                        && Objects.equals(display.getPersistentDataContainer().get(utilityKey, PersistentDataType.STRING), getEntityIdentifier())
                 ){
                     Sound sound = discsPlaying.get(display);
                     if(sound != null){

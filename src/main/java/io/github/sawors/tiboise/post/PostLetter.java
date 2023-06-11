@@ -47,6 +47,7 @@ public class PostLetter extends SendableItem implements Listener {
         setDisplayName(Component.text("Letter").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setContent("");
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
+        addTag(ItemTag.POST_SENDABLE);
         setAuthor("?????");
     }
     

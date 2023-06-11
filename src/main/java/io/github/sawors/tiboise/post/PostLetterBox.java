@@ -3,6 +3,7 @@ package io.github.sawors.tiboise.post;
 import com.destroystokyo.paper.event.block.BlockDestroyEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -415,20 +416,35 @@ public class PostLetterBox implements Listener {
                                     PostLetterBox checkDestination = null;
                                     List<ItemStack> tempEnvelopes = new ArrayList<>();
                                     List<ItemStack> sentEnvelopes = new ArrayList<>();
+                                    List<ItemStack> usableStamps = new ArrayList<>();
+                                    int sentAmount = 0;
+                                    int stampAmount = 0;
                                     for (ItemStack item : container.getInventory().getContents()) {
                                         if (item != null && TiboiseItem.getItemId(item).equals(TiboiseItem.getId(PostStamp.class)) && PostStamp.getDestination(item) != null) {
-                                            stampItem = item;
-                                            checkDestination = PostStamp.getDestination(item);
-                                            break;
+                                            if(stampItem == null){
+                                                stampItem = item;
+                                                checkDestination = PostStamp.getDestination(item);
+                                                stampAmount += item.getAmount();
+                                                usableStamps.add(item);
+                                            } else if(PostStamp.getDestination(item).equals(PostStamp.getDestination(stampItem))){
+                                                stampAmount += item.getAmount();
+                                                usableStamps.add(item);
+                                            }
                                         }
                                     }
                                     for (ItemStack item : container.getInventory().getContents()) {
-                                        if (item != null && TiboiseItem.getItemId(item).equals(TiboiseItem.getId(PostLetter.class))) {
+                                        if (item != null && TiboiseItem.getItemTags(item).contains(ItemTag.POST_SENDABLE.toString())) {
                                             tempEnvelopes.add(item);
                                             sentEnvelopes.add(item.clone());
+                                            sentAmount += item.getAmount();
                                         }
                                     }
                                     final PostLetterBox destination = checkDestination;
+                                    
+                                    if(sentAmount > stampAmount) {
+                                        p.sendActionBar(Component.text("There is not enough stamps to send everything !").color(NamedTextColor.RED));
+                                        return;
+                                    }
                                     // inventory scanned
                                     if(destination != null) {
                                         Location from = block.getLocation();
@@ -441,7 +457,21 @@ public class PostLetterBox implements Listener {
                                             final long distance = (long) from.distance(to);
                                             final long tickTravelTime = (long) ((distance/1000.0)*20.0*travelTime);
                                             UUID letterId = UUID.randomUUID();
-                                            stampItem.setAmount(stampItem.getAmount()-1);
+                                            int consumedAmount = 0;
+                                            for(int spent = 0; spent < sentAmount; spent++){
+                                                ItemStack item = usableStamps.get(spent);
+                                                int amount = item.getAmount();
+                                                consumedAmount += amount;
+                                                int diff = sentAmount - consumedAmount;
+                                                if(diff <= 0){
+                                                    item.setAmount(-1*diff);
+                                                    break;
+                                                } else {
+                                                    item.setAmount(0);
+                                                }
+                                            }
+                                            
+                                            
                                             for(ItemStack remove : tempEnvelopes){
                                                 remove.setAmount(0);
                                             }
