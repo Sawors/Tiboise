@@ -1,5 +1,6 @@
 package io.github.sawors.tiboise.post;
 
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.Recipe;
@@ -11,6 +12,7 @@ public class PostEnvelope extends TiboiseItem {
     public PostEnvelope(){
         setMaterial(Material.PAPER);
         setHelpText("Right click on a lectern containing a book to transfer the content of the book to this envelope.");
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
     }
     
     @Override

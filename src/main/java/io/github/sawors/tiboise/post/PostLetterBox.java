@@ -396,7 +396,7 @@ public class PostLetterBox implements Listener {
         ){
             final Bell.Attachment attachment = bell.getAttachment();
             final BlockFace face = bell.getFacing();
-            if(attachment.equals(Bell.Attachment.SINGLE_WALL)){
+            if(attachment.equals(Bell.Attachment.SINGLE_WALL) || attachment.equals(Bell.Attachment.DOUBLE_WALL)){
                 // try to detect the barrel
                 final Block left = block.getLocation().add(.5,.5,.5).add(face.getDirection()).getBlock();
                 final Block right = block.getLocation().add(.5,.5,.5).add(face.getDirection().multiply(-1)).getBlock();

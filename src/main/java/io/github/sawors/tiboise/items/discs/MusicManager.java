@@ -73,6 +73,7 @@ public class MusicManager extends UtilityEntity implements Listener {
                                     @Override
                                     public void run() {
                                         jukebox.setRecord(null);
+                                        jukebox.getInventory().setRecord(null);
                                         jukebox.update();
                                     }
                                 }.runTask(Tiboise.getPlugin());

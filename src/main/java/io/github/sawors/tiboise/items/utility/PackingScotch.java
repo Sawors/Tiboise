@@ -12,6 +12,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Directional;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -43,26 +44,43 @@ public class PackingScotch extends TiboiseItem implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public static void packBlock(PlayerInteractEvent event){
         
-        
         ItemStack src = event.getPlayer().getInventory().getItemInMainHand();
         final Block clicked = event.getClickedBlock();
         if(TiboiseItem.getItemId(src).equals(getId(PackingScotch.class)) && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)){
-            event.setCancelled(true);
+            //event.setCancelled(true);
             // packing the block
-            if(clicked != null && (clicked.getType().equals(Material.CHEST) || clicked.getType().equals(Material.BARREL))){
+            if(clicked != null && (clicked.getType().equals(Material.CHEST) || clicked.getType().equals(Material.BARREL)) && !(clicked.getState() instanceof DoubleChest)){
                 Container container = (Container) clicked.getState();
+                
+                event.getPlayer().closeInventory();
                 
                 ItemStack packedBlockItem = new ItemStack(Material.PAPER);
                 ItemMeta meta = packedBlockItem.getItemMeta();
                 PersistentDataContainer c = meta.getPersistentDataContainer();
                 c.set(TiboiseItem.getItemIdKey(), PersistentDataType.STRING,packedBlockItemId);
-                c.set(TiboiseItem.getItemTagsKey(), PersistentDataType.STRING, ItemTag.PREVENT_USE_IN_CRAFTING.toString());
+                StringBuilder typeskey = new StringBuilder();
+                for(String s : Set.of(ItemTag.PREVENT_PACKING.toString(),ItemTag.PREVENT_USE_IN_CRAFTING.toString())){
+                    typeskey.append(s.toUpperCase(Locale.ROOT)).append(":");
+                }
+                if(typeskey.toString().endsWith(":")){
+                    typeskey.deleteCharAt(typeskey.lastIndexOf(":"));
+                }
+                c.set(TiboiseItem.getItemTagsKey(), PersistentDataType.STRING, typeskey.toString());
                 c.set(getStoredMaterialKey(),PersistentDataType.STRING,container.getType().toString());
                 
-                meta.displayName(Component.text("Packed "+TiboiseUtils.capitalizeFirstLetter(clicked.getType().toString())).color(NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+                meta.displayName(Component.text("Packed "+TiboiseUtils.capitalizeFirstLetter(clicked.getType().toString())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
                 Map<String,Integer> contentSummary = new HashMap<>();
+                List<ItemStack> excluded = new ArrayList<>();
+                
+                for(ItemStack i : container.getInventory().getContents()){
+                    if(i != null && TiboiseItem.getItemTags(i).contains(ItemTag.PREVENT_PACKING.toString())){
+                        excluded.add(i.clone());
+                        i.setAmount(0);
+                    }
+                }
                 // serialize content
                 String serializedInventory = new ItemSerializer().serializeInventory(container.getInventory());
+                
                 for(ItemStack item : container.getSnapshotInventory().getContents()){
                     if(item == null) continue;
                     final String tiboiseId = TiboiseItem.getItemId(item);
@@ -90,9 +108,13 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 
                 final Location center = clicked.getLocation().add(.5,.5,.5);
                 center.getWorld().playSound(center,clicked.getBlockSoundGroup().getBreakSound(),1,1);
-                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_PLACE,1,1);
+                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_PLACE,.5f,1);
                 center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,32,.25,.25,.25,.05,clicked.getBlockData());
                 center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,8,.25,.25,.25,.05,Bukkit.createBlockData(Material.SLIME_BLOCK));
+                
+                for(ItemStack i : excluded){
+                    center.getWorld().dropItem(center,i);
+                }
                 
                 clicked.setType(Material.AIR);
                 
@@ -100,7 +122,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 
             }
         } else if(TiboiseItem.getItemId(src).equals(packedBlockItemId) && clicked != null && clicked.isSolid() && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND)){
-            event.setCancelled(true);
+            //event.setCancelled(true);
             // placing back the packed block
             final BlockFace face = event.getBlockFace();
             Block toReplace = clicked.getRelative(face);
@@ -117,12 +139,14 @@ public class PackingScotch extends TiboiseItem implements Listener {
                 }
                 Inventory inv = ((Container) toReplace.getState()).getInventory();
                 for(Map.Entry<Integer,ItemStack> entry : content.entrySet()){
-                    inv.setItem(entry.getKey(),entry.getValue());
+                    int slot = entry.getKey();
+                    if(slot >= inv.getSize()) break;
+                    inv.setItem(slot,entry.getValue());
                 }
                 
                 final Location center = toReplace.getLocation().add(.5,.5,.5);
                 center.getWorld().playSound(center,toReplace.getBlockSoundGroup().getPlaceSound(),1,1);
-                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_BREAK,1,1);
+                center.getWorld().playSound(center, Sound.BLOCK_SLIME_BLOCK_BREAK,.5f,1);
                 center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,12,.45,.45,.45,.05,Bukkit.createBlockData(Material.SLIME_BLOCK));
                 center.getWorld().spawnParticle(Particle.BLOCK_DUST,center,8,.45,.45,.45,.05,Bukkit.createBlockData(Material.WHITE_CONCRETE));
                 

@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.post;
 
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.items.ItemTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -45,6 +46,7 @@ public class PostLetter extends SendableItem implements Listener {
         setMaterial(Material.PAPER);
         setDisplayName(Component.text("Letter").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setContent("");
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setAuthor("?????");
     }
     

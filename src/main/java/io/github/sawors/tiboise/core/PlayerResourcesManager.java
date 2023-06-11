@@ -10,7 +10,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -346,10 +345,6 @@ public class PlayerResourcesManager implements Listener {
                                         }
                                     });
                                     server.start();
-                                    
-                                    for(Player p : Bukkit.getOnlinePlayers()){
-                                        sendPlayerResourcePack(p);
-                                    }
                                 }
                             }
                         }.runTask(Tiboise.getPlugin());

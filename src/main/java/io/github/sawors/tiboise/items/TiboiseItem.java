@@ -28,6 +28,7 @@ import io.github.sawors.tiboise.items.utility.security.KeyItem;
 import io.github.sawors.tiboise.items.utility.security.LockItem;
 import io.github.sawors.tiboise.post.PostEnvelope;
 import io.github.sawors.tiboise.post.PostLetter;
+import io.github.sawors.tiboise.post.PostPackage;
 import io.github.sawors.tiboise.post.PostStamp;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -84,6 +85,7 @@ public abstract class TiboiseItem {
         registerItem(new AmethystPickaxe());
         registerItem(new InkQuill());
         registerItem(new MusicDisc());
+        registerItem(new PostPackage());
         // TODO : <1.3>
         registerItem(new LockItem());
         registerItem(new KeyItem());

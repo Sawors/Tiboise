@@ -9,7 +9,8 @@ public enum ItemTag {
     HIDE_GLINT,
     PREVENT_BREAKING,
     HAT,
-    UNMOVABLE
+    UNMOVABLE,
+    PREVENT_PACKING
     ;
     
     
