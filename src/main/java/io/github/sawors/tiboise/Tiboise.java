@@ -181,6 +181,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(server.getPluginCommand("letter")).setExecutor(new LetterCommand());
         Objects.requireNonNull(server.getPluginCommand("sit")).setExecutor(new SitCommand());
         Objects.requireNonNull(server.getPluginCommand("mp")).setExecutor(new AdminMessageCommand());
+        Objects.requireNonNull(server.getPluginCommand("pack")).setExecutor(new PackCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setTabCompleter(maincommand);

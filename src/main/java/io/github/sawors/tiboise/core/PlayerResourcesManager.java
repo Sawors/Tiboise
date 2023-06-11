@@ -34,7 +34,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class PlayerResourcesManager implements Listener {
     
@@ -50,6 +49,8 @@ public class PlayerResourcesManager implements Listener {
     private final static String packSource = "https://github.com/Sawors/Tiboise/raw/master/resourcepack/Tiboise-1.19.2.zip";
     private static File localResourcePackDirectory;
     private static File packSourceFile;
+    // local assets
+    private static File assets;
     // webserver
     private static String webServerSrc;
     private static int webServerPort;
@@ -131,8 +132,6 @@ public class PlayerResourcesManager implements Listener {
     
     @EventHandler
     public static void reloadPlayerResourcePack(PlayerResourcePackStatusEvent event){
-        logAdmin(event.getStatus());
-        logAdmin(event.getHash());
         final Player p = event.getPlayer();
         if(event.getStatus().equals(PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) && !reloadingPlayers.contains(p.getUniqueId())){
             new BukkitRunnable(){
@@ -191,9 +190,6 @@ public class PlayerResourcesManager implements Listener {
         }
         
         File tempDir = new File(packSourceFile.getParentFile().getPath()+File.separator+"temp");
-        // loading / creating the asset directory if it not yet exists
-        File assets = new File(localResourcePackDirectory.getPath()+File.separator+"assets");
-        assets.mkdirs();
         
         // copy the data from local assets to the unzipped source
         if(tempDir.exists() && assets.exists()){
@@ -300,12 +296,14 @@ public class PlayerResourcesManager implements Listener {
                 localResourcePackDirectory = new File(resourceDirectory.getPath()+File.separator+"resourcepack");
                 localResourcePackDirectory.mkdirs();
                 packSourceFile = new File(localResourcePackDirectory.getPath()+File.separator+"source.zip");
+                
+                assets = new File(localResourcePackDirectory.getPath()+File.separator+"assets");
+                assets.mkdirs();
                 try{
                     packSourceFile.createNewFile();
                 } catch (IOException e){
                     e.printStackTrace();
                 }
-                logAdmin(packSourceFile.getPath());
                 new BukkitRunnable(){
                     @Override
                     public void run() {
@@ -318,8 +316,7 @@ public class PlayerResourcesManager implements Listener {
                                 File resourcePackBundledHash = new File(webServerDirectory.getPath()+File.separator+hashFileName);
                                 
                                 if(resourcePackBundled.exists()){
-                                    logAdmin("exists");
-                                    HttpServer server = null;
+                                    HttpServer server;
                                     try {
                                         server = HttpServer.create(new InetSocketAddress(webServerPort),8);
                                     } catch (
@@ -383,7 +380,7 @@ public class PlayerResourcesManager implements Listener {
     }
     
     
-    static void downloadSourceResourcePack(){
+    public static void downloadSourceResourcePack(){
         try (BufferedInputStream in = new BufferedInputStream(new URL(packSource).openStream()); FileOutputStream fileOutputStream = new FileOutputStream(packSourceFile)) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
@@ -427,5 +424,9 @@ public class PlayerResourcesManager implements Listener {
                 zipOut.write(bytes, 0, length);
             }
         }
+    }
+    
+    public static File getAssetDirectory(){
+        return assets;
     }
 }

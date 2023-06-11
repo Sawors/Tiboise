@@ -37,6 +37,8 @@ commands:
     usage: /sit to sit on the block you're standing
   mp:
     usage: /mp to receive messages from admins or to respond
+  pack:
+    usage: /pack reloads your texture pack
 softdepend:
   - voicechat
 depend:
