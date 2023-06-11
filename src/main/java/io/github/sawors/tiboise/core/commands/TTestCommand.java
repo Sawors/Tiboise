@@ -1,11 +1,5 @@
 package io.github.sawors.tiboise.core.commands;
 
-import de.maxhenkel.voicechat.api.ServerPlayer;
-import de.maxhenkel.voicechat.api.VoicechatConnection;
-import de.maxhenkel.voicechat.api.VoicechatServerApi;
-import de.maxhenkel.voicechat.api.audiochannel.AudioChannel;
-import de.maxhenkel.voicechat.api.audiochannel.AudioPlayer;
-import de.maxhenkel.voicechat.api.audiochannel.LocationalAudioChannel;
 import io.github.gaeqs.javayoutubedownloader.JavaYoutubeDownloader;
 import io.github.gaeqs.javayoutubedownloader.decoder.MultipleDecoderMethod;
 import io.github.gaeqs.javayoutubedownloader.stream.StreamOption;
@@ -16,34 +10,23 @@ import io.github.gaeqs.javayoutubedownloader.tag.AudioQuality;
 import io.github.gaeqs.javayoutubedownloader.tag.Encoding;
 import io.github.gaeqs.javayoutubedownloader.tag.StreamType;
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
-import io.github.sawors.tiboise.items.ItemTag;
-import io.github.sawors.tiboise.items.TiboiseItem;
-import javazoom.spi.mpeg.sampled.convert.MpegFormatConversionProvider;
-import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import net.bramp.ffmpeg.builder.FFmpegOutputBuilder;
+import net.bramp.ffmpeg.progress.Progress;
+import net.bramp.ffmpeg.progress.ProgressListener;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioFormat;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Locale;
-import java.util.UUID;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
@@ -56,94 +39,18 @@ public class TTestCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         
-        if(commandSender instanceof Player p){
-            ItemStack ui = p.getInventory().getItemInMainHand();
-            TiboiseItem.addItemTag(ui, ItemTag.HIDE_GLINT.toString());
-            p.getInventory().setItemInMainHand(ui);
-        }
-        
-        
-        if(args.length > 0){
-            return true;
-        }
-        /*try (CloseableHttpClient client = HttpClients.custom()
-                .setUserAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1")
-                .build()
-        ) {
-            final String convertUrl = "https://yt1s.com/api/ajaxConvert/convert";
-            final String indexUrl = "https://yt1s.com/api/ajaxSearch/index";
-            final String videoUrl = "https://youtu.be/tzx8gCkIKkU";
-            
-            HttpPost postIndex = new HttpPost(indexUrl);
-            postIndex.addHeader("q", videoUrl);
-            postIndex.addHeader("vt", "home");
-            BasicHttpClientResponseHandler handler = new BasicHttpClientResponseHandler();
-            final String response = client.execute(postIndex,handler);
-            
-            JSONParser parser = new JSONParser();
-            JSONObject parsedObject = (JSONObject) parser.parse(response);
-            logAdmin(parsedObject);
-            final String resolution = "auto";
-            *//*try{
-                final Map<?, ?> payload = ((Map<?,?>)((Map<?,?>)((Map<?,?>)((Map<?,?>)parsedObject.get("links")).get("mp3")).get(resolution)).get("k"));
-                
-                HttpPost postContent = new HttpPost(convertUrl);
-                postContent.addHeader("vid","tzx8gCkIKkU");
-                postContent.addHeader("k", payload);
-                
-                BasicHttpClientResponseHandler handler2 = new BasicHttpClientResponseHandler();
-                final String response2 = client.execute(postContent,handler2);
-                JSONObject parsedContent = (JSONObject) parser.parse(response2);
-                logAdmin(parsedContent.get("dlink"));
-                return true;
-            } catch (ClassCastException e){
-                e.printStackTrace();
-            }*//*
-            
-        } catch (IOException e){
-            e.printStackTrace();
-        } catch (
-                ParseException e) {
-            throw new RuntimeException(e);
-        }
-        */
-        
-        final VoicechatServerApi api = VoiceChatIntegrationPlugin.getVoicechatServerApi();
-        
-        final File src = new File("C:\\Users\\sosol\\IdeaProjects\\Tiboise\\_server\\server\\plugins\\Tiboise\\yt1s.com - How Bad Can I Be.mp3");
+        //final VoicechatServerApi api = VoiceChatIntegrationPlugin.getVoicechatServerApi();
         
         ////logAdmin(shorts.length);
         
-        playLocationalAudio(api,src.toPath(),((Player) commandSender).getLocation().getBlock());
+        //playLocationalAudio(api,src.toPath(),((Player) commandSender).getLocation().getBlock());
         
-        for (Player onlineplayer : Bukkit.getServer().getOnlinePlayers()) {
-            // Don't send the audio to the player that is broadcasting
-            
-            if(true){
-                VoicechatConnection connection = api.getConnectionOf(onlineplayer.getUniqueId());
-                // Check if the player is actually connected to the voice chat
-                if (connection == null) {
-                    logAdmin("null co");
-                    continue;
-                }
-                //short[] voiceaudio = decoder.decode(event.getPacket().getOpusEncodedData());
-                //Tiboise.logAdmin("Audio packet length : "+voiceaudio.length);
-                
-                // Send a static audio packet of the microphone data to the connection of each player
-                //api.sendStaticSoundPacketTo(connection, api.create);
-                UUID cid = UUID.randomUUID();
-                
-                
-            }
-            
-        }
-        
-        if(false){
+        if(true){
             //Extracts and decodes all streams.
             YoutubeVideo video = JavaYoutubeDownloader.decodeOrNull("https://youtu.be/tzx8gCkIKkU", MultipleDecoderMethod.OR, "html", "embedded");
             //Gets the option with the greatest quality that has video and audio.
             final StreamOption option = video.getStreamOptions().stream()
-                    .filter(target -> target.getType().hasAudio() && !target.getType().hasVideo() && target.getType().getAudioEncoding().equals(Encoding.OPUS) )
+                    .filter(target -> target.getType().hasAudio() && !target.getType().hasVideo() && target.getType().getAudioEncoding().equals(Encoding.AAC) )
                     .max(Comparator.comparingInt(o -> o.getType().getAudioQuality().ordinal())).orElse(null);
             if(option == null) return false;
             for(StreamOption op : video.getStreamOptions()){
@@ -190,19 +97,45 @@ public class TTestCommand implements CommandExecutor {
                 
                 @Override
                 public void onFinish(StreamDownloader downloader) {
-                    if(true){
+                    if(false){
                         return;
                     }
-                    
-                    
-                    
-                    Player player = ((Player) commandSender);
-                    Location emitloc = (player.getLocation());
-                    
+                    logAdmin("starting");
+                    File installation = Tiboise.getFFmpegInstallation();
+                    logAdmin(installation);
+                    if(installation != null){
+                        logAdmin("starting ffmpeg conversion");
+                        try {
+                            FFmpeg fFmpeg = new FFmpeg(installation.getCanonicalPath()+File.separator+"ffmpeg.exe");
+                            FFprobe fFprobe = new FFprobe(installation.getCanonicalPath()+File.separator+"ffprobe.exe");
+                            FFmpegOutputBuilder builder = new FFmpegBuilder()
+                                    .setInput(fFprobe.probe(file.getCanonicalPath()))
+                                    .overrideOutputFiles(true)
+                                    .addOutput(Tiboise.getPlugin().getDataFolder().getCanonicalPath()+File.separator+"out.ogg")
+                                    .setFormat("ogg")
+                                    .setAudioChannels(1)
+                                    ;
+                            
+                            FFmpegExecutor executor = new FFmpegExecutor(fFmpeg,fFprobe);
+                            
+                            executor.createJob(builder.done(), new ProgressListener() {
+                                @Override
+                                public void progress(Progress progress) {
+                                    logAdmin(progress.status);
+                                }
+                            }).run();
+                            
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        logAdmin("ffmpeg installation not provided, abandonning the conversion");
+                        file.delete();
+                    }
                     //OpusDecoder decoder = api.createDecoder();
                     // Iterating over every player on the server
                     
-                    logAdmin("bitrate",Integer.parseInt(quality.name().replaceAll("k",""))*1000);
+                    /*logAdmin("bitrate",Integer.parseInt(quality.name().replaceAll("k",""))*1000);
                     try( FileInputStream in = new FileInputStream(file)){
                         ;
                         //logAdmin(Arrays.toString(file2.readAllBytes()));
@@ -227,8 +160,8 @@ public class TTestCommand implements CommandExecutor {
 
                         
 
-                        /*OpusDecoder dc = api.createDecoder();
-                        short[] decoded = dc.decode(bytes);*/
+                        *//*OpusDecoder dc = api.createDecoder();
+                        short[] decoded = dc.decode(bytes);*//*
                         logAdmin(src.length);
                         logAdmin(bytes.length);
                         logAdmin(shorts.length);
@@ -237,7 +170,7 @@ public class TTestCommand implements CommandExecutor {
                     } catch (
                             IOException e) {
                         e.printStackTrace();
-                    }
+                    }*/
                 }
                 
                 @Override
@@ -365,7 +298,7 @@ public class TTestCommand implements CommandExecutor {
     
     
     
-    private static short[] readSoundFile(Path file) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+    /*private static short[] readSoundFile(Path file) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         return VoiceChatIntegrationPlugin.getVoicechatApi().getAudioConverter().bytesToShorts(convertFormat(file, FORMAT));
     }
     
@@ -455,6 +388,6 @@ public class TTestCommand implements CommandExecutor {
             }
             return null;
         }
-    }
+    }*/
     
 }

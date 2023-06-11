@@ -1,5 +1,6 @@
 test-mode: false
 token: ""
+path-to-ffmpeg:
 modules:
   bettervanilla:
     enabled: true

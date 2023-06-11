@@ -74,6 +74,8 @@ public final class Tiboise extends JavaPlugin {
     private static JDA jdaInstance = null;
     // resource pack
     private static File resourceDirectory = null;
+    //
+    private static File ffmpegInstallation = null;
     
 
     @Override
@@ -122,6 +124,19 @@ public final class Tiboise extends JavaPlugin {
                 logAdmin("Discord bot enabled !");
             } else {
                 Bukkit.getLogger().log(Level.WARNING,"[Tiboise] Discord features disabled, please add your bot token to config.yml in the field token:\"\"");
+            }
+            
+            
+            final String pathToFfmpeg = configuration.getString("path-to-ffmpeg");
+            if(pathToFfmpeg != null){
+                ffmpegInstallation = new File(pathToFfmpeg);
+                try{
+                    if(!new HashSet<>(Arrays.asList(Objects.requireNonNull(ffmpegInstallation.list()))).containsAll(Set.of("ffmpeg.exe","ffprobe.exe"))){
+                        ffmpegInstallation = null;
+                    }
+                } catch (NullPointerException e){
+                    ffmpegInstallation = null;
+                }
             }
         }
         
@@ -289,6 +304,10 @@ public final class Tiboise extends JavaPlugin {
     
     public static File getResourceDirectory() {
         return resourceDirectory;
+    }
+    
+    public static @Nullable File getFFmpegInstallation() {
+        return ffmpegInstallation;
     }
     
     public static boolean isModuleEnabled(ConfigModules module){

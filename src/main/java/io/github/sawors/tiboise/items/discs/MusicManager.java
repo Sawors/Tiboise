@@ -65,6 +65,18 @@ public class MusicManager extends UtilityEntity implements Listener {
                                     p0.stopSound(discsPlaying.get(e).asStop());
                                 }
                             }
+                            if(p.getInventory().getItemInMainHand().getType().isAir()){
+                                p.getInventory().setItemInMainHand(jukebox.getInventory().getRecord());
+                                event.setCancelled(true);
+                                jukebox.stopPlaying();
+                                new BukkitRunnable(){
+                                    @Override
+                                    public void run() {
+                                        jukebox.setRecord(null);
+                                        jukebox.update();
+                                    }
+                                }.runTask(Tiboise.getPlugin());
+                            }
                         }
                     }
                 }
