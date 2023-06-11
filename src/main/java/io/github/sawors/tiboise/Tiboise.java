@@ -152,10 +152,6 @@ public final class Tiboise extends JavaPlugin {
         }
         DatabaseLink.connectInit();*/
         
-        
-        
-        
-        PlayerResourcesManager.rebuildResourcePack();
         final Server server = getServer();
         final PluginManager manager = server.getPluginManager();
         manager.registerEvents(new ItemGlobalListeners(), this);

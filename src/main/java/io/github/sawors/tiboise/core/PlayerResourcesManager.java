@@ -8,6 +8,9 @@ import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugi
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -23,9 +26,13 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
@@ -40,7 +47,8 @@ public class PlayerResourcesManager implements Listener {
     // local packed resource names
     private static final String packFileName = "TiboiseResourcePack.zip";
     private static final String hashFileName = "sha1.txt";
-    private final static String packSource = "https://github.com/Sawors/Tiboise/raw/master/src/main/resources/resourcepack/Tiboise-1.19.2.zip";
+    private final static String packSource = "https://github.com/Sawors/Tiboise/raw/master/resourcepack/Tiboise-1.19.2.zip";
+    private static File localResourcePackDirectory;
     private static File packSourceFile;
     // webserver
     private static String webServerSrc;
@@ -140,26 +148,20 @@ public class PlayerResourcesManager implements Listener {
     }
     
     public static void rebuildResourcePack(){
-        logAdmin(packSourceFile);
-        logAdmin(packSourceFile != null && packSourceFile.exists());
-        try (BufferedInputStream in = new BufferedInputStream(new URL(packSource).openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(packSourceFile)) {
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
-            }
-        } catch (IOException e) {
-            // handle exception
-        }
+        // unzip the downloaded source
         if(packSourceFile != null && packSourceFile.exists()){
+            File tempDir = new File(packSourceFile.getParentFile().getPath()+File.separator+"temp");
             // decompress pack source
-            try(ZipInputStream zis = new ZipInputStream(new FileInputStream(packSourceFile));){
+            try(ZipInputStream zis = new ZipInputStream(new FileInputStream(packSourceFile))){
                 byte[] buffer = new byte[1024];
                 
                 ZipEntry zipEntry = zis.getNextEntry();
+                if(tempDir.exists()){
+                    FileUtils.deleteDirectory(tempDir);
+                }
+                tempDir.mkdirs();
                 while (zipEntry != null) {
-                    File newFile = new File(packSourceFile.getParentFile().getPath()+File.separator+"temp");
+                    File newFile = new File(tempDir.getPath()+File.separator+zipEntry);
                     if (zipEntry.isDirectory()) {
                         if (!newFile.isDirectory() && !newFile.mkdirs()) {
                             throw new IOException("Failed to create directory " + newFile);
@@ -186,6 +188,71 @@ public class PlayerResourcesManager implements Listener {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        
+        File tempDir = new File(packSourceFile.getParentFile().getPath()+File.separator+"temp");
+        // loading / creating the asset directory if it not yet exists
+        File assets = new File(localResourcePackDirectory.getPath()+File.separator+"assets");
+        assets.mkdirs();
+        
+        // copy the data from local assets to the unzipped source
+        if(tempDir.exists() && assets.exists()){
+            try{
+                FileUtils.copyDirectoryToDirectory(assets,tempDir);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            // zip the merged data and transfer it to the webserver's directory for download
+            File tempZipFile = new File(localResourcePackDirectory.getPath() + File.separator + "tempResourcePack.zip");
+            try(
+                    FileOutputStream out = new FileOutputStream(tempZipFile);
+                    ZipOutputStream outZip = new ZipOutputStream(out);
+            ){
+                // zip the file
+                File[] content = tempDir.listFiles();
+                if(content!=null){
+                    for(File file : content){
+                        zipFile(file, file.getName(), outZip);
+                    }
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            
+            try{
+                if(tempZipFile.exists()){
+                    // copy the zipped result to the webserver's directory
+                    File target = new File(webServerDirectory.getPath()+File.separator+packFileName);
+                    target.delete();
+                    Files.copy(tempZipFile.toPath(),target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    try(InputStream fis = new FileInputStream(target)){
+                        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+                        
+                        byte[] buffer = new byte[8192];
+                        int len = fis.read(buffer);
+                        
+                        while (len != -1) {
+                            digest.update(buffer, 0, len);
+                            len = fis.read(buffer);
+                        }
+                        
+                        String hash = Hex.encodeHexString(digest.digest());
+                        Files.writeString(Path.of(webServerDirectory.getPath()+File.separator+hashFileName),hash);
+                    }
+                }
+                
+                tempZipFile.delete();
+            } catch (
+                    IOException |
+                    NoSuchAlgorithmException e){
+                e.printStackTrace();
+            }
+            
+            
+            // cleanup temporary files
+            try{
+                FileUtils.deleteDirectory(tempDir);
+            } catch (IOException e) {e.printStackTrace();}
         }
     }
     
@@ -230,47 +297,69 @@ public class PlayerResourcesManager implements Listener {
                 webServerDirectory.mkdirs();
                 
                 
-                String parent = resourceDirectory.getPath()+File.separator+"resourcepack";
-                new File(parent).mkdirs();
-                packSourceFile = new File(parent+File.separator+"source.zip");
+                localResourcePackDirectory = new File(resourceDirectory.getPath()+File.separator+"resourcepack");
+                localResourcePackDirectory.mkdirs();
+                packSourceFile = new File(localResourcePackDirectory.getPath()+File.separator+"source.zip");
                 try{
                     packSourceFile.createNewFile();
                 } catch (IOException e){
                     e.printStackTrace();
                 }
                 logAdmin(packSourceFile.getPath());
-                rebuildResourcePack();
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        downloadSourceResourcePack();
+                        rebuildResourcePack();
+                        new BukkitRunnable(){
+                            @Override
+                            public void run() {
+                                File resourcePackBundled = new File(webServerDirectory.getPath()+File.separator+packFileName);
+                                File resourcePackBundledHash = new File(webServerDirectory.getPath()+File.separator+hashFileName);
+                                
+                                if(resourcePackBundled.exists()){
+                                    logAdmin("exists");
+                                    HttpServer server = null;
+                                    try {
+                                        server = HttpServer.create(new InetSocketAddress(webServerPort),8);
+                                    } catch (
+                                            IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    // context for downloading the resource pack
+                                    server.createContext(resourcePackContext, exchange -> {
+                                        try(OutputStream out = exchange.getResponseBody(); InputStream in = new FileInputStream(resourcePackBundled)) {
+                                            exchange.sendResponseHeaders(200, resourcePackBundled.length());
+                                            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename="+packFileName);
+                                            exchange.setAttribute(HttpHeaders.CONTENT_TYPE, "application/zip");
+                                            out.write(in.readAllBytes());
+                                        } catch (IOException exception) {
+                                            exception.printStackTrace();
+                                        }
+                                    });
+                                    // context for downloading the sha1 text file
+                                    server.createContext(resourcePackHashContext, exchange -> {
+                                        try(OutputStream out = exchange.getResponseBody(); InputStream in = new FileInputStream(resourcePackBundledHash)) {
+                                            exchange.sendResponseHeaders(200, resourcePackBundledHash.length());
+                                            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename="+hashFileName);
+                                            exchange.setAttribute(HttpHeaders.CONTENT_TYPE, "text/plain");
+                                            out.write(in.readAllBytes());
+                                        } catch (IOException exception) {
+                                            exception.printStackTrace();
+                                        }
+                                    });
+                                    server.start();
+                                    
+                                    for(Player p : Bukkit.getOnlinePlayers()){
+                                        sendPlayerResourcePack(p);
+                                    }
+                                }
+                            }
+                        }.runTask(Tiboise.getPlugin());
+                    }
+                }.runTaskAsynchronously(Tiboise.getPlugin());
                 
-                File resourcePackBundled = new File(webServerDirectory.getPath()+File.separator+packFileName);
-                File resourcePackBundledHash = new File(webServerDirectory.getPath()+File.separator+hashFileName);
                 
-                if(resourcePackBundled.exists()){
-                    logAdmin("exists");
-                    HttpServer server = HttpServer.create(new InetSocketAddress(webServerPort),8);
-                    // context for downloading the resource pack
-                    server.createContext(resourcePackContext, exchange -> {
-                        try(OutputStream out = exchange.getResponseBody(); InputStream in = new FileInputStream(resourcePackBundled)) {
-                            exchange.sendResponseHeaders(200, resourcePackBundled.length());
-                            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename="+packFileName);
-                            exchange.setAttribute(HttpHeaders.CONTENT_TYPE, "application/zip");
-                            out.write(in.readAllBytes());
-                        } catch (IOException exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-                    // context for downloading the sha1 text file
-                    server.createContext(resourcePackHashContext, exchange -> {
-                        try(OutputStream out = exchange.getResponseBody(); InputStream in = new FileInputStream(resourcePackBundledHash)) {
-                            exchange.sendResponseHeaders(200, resourcePackBundledHash.length());
-                            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename="+hashFileName);
-                            exchange.setAttribute(HttpHeaders.CONTENT_TYPE, "text/plain");
-                            out.write(in.readAllBytes());
-                        } catch (IOException exception) {
-                            exception.printStackTrace();
-                        }
-                    });
-                    server.start();
-                }
                 /*final String fileToCopy = "index.html";
                 try(InputStream in = PlayerResourcesManager.class.getResourceAsStream("io/github/tiboise/resources/webserver/"+fileToCopy)){
                     
@@ -289,23 +378,54 @@ public class PlayerResourcesManager implements Listener {
                 // TODO : Implement server-side resourcepack management
             } catch (SecurityException e){
                 e.printStackTrace();
-            } catch (
-                    IOException e) {
-                throw new RuntimeException(e);
             }
         }
     }
     
-    static void zipResourcePack(){
-        if(resourceDirectory != null && resourceDirectory.exists()){
-            File resourcePackBundled = new File(webServerDirectory.getPath()+File.separator+"resourcepack.zip");
-            File resourcePackBundledHash = new File(webServerDirectory.getPath()+File.separator+"sha1.txt");
-            
-            
+    
+    static void downloadSourceResourcePack(){
+        try (BufferedInputStream in = new BufferedInputStream(new URL(packSource).openStream()); FileOutputStream fileOutputStream = new FileOutputStream(packSourceFile)) {
+            byte[] dataBuffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            // handle exception
+            e.printStackTrace();
         }
     }
     
-    static void downloadBaseResourcePack(){
     
+    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+        if (fileToZip.isHidden()) {
+            return;
+        }
+        if (fileToZip.isDirectory()) {
+            if (fileName.endsWith("/")) {
+                zipOut.putNextEntry(new ZipEntry(fileName));
+                zipOut.closeEntry();
+            } else {
+                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+                zipOut.closeEntry();
+            }
+            File[] children = fileToZip.listFiles();
+            if(children != null){
+                for (File childFile : children) {
+                    zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+                }
+            }
+            return;
+        }
+        
+        try(FileInputStream fis = new FileInputStream(fileToZip)){
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOut.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+        }
     }
 }
