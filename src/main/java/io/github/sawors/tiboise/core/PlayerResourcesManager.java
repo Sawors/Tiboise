@@ -20,7 +20,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
@@ -33,13 +38,15 @@ public class PlayerResourcesManager implements Listener {
     private static File resourceDirectory = null;
     private static File webServerDirectory = null;
     // local packed resource names
-    private static final String packFileName = "resourcepack.zip";
+    private static final String packFileName = "TiboiseResourcePack.zip";
     private static final String hashFileName = "sha1.txt";
+    private final static String packSource = "https://github.com/Sawors/Tiboise/raw/master/src/main/resources/resourcepack/Tiboise-1.19.2.zip";
+    private static File packSourceFile;
     // webserver
     private static String webServerSrc;
     private static int webServerPort;
-    private static final String resourcePackContext = "/download/TiboiseResourcePack.zip";
-    private static final String resourcePackHashContext = "/download/sha1.txt";
+    private static final String resourcePackContext = "/download/"+packFileName;
+    private static final String resourcePackHashContext = "/download/"+hashFileName;
     
     final private static Map<String, UUID> nickNamesMap = new HashMap<>(Map.of(
             "GrosOrteilDePied",UUID.fromString("66e25a14-b468-4cb1-8cde-6cf6054255ba"),
@@ -116,6 +123,8 @@ public class PlayerResourcesManager implements Listener {
     
     @EventHandler
     public static void reloadPlayerResourcePack(PlayerResourcePackStatusEvent event){
+        logAdmin(event.getStatus());
+        logAdmin(event.getHash());
         final Player p = event.getPlayer();
         if(event.getStatus().equals(PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) && !reloadingPlayers.contains(p.getUniqueId())){
             new BukkitRunnable(){
@@ -130,16 +139,64 @@ public class PlayerResourcesManager implements Listener {
         }
     }
     
-    public static void reloadPackData(){
-        /*try(InputStream in = new URL(hashfile).openStream(); Scanner hashread = new Scanner(in)){
-            packhash = hashread.next();
-        }catch (IOException e){
-            logAdmin("Can't load resource pack, malformed hash file URL");
-        }*/
+    public static void rebuildResourcePack(){
+        logAdmin(packSourceFile);
+        logAdmin(packSourceFile != null && packSourceFile.exists());
+        try (BufferedInputStream in = new BufferedInputStream(new URL(packSource).openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream(packSourceFile)) {
+            byte[] dataBuffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            // handle exception
+        }
+        if(packSourceFile != null && packSourceFile.exists()){
+            // decompress pack source
+            try(ZipInputStream zis = new ZipInputStream(new FileInputStream(packSourceFile));){
+                byte[] buffer = new byte[1024];
+                
+                ZipEntry zipEntry = zis.getNextEntry();
+                while (zipEntry != null) {
+                    File newFile = new File(packSourceFile.getParentFile().getPath()+File.separator+"temp");
+                    if (zipEntry.isDirectory()) {
+                        if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                            throw new IOException("Failed to create directory " + newFile);
+                        }
+                    } else {
+                        // fix for Windows-created archives
+                        File parent = newFile.getParentFile();
+                        if (!parent.isDirectory() && !parent.mkdirs()) {
+                            throw new IOException("Failed to create directory " + parent);
+                        }
+                        
+                        // write file content
+                        FileOutputStream fos = new FileOutputStream(newFile);
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                        fos.close();
+                    }
+                    zipEntry = zis.getNextEntry();
+                }
+                
+                zis.closeEntry();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     public static void sendPlayerResourcePack(Player p){
-        p.setResourcePack(getPackSource(),getPackHashSource());
+        try{
+            String hash = Files.readString(Path.of(webServerDirectory + File.separator + hashFileName));
+            hash = hash.substring(0,Math.min(40,hash.length()));
+            p.setResourcePack(getPackSource(), hash);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public static String getPackHash(){
@@ -156,22 +213,33 @@ public class PlayerResourcesManager implements Listener {
     
     @EventHandler
     public static void initialize(PluginEnableEvent event){
-        //webserver-ip: ""
-        //webserver-port: 8123
-        
-        YamlConfiguration config = Tiboise.getConfigData();
-        webServerSrc = config.getString("webserver-ip","mc.sawors.com");
-        webServerPort = config.getInt("webserver-port",8123);
-        
-        
-        
         if(event.getPlugin().equals(Tiboise.getPlugin())){
+            
+            YamlConfiguration config = Tiboise.getConfigData();
+            webServerSrc = config.getString("webserver-ip","http://mc.sawors.com");
+            if(!webServerSrc.startsWith("http")){
+                webServerSrc = "http://"+webServerSrc;
+            }
+            webServerPort = config.getInt("webserver-port",8123);
+            
             try{
                 resourceDirectory = new File(Tiboise.getPlugin().getDataFolder().getPath()+File.separator+"resources");
                 resourceDirectory.mkdirs();
                 
                 webServerDirectory = new File(resourceDirectory.getPath()+File.separator+ "webserver");
                 webServerDirectory.mkdirs();
+                
+                
+                String parent = resourceDirectory.getPath()+File.separator+"resourcepack";
+                new File(parent).mkdirs();
+                packSourceFile = new File(parent+File.separator+"source.zip");
+                try{
+                    packSourceFile.createNewFile();
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+                logAdmin(packSourceFile.getPath());
+                rebuildResourcePack();
                 
                 File resourcePackBundled = new File(webServerDirectory.getPath()+File.separator+packFileName);
                 File resourcePackBundledHash = new File(webServerDirectory.getPath()+File.separator+hashFileName);

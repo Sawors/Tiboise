@@ -155,7 +155,7 @@ public final class Tiboise extends JavaPlugin {
         
         
         
-        PlayerResourcesManager.reloadPackData();
+        PlayerResourcesManager.rebuildResourcePack();
         final Server server = getServer();
         final PluginManager manager = server.getPluginManager();
         manager.registerEvents(new ItemGlobalListeners(), this);
@@ -322,7 +322,7 @@ public final class Tiboise extends JavaPlugin {
     public static @Nullable ConfigurationSection getModuleSection(ConfigModules module){
         YamlConfiguration configdata = YamlConfiguration.loadConfiguration(configfile);
         ConfigurationSection sec = configdata.getConfigurationSection("modules");
-        if(sec != null){
+        if(sec != null) {
             return sec.getConfigurationSection(module.getName());
         }
 

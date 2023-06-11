@@ -22,7 +22,7 @@ public class TiboiseMainCommand implements CommandExecutor, TabCompleter {
                         switch (args[1]){
                             case "packs":
                             case "pack":
-                                PlayerResourcesManager.reloadPackData();
+                                PlayerResourcesManager.rebuildResourcePack();
                                 for(Player p : Bukkit.getOnlinePlayers()){
                                     PlayerResourcesManager.sendPlayerResourcePack(p);
                                 }

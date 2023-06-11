@@ -20,11 +20,16 @@ import net.bramp.ffmpeg.progress.ProgressListener;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.AudioFormat;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Comparator;
 import java.util.Locale;
 
@@ -46,6 +51,21 @@ public class TTestCommand implements CommandExecutor {
         //playLocationalAudio(api,src.toPath(),((Player) commandSender).getLocation().getBlock());
         
         if(true){
+            if(commandSender instanceof Player player){
+                String url = "http://img.youtube.com/vi/G2nAezLoy2k/0.jpg";
+                try{
+                    URL target = new URL(url);
+                    try(InputStream in = target.openStream(); FileOutputStream out = new FileOutputStream(new File(Tiboise.getPlugin().getDataFolder().getCanonicalFile()+File.separator+"0.jpg"))){
+                        out.write(in.readAllBytes());
+                    }
+                } catch (MalformedURLException e){
+                    e.printStackTrace();
+                } catch (
+                        IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return true;
+            }
             //Extracts and decodes all streams.
             YoutubeVideo video = JavaYoutubeDownloader.decodeOrNull("https://youtu.be/tzx8gCkIKkU", MultipleDecoderMethod.OR, "html", "embedded");
             //Gets the option with the greatest quality that has video and audio.
