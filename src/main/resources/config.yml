@@ -1,6 +1,8 @@
 test-mode: false
 token: ""
-path-to-ffmpeg:
+path-to-ffmpeg: ""
+webserver-ip: ""
+webserver-port: 8123
 modules:
   bettervanilla:
     enabled: true

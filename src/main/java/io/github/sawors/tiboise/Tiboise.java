@@ -128,7 +128,7 @@ public final class Tiboise extends JavaPlugin {
             
             
             final String pathToFfmpeg = configuration.getString("path-to-ffmpeg");
-            if(pathToFfmpeg != null){
+            if(pathToFfmpeg != null && pathToFfmpeg.length() > 1){
                 ffmpegInstallation = new File(pathToFfmpeg);
                 try{
                     if(!new HashSet<>(Arrays.asList(Objects.requireNonNull(ffmpegInstallation.list()))).containsAll(Set.of("ffmpeg.exe","ffprobe.exe"))){
@@ -152,12 +152,10 @@ public final class Tiboise extends JavaPlugin {
         }
         DatabaseLink.connectInit();*/
         
-        resourceDirectory = new File(getPlugin().getDataFolder().getPath()+File.separator+"resources");
-        resourceDirectory.mkdirs();
-        // TODO : Implement server-side resourcepack management
         
         
-        PlayerDataManager.reloadPackData();
+        
+        PlayerResourcesManager.reloadPackData();
         final Server server = getServer();
         final PluginManager manager = server.getPluginManager();
         manager.registerEvents(new ItemGlobalListeners(), this);
@@ -165,7 +163,7 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new QOLImprovements(),this);
         manager.registerEvents(new CropsManager(),this);
         manager.registerEvents(new AnimalsManager(), this);
-        manager.registerEvents(new PlayerDataManager(), this);
+        manager.registerEvents(new PlayerResourcesManager(), this);
         manager.registerEvents(new PlayerCompassMarker(), this);
         manager.registerEvents(new ExplorationGeneralFeatures(), this);
         manager.registerEvents(new OfflinePlayerManagement(), this);
@@ -289,6 +287,9 @@ public final class Tiboise extends JavaPlugin {
         }
     }
 
+    public static YamlConfiguration getConfigData() {
+        return YamlConfiguration.loadConfiguration(configfile);
+    }
 
     public static JavaPlugin getPlugin(){
         return instance;
@@ -302,9 +303,7 @@ public final class Tiboise extends JavaPlugin {
         return jdaInstance;
     }
     
-    public static File getResourceDirectory() {
-        return resourceDirectory;
-    }
+    
     
     public static @Nullable File getFFmpegInstallation() {
         return ffmpegInstallation;

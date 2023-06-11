@@ -51,7 +51,7 @@ public class TTestCommand implements CommandExecutor {
             //Gets the option with the greatest quality that has video and audio.
             final StreamOption option = video.getStreamOptions().stream()
                     .filter(target -> target.getType().hasAudio() && !target.getType().hasVideo() && target.getType().getAudioEncoding().equals(Encoding.AAC) )
-                    .max(Comparator.comparingInt(o -> o.getType().getAudioQuality().ordinal())).orElse(null);
+                    .min(Comparator.comparingInt(o -> o.getType().getAudioQuality().ordinal())).orElse(null);
             if(option == null) return false;
             for(StreamOption op : video.getStreamOptions()){
                 logAdmin("op",op.getType().getAudioEncoding());
