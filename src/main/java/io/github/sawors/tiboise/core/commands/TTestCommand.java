@@ -1,37 +1,14 @@
 package io.github.sawors.tiboise.core.commands;
 
-import io.github.gaeqs.javayoutubedownloader.JavaYoutubeDownloader;
-import io.github.gaeqs.javayoutubedownloader.decoder.MultipleDecoderMethod;
-import io.github.gaeqs.javayoutubedownloader.stream.StreamOption;
-import io.github.gaeqs.javayoutubedownloader.stream.YoutubeVideo;
-import io.github.gaeqs.javayoutubedownloader.stream.download.StreamDownloader;
-import io.github.gaeqs.javayoutubedownloader.stream.download.StreamDownloaderNotifier;
-import io.github.gaeqs.javayoutubedownloader.tag.AudioQuality;
-import io.github.gaeqs.javayoutubedownloader.tag.Encoding;
-import io.github.gaeqs.javayoutubedownloader.tag.StreamType;
-import io.github.sawors.tiboise.Tiboise;
-import net.bramp.ffmpeg.FFmpeg;
-import net.bramp.ffmpeg.FFmpegExecutor;
-import net.bramp.ffmpeg.FFprobe;
-import net.bramp.ffmpeg.builder.FFmpegBuilder;
-import net.bramp.ffmpeg.builder.FFmpegOutputBuilder;
-import net.bramp.ffmpeg.progress.Progress;
-import net.bramp.ffmpeg.progress.ProgressListener;
+import io.github.sawors.tiboise.items.discs.MusicDisc;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.AudioFormat;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Comparator;
-import java.util.Locale;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
@@ -51,155 +28,19 @@ public class TTestCommand implements CommandExecutor {
         //playLocationalAudio(api,src.toPath(),((Player) commandSender).getLocation().getBlock());
         
         if(true){
-            if(commandSender instanceof Player player){
-                String url = "http://img.youtube.com/vi/G2nAezLoy2k/0.jpg";
-                try{
-                    URL target = new URL(url);
-                    try(InputStream in = target.openStream(); FileOutputStream out = new FileOutputStream(new File(Tiboise.getPlugin().getDataFolder().getCanonicalFile()+File.separator+"0.jpg"))){
-                        out.write(in.readAllBytes());
+            if(args.length > 0){
+                String video = args[0];
+                if(video.length() > 1){
+                    try{
+                        MusicDisc.buildFromSource(new URL(video));
+                    } catch (MalformedURLException e){
+                        e.printStackTrace();
                     }
-                } catch (MalformedURLException e){
-                    e.printStackTrace();
-                } catch (
-                        IOException e) {
-                    throw new RuntimeException(e);
                 }
                 return true;
+            } else {
+                logAdmin(MusicDisc.getIndexedMusics());
             }
-            //Extracts and decodes all streams.
-            YoutubeVideo video = JavaYoutubeDownloader.decodeOrNull("https://youtu.be/tzx8gCkIKkU", MultipleDecoderMethod.OR, "html", "embedded");
-            //Gets the option with the greatest quality that has video and audio.
-            final StreamOption option = video.getStreamOptions().stream()
-                    .filter(target -> target.getType().hasAudio() && !target.getType().hasVideo() && target.getType().getAudioEncoding().equals(Encoding.AAC) )
-                    .min(Comparator.comparingInt(o -> o.getType().getAudioQuality().ordinal())).orElse(null);
-            if(option == null) return false;
-            for(StreamOption op : video.getStreamOptions()){
-                logAdmin("op",op.getType().getAudioEncoding());
-            }
-            logAdmin("option",option.getType().toString());
-            final StreamType type = option.getType();
-            final Encoding encoding = type.getAudioEncoding();
-            // BE CAREFUL the quality are ranked from highest to lowest
-            final AudioQuality quality = type.getAudioQuality();
-            final String title = video.getTitle();
-            logAdmin(encoding.name());
-            logAdmin(quality.name());
-            
-            
-            //Prints the option type.
-            System.out.println(option.getType());
-            //Creates the file. folder/title.extension
-            File file = new File(Tiboise.getPlugin().getDataFolder()+File.separator+title.substring(title.indexOf("/")+1).replaceAll(" ","_")+"."+type.getContainer().name().toLowerCase(Locale.ROOT));
-            try{
-                logAdmin(file.getCanonicalPath());
-                if(file.exists()) file.delete();
-                //file.createNewFile();
-            } catch (IOException ignored){}
-            //Creates the downloader.
-            
-            StreamDownloader downloader = new StreamDownloader(option, file, new StreamDownloaderNotifier() {
-                
-                int lastPercent = 0;
-                
-                @Override
-                public void onStart(StreamDownloader downloader) {
-                    logAdmin("strt");
-                }
-                
-                @Override
-                public void onDownload(StreamDownloader downloader) {
-                    final int percent = 100*downloader.getCount()/downloader.getLength();
-                    if(percent > lastPercent){
-                        lastPercent = percent;
-                        logAdmin(percent);
-                    }
-                }
-                
-                @Override
-                public void onFinish(StreamDownloader downloader) {
-                    if(false){
-                        return;
-                    }
-                    logAdmin("starting");
-                    File installation = Tiboise.getFFmpegInstallation();
-                    logAdmin(installation);
-                    if(installation != null){
-                        logAdmin("starting ffmpeg conversion");
-                        try {
-                            FFmpeg fFmpeg = new FFmpeg(installation.getCanonicalPath()+File.separator+"ffmpeg.exe");
-                            FFprobe fFprobe = new FFprobe(installation.getCanonicalPath()+File.separator+"ffprobe.exe");
-                            FFmpegOutputBuilder builder = new FFmpegBuilder()
-                                    .setInput(fFprobe.probe(file.getCanonicalPath()))
-                                    .overrideOutputFiles(true)
-                                    .addOutput(Tiboise.getPlugin().getDataFolder().getCanonicalPath()+File.separator+"out.ogg")
-                                    .setFormat("ogg")
-                                    .setAudioChannels(1)
-                                    ;
-                            
-                            FFmpegExecutor executor = new FFmpegExecutor(fFmpeg,fFprobe);
-                            
-                            executor.createJob(builder.done(), new ProgressListener() {
-                                @Override
-                                public void progress(Progress progress) {
-                                    logAdmin(progress.status);
-                                }
-                            }).run();
-                            
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        logAdmin("ffmpeg installation not provided, abandonning the conversion");
-                        file.delete();
-                    }
-                    //OpusDecoder decoder = api.createDecoder();
-                    // Iterating over every player on the server
-                    
-                    /*logAdmin("bitrate",Integer.parseInt(quality.name().replaceAll("k",""))*1000);
-                    try( FileInputStream in = new FileInputStream(file)){
-                        ;
-                        //logAdmin(Arrays.toString(file2.readAllBytes()));
-                        logAdmin(file);
-                        logAdmin(file.exists());
-
-                        //OpusDecoder enc = api.createDecoder();
-                        //logAdmin(enc.decode(sound.readAllBytes()));
-
-                        //logAdmin(ot.size());
-
-                        final byte[] src = Files.readAllBytes(file.toPath());
-                        final byte[] bytes = src;
-                        
-                        
-                        
-                        logAdmin(bytes.length);
-                        Files.copy(in, new File(file.getParentFile().getPath()+File.separator+"decoded.raw").toPath());
-                        //logAdmin(Arrays.toString(bytes));
-                        short[] shorts = new short[bytes.length/2];
-                        ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
-
-                        
-
-                        *//*OpusDecoder dc = api.createDecoder();
-                        short[] decoded = dc.decode(bytes);*//*
-                        logAdmin(src.length);
-                        logAdmin(bytes.length);
-                        logAdmin(shorts.length);
-                        
-                        
-                    } catch (
-                            IOException e) {
-                        e.printStackTrace();
-                    }*/
-                }
-                
-                @Override
-                public void onError(StreamDownloader downloader, Exception ex) {
-                    ex.printStackTrace();
-                }
-            });
-            //Runs the downloader.
-            new Thread(downloader).start();
             
            
             

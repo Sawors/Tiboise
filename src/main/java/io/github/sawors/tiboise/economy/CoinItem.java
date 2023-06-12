@@ -171,8 +171,8 @@ public class CoinItem extends TiboiseItem implements Listener {
                         s -= sref/(mid);
                         s = Math.max(0,s);
                     }
-*/
-                    return result.color(TextColor.color(0xFFD3DE)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+*/                  name = "Star";
+                    return Component.text(name+" Coin").color(TextColor.color(0xFFD3DE)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
                 }
                 default -> {rgb = translateColorString(upcolor);}
             }

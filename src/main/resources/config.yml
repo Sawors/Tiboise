@@ -1,6 +1,7 @@
 test-mode: false
 token: ""
 path-to-ffmpeg: ""
+path-to-ytdlp: ""
 webserver-ip: ""
 webserver-port: 8123
 modules:

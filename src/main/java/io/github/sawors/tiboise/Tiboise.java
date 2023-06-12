@@ -76,7 +76,8 @@ public final class Tiboise extends JavaPlugin {
     private static File resourceDirectory = null;
     //
     private static File ffmpegInstallation = null;
-    
+    //
+    private static File ytdlpInstallation = null;
 
     @Override
     public void onEnable() {
@@ -126,16 +127,36 @@ public final class Tiboise extends JavaPlugin {
                 Bukkit.getLogger().log(Level.WARNING,"[Tiboise] Discord features disabled, please add your bot token to config.yml in the field token:\"\"");
             }
             
-            
+            // FFMPEG
             final String pathToFfmpeg = configuration.getString("path-to-ffmpeg");
             if(pathToFfmpeg != null && pathToFfmpeg.length() > 1){
                 ffmpegInstallation = new File(pathToFfmpeg);
                 try{
-                    if(!new HashSet<>(Arrays.asList(Objects.requireNonNull(ffmpegInstallation.list()))).containsAll(Set.of("ffmpeg.exe","ffprobe.exe"))){
+                    if(
+                            new HashSet<>(Arrays.asList(Objects.requireNonNull(ffmpegInstallation.list()))).stream().noneMatch(s -> s.startsWith("ffmpeg"))
+                            || new HashSet<>(Arrays.asList(Objects.requireNonNull(ffmpegInstallation.list()))).stream().noneMatch(s -> s.startsWith("ffprobe"))
+                    ){
                         ffmpegInstallation = null;
                     }
                 } catch (NullPointerException e){
                     ffmpegInstallation = null;
+                }
+            }
+            // YTDLP
+            final String pathToYtdlp = configuration.getString("path-to-ytdlp");
+            logAdmin("path",pathToYtdlp);
+            if(pathToYtdlp != null && pathToYtdlp.length() > 1){
+                ytdlpInstallation = new File(pathToYtdlp);
+                try{
+                    logAdmin(new HashSet<>(Arrays.asList(Objects.requireNonNull(ytdlpInstallation.list()))));
+                    if(
+                            new HashSet<>(Arrays.asList(Objects.requireNonNull(ytdlpInstallation.list()))).stream().noneMatch(s -> s.startsWith("yt-dlp"))
+                    ){
+                        logAdmin("fail");
+                        ytdlpInstallation = null;
+                    }
+                } catch (NullPointerException e){
+                    ytdlpInstallation = null;
                 }
             }
         }
@@ -159,7 +180,7 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new QOLImprovements(),this);
         manager.registerEvents(new CropsManager(),this);
         manager.registerEvents(new AnimalsManager(), this);
-        manager.registerEvents(new PlayerResourcesManager(), this);
+        manager.registerEvents(new LocalResourcesManager(), this);
         manager.registerEvents(new PlayerCompassMarker(), this);
         manager.registerEvents(new ExplorationGeneralFeatures(), this);
         manager.registerEvents(new OfflinePlayerManagement(), this);
@@ -304,6 +325,10 @@ public final class Tiboise extends JavaPlugin {
     
     public static @Nullable File getFFmpegInstallation() {
         return ffmpegInstallation;
+    }
+    
+    public static File getYtdlpInstallation() {
+        return ytdlpInstallation;
     }
     
     public static boolean isModuleEnabled(ConfigModules module){

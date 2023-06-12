@@ -89,7 +89,9 @@ public class TiboiseUtils {
             final String separator = text.contains("_") ? "_" : " ";
             StringBuilder bd = new StringBuilder();
             for(String s : text.split(separator)){
-                bd.append(s.substring(0, 1).toUpperCase(Locale.ROOT)).append(s.substring(1).toLowerCase(Locale.ROOT)).append(separator);
+                if(s.length() > 0){
+                    bd.append(s.substring(0, 1).toUpperCase(Locale.ROOT)).append(s.substring(1).toLowerCase(Locale.ROOT)).append(separator);
+                }
             }
             bd.deleteCharAt(bd.length()-1);
             return bd.toString();

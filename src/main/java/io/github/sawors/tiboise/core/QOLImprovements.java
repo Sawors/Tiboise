@@ -483,13 +483,13 @@ public class QOLImprovements implements Listener {
         Tiboise.addPlayerToInvisibleNametagTeam(p);
         
         // rename. TODO : merge this with the nickname mechanic
-        if(PlayerResourcesManager.hasNickName(p.getUniqueId())){
+        if(LocalResourcesManager.hasNickName(p.getUniqueId())){
             //switch(p.getUniqueId().toString()){
             //            case "66e25a14-b468-4cb1-8cde-6cf6054255ba" -> name = "Gros Orteil de Pied";
             //            case "30b80f6f-f0dc-4b4a-96b2-c37b28494b1b" -> name = "MOLE1283";
             //            case "6864eb4a-91d6-4292-8dfb-f398cbd5dc57" -> name = "Walid Bedouin";
             //        }
-            final String name = PlayerResourcesManager.getNickName(p.getUniqueId());
+            final String name = LocalResourcesManager.getNickName(p.getUniqueId());
             Component compname = Component.text(name);
             p.displayName(compname);
             p.playerListName(compname);
