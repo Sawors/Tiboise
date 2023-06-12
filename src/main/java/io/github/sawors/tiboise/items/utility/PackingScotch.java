@@ -34,6 +34,7 @@ public class PackingScotch extends TiboiseItem implements Listener {
     
     public PackingScotch(){
         setMaterial(Material.SLIME_BALL);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setLore(List.of(
                 Component.text("Use it to pack storage blocks.").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),
                 Component.text("Packed storage blocks can be broken").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE),

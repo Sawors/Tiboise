@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.items.tools;
 
 import io.github.sawors.tiboise.items.DurabilityItem;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -29,6 +30,7 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
     
     public AmethystPickaxe(){
         setMaterial(pickaxeMaterial);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setHelpText("This pickaxe behaves like an iron pickaxe enchanted with Silk Touch");
     }
     

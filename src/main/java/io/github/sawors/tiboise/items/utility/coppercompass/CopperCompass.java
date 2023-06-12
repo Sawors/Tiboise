@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.items.utility.coppercompass;
 
 import io.github.sawors.tiboise.gui.GUIDisplayItem;
 import io.github.sawors.tiboise.gui.TiboiseGUI;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -55,6 +56,7 @@ public class CopperCompass extends TiboiseItem implements Listener {
 
     public CopperCompass(){
         setMaterial(Material.COMPASS);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
     }
 
     public static TiboiseGUI.SortingType getPreferredSortingMethod(UUID playerId){

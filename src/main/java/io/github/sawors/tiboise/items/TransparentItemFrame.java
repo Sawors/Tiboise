@@ -6,7 +6,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -25,6 +24,7 @@ public class TransparentItemFrame extends TiboiseItem implements Listener, Utili
     
     public TransparentItemFrame(){
         setMaterial(Material.ITEM_FRAME);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
     }
     
     @Override
@@ -44,7 +44,6 @@ public class TransparentItemFrame extends TiboiseItem implements Listener, Utili
     
     @EventHandler
     public void makeSpawnedTransparent(PlayerInteractEvent event){
-        final Player p = event.getPlayer();
         ItemStack item = event.getItem();
         Block clicked = event.getClickedBlock();
         if(item != null && event.getAction().isRightClick() && clicked != null && getItemId(item).equals(getId(TransparentItemFrame.class))){

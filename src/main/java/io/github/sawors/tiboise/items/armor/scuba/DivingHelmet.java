@@ -33,6 +33,7 @@ public class DivingHelmet extends TiboiseItem implements Listener, DurabilityIte
         setMaterial(Material.CHAINMAIL_HELMET);
         setDisplayName(Component.text("Diving Helmet").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setShortLore("Helps you breath underwater");
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         addTag(ItemTag.PREVENT_BREAKING);
     }
     

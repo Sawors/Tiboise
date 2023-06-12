@@ -4,6 +4,7 @@ import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.VoicechatServerApi;
 import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -34,6 +35,7 @@ public class PortableRadio extends FrequencyItem implements Listener {
     public PortableRadio(){
         setMaterial(Material.AMETHYST_SHARD);
         setFrequency(462000);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
     }
     
     @Override

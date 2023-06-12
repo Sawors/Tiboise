@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.items.tools.radius;
 
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemVariant;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -34,6 +35,7 @@ public class Excavator extends RadiusBreakingTool implements Listener {
     
     public Excavator(ItemVariant variant){
         setVariant(variant.toString());
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
     }
     
     @Override

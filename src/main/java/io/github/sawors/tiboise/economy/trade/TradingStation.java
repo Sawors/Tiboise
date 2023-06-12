@@ -3,8 +3,18 @@ package io.github.sawors.tiboise.economy.trade;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class TradingStation implements Listener {
+    
+    private ItemStack sold;
+    private int stockAmount;
+    private int stockedCoins;
+    
+    
+    
+    
+    
     
     @EventHandler
     public static void displayCategory(PlayerInteractEvent event){

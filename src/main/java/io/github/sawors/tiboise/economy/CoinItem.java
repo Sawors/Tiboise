@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.economy;
 
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -92,6 +93,7 @@ public class CoinItem extends TiboiseItem implements Listener {
 
     private void setCoinBaseAttributes(){
         setMaterial(Material.GOLD_NUGGET);
+        addTag(ItemTag.INGREDIENT);
         setId("coin");
     }
     
@@ -170,7 +172,7 @@ public class CoinItem extends TiboiseItem implements Listener {
                         s = Math.max(0,s);
                     }
 */
-                    return result.decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+                    return result.color(TextColor.color(0xFFD3DE)).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
                 }
                 default -> {rgb = translateColorString(upcolor);}
             }

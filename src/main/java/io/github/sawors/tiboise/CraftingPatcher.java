@@ -24,6 +24,7 @@ public class CraftingPatcher implements Listener {
         Recipe r = event.getRecipe();
         if(event.getInventory().getResult() == null || r == null) return;
         if(Arrays.stream(event.getInventory().getMatrix()).anyMatch(TiboiseItem::isTiboiseItem)){
+            if(Arrays.stream(event.getInventory().getMatrix()).allMatch(c -> (!TiboiseItem.isTiboiseItem(c) || !TiboiseItem.getItemTags(c).contains(ItemTag.PREVENT_USE_IN_CRAFTING.toString())))) return;
             final ItemStack result = event.getInventory().getResult();
             final TiboiseItem tiboiseResult = TiboiseItem.getRegisteredItem(TiboiseItem.getItemId(result));
             boolean cancelEvent = false;

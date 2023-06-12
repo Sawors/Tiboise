@@ -1,5 +1,6 @@
 package io.github.sawors.tiboise.items.utility;
 
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -21,6 +22,7 @@ public class InkQuill extends TiboiseItem implements Listener {
     
     public InkQuill(){
         setMaterial(Material.FEATHER);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
     }
     
     @Override

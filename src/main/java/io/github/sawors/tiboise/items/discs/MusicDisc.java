@@ -37,6 +37,7 @@ public class MusicDisc extends TiboiseItem {
     
     public MusicDisc(String musicName){
         this("unknown",musicName);
+        
     }
     
     public static String lookupMusicName(String hash){

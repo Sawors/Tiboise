@@ -19,6 +19,7 @@ public abstract class TiboiseHat extends TiboiseItem implements Listener {
     
     protected void setDefaultHatData(){
         addTag(ItemTag.HAT);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setHelpText("Right click while looking up with this hat in your hand to wear it. To take it off with style, look down and right click while sneaking with an empty hand.");
     }
     

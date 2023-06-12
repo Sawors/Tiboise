@@ -4,6 +4,7 @@ import com.destroystokyo.paper.MaterialSetTag;
 import com.google.common.collect.Lists;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemVariant;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.github.sawors.tiboise.items.tools.VeinMinerUtility;
 import net.kyori.adventure.text.Component;
@@ -47,6 +48,7 @@ public class Broadaxe extends TiboiseItem implements Listener {
     
     public Broadaxe(ItemVariant variant){
         setVariant(variant.toString());
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
     }
     
     

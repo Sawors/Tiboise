@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.items.utility;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -40,6 +41,7 @@ public class Flare extends TiboiseItem implements Listener {
     
     public Flare(){
         setMaterial(Material.FIREWORK_ROCKET);
+        addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setLore(List.of(
                 Component.text("Useful when lost or when looking for someone").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
         ));
