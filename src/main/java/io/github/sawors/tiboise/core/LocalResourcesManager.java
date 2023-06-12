@@ -210,6 +210,7 @@ public class LocalResourcesManager implements Listener {
                 // before copying merging the data from sounds.json
                 // transferring downloaded audio from the music storage to the asset directory :
                 File newSound = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"sounds.json");
+                newSound.getParentFile().mkdirs();
                 String subDir = "music_discs";
                 Set<String> loadedMusics = new HashSet<>();
                 for(String indexedMusicId : MusicDisc.getIndexedMusics().keySet()){
@@ -221,17 +222,18 @@ public class LocalResourcesManager implements Listener {
                         File cit = new File(musicDir.getPath()+File.separator+indexedMusicId+".properties");
                         File texture = new File(musicDir.getPath()+File.separator+indexedMusicId+".png");
                         if(ogg.exists() && model.exists() && cit.exists() && texture.exists()){
-                            File targetOggs = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"sounds"+File.separator+subDir+File.separator+indexedMusicId+".ogg");
-                            File targetModels = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"models"+File.separator+"item"+File.separator+subDir);
-                            File targetCits = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"optifine"+File.separator+"cit"+File.separator+subDir);
-                            File targetTextures = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"textures"+File.separator+"item"+File.separator+subDir);
+                            File targetOggs = new File(tempDir.getPath()+File.separator+"assets"+File.separator+"minecraft"+File.separator+"sounds"+File.separator+subDir+File.separator+indexedMusicId+".ogg");
+                            File targetModels = new File(tempDir.getPath()+File.separator+"assets"+File.separator+"minecraft"+File.separator+"models"+File.separator+"item"+File.separator+subDir);
+                            File targetCits = new File(tempDir.getPath()+File.separator+"assets"+File.separator+"minecraft"+File.separator+"optifine"+File.separator+"cit"+File.separator+subDir);
+                            File targetTextures = new File(tempDir.getPath()+File.separator+"assets"+File.separator+"minecraft"+File.separator+"textures"+File.separator+"item"+File.separator+subDir);
+                            
                             
                             FileUtils.copyFile(ogg,targetOggs);
                             FileUtils.copyFileToDirectory(model,targetModels);
                             FileUtils.copyFileToDirectory(cit,targetCits);
                             FileUtils.copyFileToDirectory(texture,targetTextures);
                             // copying the index to allow users to find back the songs
-                            FileUtils.copyFile(getMusicIndexFile(),targetOggs);
+                            FileUtils.copyFileToDirectory(getMusicIndexFile(),targetOggs.getParentFile());
                             
                             loadedMusics.add(indexedMusicId);
                         }
@@ -252,12 +254,10 @@ public class LocalResourcesManager implements Listener {
                 baseSound.createNewFile();
                 
                 
-                
-                
                 if(baseSound.exists() && newSound.exists()){
                     try{
                         merged.putAll(mapper.readValue(baseSound,new TypeReference<HashMap<String, Object>>(){}));
-                    } catch (JacksonException ignored){}
+                    } catch (JacksonException  ignored){}
                     try{
                         merged.putAll(mapper.readValue(newSound,new TypeReference<HashMap<String, Object>>(){}));
                     } catch (JacksonException ignored){}

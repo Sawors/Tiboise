@@ -194,10 +194,10 @@ public class MusicDisc extends TiboiseItem implements Listener {
                             Tiboise.getFFmpegInstallation()+File.separator+"ffmpeg",// also works with "youtube-dl"
                             "-i",discId+".ogg",
                             "-af", "pan=mono|c0=0.5*FL+0.5*FR",
-                            "-ab","128k",
                             "sound.ogg"
                     );
-                    mixDown.redirectError(new File("C:/Users/sosol/IdeaProjects/Tiboise/_server/server/plugins/Tiboise/resources/musics/-145730963/err.txt"));
+                    File log = new File(musicStorageDirectory.getPath()+File.separator+"err.txt");
+                    mixDown.redirectError(log);
                     //-af pan=1c|c0=0.5*c0+0.5*c1
                     Process ffmpegP = mixDown.start();
                     // timeout the thread after 1 minutes if there is no answer.
@@ -210,6 +210,7 @@ public class MusicDisc extends TiboiseItem implements Listener {
                     
                     // delete the downloaded stereo version
                     Files.delete(Path.of(musicStorageDirectory.getPath(),discId+".ogg"));
+                    log.delete();
                     
                     // creating a file which name is the title to improve readability
                     new File(musicStorageDirectory.getPath()+File.separator+disc.getTitle()).createNewFile();
