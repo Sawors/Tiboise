@@ -25,8 +25,11 @@ public class GiveItemCommand implements CommandExecutor {
             
             if(args.length >= 2){
                 if(item instanceof MusicDisc){
-                    final String name = Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(args[0]+" ","");
-                    final String lookup = MusicDisc.lookupMusicName(name);
+                    String name = Arrays.stream(args).reduce((c1,c2) -> c1+" "+c2).get().replaceFirst(args[0]+" ","");
+                    String lookup = MusicDisc.lookupMusicName(name);
+                    if(lookup == null && (name.startsWith("-") || !name.contains("-"))){
+                        name = "Unknown - Unknown";
+                    }
                     Pair<String,String> musicData = MusicDisc.parseTitleString(lookup != null ? lookup : name);
                     item = new MusicDisc(musicData.getKey(),musicData.getValue());
                 } else {

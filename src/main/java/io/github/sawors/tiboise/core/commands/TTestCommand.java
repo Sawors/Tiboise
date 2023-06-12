@@ -1,9 +1,13 @@
 package io.github.sawors.tiboise.core.commands;
 
+import io.github.sawors.tiboise.core.LocalResourcesManager;
 import io.github.sawors.tiboise.items.discs.MusicDisc;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.AudioFormat;
@@ -32,7 +36,12 @@ public class TTestCommand implements CommandExecutor {
                 String video = args[0];
                 if(video.length() > 1){
                     try{
-                        MusicDisc.buildFromSource(new URL(video));
+                        MusicDisc.buildFromSource(new URL(video), disc -> {
+                            if(commandSender instanceof Player player){
+                                player.sendMessage(Component.text("created disc with id : "+disc.getTitleHash()).clickEvent(ClickEvent.suggestCommand("/tgive music_disc "+disc.getTitleHash())));
+                            }
+                            LocalResourcesManager.rebuildResourcePack();
+                        });
                     } catch (MalformedURLException e){
                         e.printStackTrace();
                     }

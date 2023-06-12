@@ -36,9 +36,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
@@ -69,7 +71,7 @@ public class MusicDisc extends TiboiseItem implements Listener {
     }
     
     public static String lookupMusicName(String hash){
-        return hashLookup.get(hash);
+        return indexedMusics.get(hash);
     }
     
     public MusicDisc(String author, String musicName){
@@ -97,9 +99,8 @@ public class MusicDisc extends TiboiseItem implements Listener {
      *
      * @param youtubeUrl the url of the YouTube video
      */
-    public static void buildFromSource(@NotNull URL youtubeUrl){
+    public static void buildFromSource(@NotNull URL youtubeUrl, Consumer<MusicDisc> whenFinished){
         String videoId = parseVideoId(youtubeUrl);
-        logAdmin(videoId);
         
         if(Tiboise.getYtdlpInstallation() == null){
             Bukkit.getLogger().log(Level.WARNING,"yt-dlp path not specified, disc creation cannot be done");
@@ -169,7 +170,6 @@ public class MusicDisc extends TiboiseItem implements Listener {
                             "--extract-audio",
                             "--audio-format", "vorbis",
                             "--ffmpeg-location",Tiboise.getFFmpegInstallation().getPath(),
-                            "--postprocessor-args", "ffmpeg:-ac 1",
                             "--audio-quality", "5",
                             "--output", String.valueOf(disc.getTitleHash()),
                             "--embed-metadata",
@@ -177,14 +177,43 @@ public class MusicDisc extends TiboiseItem implements Listener {
                             "https://www.youtube.com/watch?v="+videoId
                     
                     );
+                    //-af pan=1c|c0=0.5*c0+0.5*c1
+                    getAudio.redirectOutput(new File("C:/Users/sosol/IdeaProjects/Tiboise/_server/server/plugins/Tiboise/resources/musics/-145730963/out.txt"));
+                    getAudio.redirectError(new File("C:/Users/sosol/IdeaProjects/Tiboise/_server/server/plugins/Tiboise/resources/musics/-145730963/err.txt"));
                     Process p = getAudio.start();
                     // timeout the thread after 3 minutes if there is no answer.
-                    p.waitFor(180, TimeUnit.SECONDS);
+                    p.waitFor(120, TimeUnit.SECONDS);
                     if(p.exitValue() != 0) {
                         logAdmin("download failed");
                         return;
                     }
                     logAdmin("download successful !");
+                    
+                    //ffmpeg mixing to mono
+                    ProcessBuilder mixDown = new ProcessBuilder();
+                    mixDown.directory(musicStorageDirectory);
+                    mixDown.command (
+                            Tiboise.getFFmpegInstallation()+File.separator+"ffmpeg",// also works with "youtube-dl"
+                            "-y",
+                            "-i",discId+".ogg",
+                            "-af", "pan=mono|c0=0.5*FL+0.5*FR",
+                            "sound.ogg"
+                    );
+                    //-af pan=1c|c0=0.5*c0+0.5*c1
+                    Process ffmpegP = mixDown.start();
+                    // timeout the thread after 3 minutes if there is no answer.
+                    ffmpegP.waitFor(60, TimeUnit.SECONDS);
+                    if(ffmpegP.exitValue() != 0) {
+                        logAdmin("mixing failed");
+                        return;
+                    }
+                    logAdmin("mixing successful !");
+                    
+                    // delete the downloaded stereo version
+                    Files.delete(Path.of(musicStorageDirectory.getPath(),discId+".ogg"));
+                    
+                    // creating a file which name is the title to improve readability
+                    new File(musicStorageDirectory.getPath()+File.separator+disc.getTitle()).createNewFile();
                     
                     String scanCit = "";
                     String scanModel = "{}";
@@ -228,6 +257,8 @@ public class MusicDisc extends TiboiseItem implements Listener {
                         indexedMusics.put(String.valueOf(discId),disc.getTitle());
                         
                         logAdmin("DONE !!!");
+                        whenFinished.accept(disc);
+                        
                     } catch (IOException | IllegalArgumentException e){
                         e.printStackTrace();
                     }

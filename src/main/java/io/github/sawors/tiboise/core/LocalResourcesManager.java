@@ -1,9 +1,9 @@
 package io.github.sawors.tiboise.core;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import io.github.sawors.tiboise.Tiboise;
@@ -24,7 +24,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -38,6 +37,8 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 
 public class LocalResourcesManager implements Listener {
@@ -148,16 +149,13 @@ public class LocalResourcesManager implements Listener {
     @EventHandler
     public static void reloadPlayerResourcePack(PlayerResourcePackStatusEvent event){
         final Player p = event.getPlayer();
-        if(event.getStatus().equals(PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) && !reloadingPlayers.contains(p.getUniqueId())){
+        if(reloadingPlayers.contains(p.getUniqueId()) && event.getStatus().equals(PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED)){
             new BukkitRunnable(){
                 @Override
                 public void run() {
                     sendPlayerResourcePack(p);
-                    reloadingPlayers.add(p.getUniqueId());
                 }
             }.runTaskLater(Tiboise.getPlugin(),20);
-        } else if(event.getStatus().equals(PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED)){
-            reloadingPlayers.remove(p.getUniqueId());
         }
     }
     
@@ -217,64 +215,64 @@ public class LocalResourcesManager implements Listener {
                 for(String indexedMusicId : MusicDisc.getIndexedMusics().keySet()){
                     File musicDir = new File(getMusicStorageDirectory().getPath()+File.separator+indexedMusicId);
                     if(musicDir.exists()){
-                        File ogg = new File(musicDir.getPath()+File.separator+indexedMusicId+".ogg");
+                        // sound file names are all sound.ogg to allow better compatibility with tools like ffmpeg, some ids might start with a "-" which creates annoying errors to handle
+                        File ogg = new File(musicDir.getPath()+File.separator+"sound.ogg");
                         File model = new File(musicDir.getPath()+File.separator+indexedMusicId+".json");
                         File cit = new File(musicDir.getPath()+File.separator+indexedMusicId+".properties");
                         File texture = new File(musicDir.getPath()+File.separator+indexedMusicId+".png");
                         if(ogg.exists() && model.exists() && cit.exists() && texture.exists()){
-                            File targetOggs = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"sounds"+File.separator+subDir);
+                            File targetOggs = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"sounds"+File.separator+subDir+File.separator+indexedMusicId+".ogg");
                             File targetModels = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"models"+File.separator+"item"+File.separator+subDir);
                             File targetCits = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"optifine"+File.separator+"cit"+File.separator+subDir);
                             File targetTextures = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"textures"+File.separator+"item"+File.separator+subDir);
                             
-                            FileUtils.copyFileToDirectory(ogg,targetOggs);
+                            FileUtils.copyFile(ogg,targetOggs);
                             FileUtils.copyFileToDirectory(model,targetModels);
                             FileUtils.copyFileToDirectory(cit,targetCits);
                             FileUtils.copyFileToDirectory(texture,targetTextures);
+                            // copying the index to allow users to find back the songs
+                            FileUtils.copyFileToDirectory(getMusicIndexFile(),targetOggs);
                             
                             loadedMusics.add(indexedMusicId);
                         }
                     }
                 }
-                String soundTemplate = "{}";
-                try(
-                        InputStream jsonIn = Tiboise.getPlugin().getResource("discs/soundElement.json");
-                        Scanner scannerJson = new Scanner(Objects.requireNonNull(jsonIn));
-                ){
-                    soundTemplate = scannerJson.useDelimiter("\\A").next();
-                } catch (IOException | NullPointerException e){
-                    e.printStackTrace();
-                }
+                
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String,Object> merged = new HashMap<>();
+                
+                Map<String,Object> soundTemplate = new HashMap<>();
+                try(InputStream in = Tiboise.getPlugin().getResource("discs/soundElement.json")){
+                    soundTemplate = mapper.readValue(in,new TypeReference<HashMap<String, Object>>(){});
+                } catch (JacksonException ignored){}
                 
                 File baseSound = new File(tempDir.getPath()+File.separator+"assets"+File.separator+"minecraft"+File.separator+"sounds.json");
                 
-                Map<String,Object> merged = new HashMap<>();
+                newSound.createNewFile();
+                baseSound.createNewFile();
+                
+                
+                
+                
                 if(baseSound.exists() && newSound.exists()){
-                    ObjectMapper mapper = new ObjectMapper();
-                    Map<?, ?> oldData = mapper.readValue(baseSound, HashMap.class);
-                    Map<?, ?> newData = mapper.readValue(newSound,Map.class);
-                    
-                    for(Map.Entry<?,?> entry : oldData.entrySet()){
-                        if(entry.getKey() instanceof String key && entry.getValue() != null){
-                            merged.put(key,entry.getValue());
-                        }
-                    }
-                    for(Map.Entry<?,?> entry : newData.entrySet()){
-                        if(entry.getKey() instanceof String key && entry.getValue() != null){
-                            merged.put(key,entry.getValue());
-                        }
-                    }
+                    try{
+                        merged.putAll(mapper.readValue(baseSound,new TypeReference<HashMap<String, Object>>(){}));
+                    } catch (JacksonException ignored){}
+                    try{
+                        merged.putAll(mapper.readValue(newSound,new TypeReference<HashMap<String, Object>>(){}));
+                    } catch (JacksonException ignored){}
                     
                     for(String musicId : loadedMusics){
-                        merged.put("tiboise.music_disc."+musicId,soundTemplate.replace("MUSIC_ID",musicId));
+                        Map<String, Object> localMap = new HashMap<>(soundTemplate);
+                        if(localMap.containsKey("sounds")) localMap.put("sounds",List.of("music_discs/"+musicId));
+                        merged.put("tiboise.music_disc."+musicId,localMap);
                     }
                 }
                 
                 FileUtils.copyDirectoryToDirectory(assets,tempDir);
                 if(!merged.isEmpty()){
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
                     try(FileWriter writer = new FileWriter(baseSound)){
-                        gson.toJson(new JSONObject(merged),writer);
+                        writer.write(mapper.writeValueAsString(merged));
                     }
                 }
             } catch (IOException e){
@@ -315,7 +313,10 @@ public class LocalResourcesManager implements Listener {
                         }
                         
                         String hash = Hex.encodeHexString(digest.digest());
+                        packhash = hash;
                         Files.writeString(Path.of(webServerDirectory.getPath()+File.separator+hashFileName),hash);
+                        logAdmin(packhash);
+                        logAdmin("pack successfully built !");
                     }
                 }
                 
@@ -335,12 +336,15 @@ public class LocalResourcesManager implements Listener {
     }
     
     public static void sendPlayerResourcePack(Player p){
-        try{
-            String hash = Files.readString(Path.of(webServerDirectory + File.separator + hashFileName));
-            hash = hash.substring(0,Math.min(40,hash.length()));
-            p.setResourcePack(getPackSource(), hash);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(getPackHash() != null){
+            String hash = getPackHash().substring(0,Math.min(40,getPackHash().length()));
+            logAdmin(hash);
+            p.setResourcePack(getPackSource(), hash,true,Component.text("RPDL"));
+            if(!reloadingPlayers.contains(p.getUniqueId())){
+                reloadingPlayers.add(p.getUniqueId());
+            } else {
+                reloadingPlayers.remove(p.getUniqueId());
+            }
         }
     }
     
