@@ -178,8 +178,6 @@ public class MusicDisc extends TiboiseItem implements Listener {
                     
                     );
                     //-af pan=1c|c0=0.5*c0+0.5*c1
-                    getAudio.redirectOutput(new File("C:/Users/sosol/IdeaProjects/Tiboise/_server/server/plugins/Tiboise/resources/musics/-145730963/out.txt"));
-                    getAudio.redirectError(new File("C:/Users/sosol/IdeaProjects/Tiboise/_server/server/plugins/Tiboise/resources/musics/-145730963/err.txt"));
                     Process p = getAudio.start();
                     // timeout the thread after 3 minutes if there is no answer.
                     p.waitFor(120, TimeUnit.SECONDS);
@@ -194,14 +192,15 @@ public class MusicDisc extends TiboiseItem implements Listener {
                     mixDown.directory(musicStorageDirectory);
                     mixDown.command (
                             Tiboise.getFFmpegInstallation()+File.separator+"ffmpeg",// also works with "youtube-dl"
-                            "-y",
                             "-i",discId+".ogg",
                             "-af", "pan=mono|c0=0.5*FL+0.5*FR",
+                            "-ab","128k",
                             "sound.ogg"
                     );
+                    mixDown.redirectError(new File("C:/Users/sosol/IdeaProjects/Tiboise/_server/server/plugins/Tiboise/resources/musics/-145730963/err.txt"));
                     //-af pan=1c|c0=0.5*c0+0.5*c1
                     Process ffmpegP = mixDown.start();
-                    // timeout the thread after 3 minutes if there is no answer.
+                    // timeout the thread after 1 minutes if there is no answer.
                     ffmpegP.waitFor(60, TimeUnit.SECONDS);
                     if(ffmpegP.exitValue() != 0) {
                         logAdmin("mixing failed");

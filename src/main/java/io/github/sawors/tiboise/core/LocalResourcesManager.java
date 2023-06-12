@@ -231,7 +231,7 @@ public class LocalResourcesManager implements Listener {
                             FileUtils.copyFileToDirectory(cit,targetCits);
                             FileUtils.copyFileToDirectory(texture,targetTextures);
                             // copying the index to allow users to find back the songs
-                            FileUtils.copyFileToDirectory(getMusicIndexFile(),targetOggs);
+                            FileUtils.copyFile(getMusicIndexFile(),targetOggs);
                             
                             loadedMusics.add(indexedMusicId);
                         }
