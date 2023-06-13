@@ -315,7 +315,6 @@ public class LocalResourcesManager implements Listener {
                         String hash = Hex.encodeHexString(digest.digest());
                         packhash = hash;
                         Files.writeString(Path.of(webServerDirectory.getPath()+File.separator+hashFileName),hash);
-                        logAdmin(packhash);
                         logAdmin("pack successfully built !");
                     }
                 }
@@ -338,7 +337,6 @@ public class LocalResourcesManager implements Listener {
     public static void sendPlayerResourcePack(Player p){
         if(getPackHash() != null){
             String hash = getPackHash().substring(0,Math.min(40,getPackHash().length()));
-            logAdmin(hash);
             p.setResourcePack(getPackSource(), hash,true,Component.text("RPDL"));
             if(!reloadingPlayers.contains(p.getUniqueId())){
                 reloadingPlayers.add(p.getUniqueId());

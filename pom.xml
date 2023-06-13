@@ -82,6 +82,10 @@
             <id>local-maven-repo</id>
             <url>file:///${project.basedir}/local-maven-repo</url>
         </repository>
+        <repository>
+            <id>aria-repo</id>
+            <url>https://www.asangarin.eu/repo/snapshots</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -116,17 +120,6 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.15.2</version>
         </dependency>
-        <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.10</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>club.minnced</groupId>
-                    <artifactId>opus-java</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
         <dependency>
             <groupId>commons-codec</groupId>
@@ -139,7 +132,12 @@
             <artifactId>commons-io</artifactId>
             <version>2.13.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>eu.asangarin</groupId>
+            <artifactId>arikeysplugin</artifactId>
+            <version>2.2</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 </project>

@@ -17,15 +17,12 @@ import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugi
 import io.github.sawors.tiboise.items.GiveItemCommand;
 import io.github.sawors.tiboise.items.ItemGlobalListeners;
 import io.github.sawors.tiboise.items.TiboiseItem;
+import io.github.sawors.tiboise.items.discs.DiscCommand;
 import io.github.sawors.tiboise.items.discs.MusicManager;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerCompassMarker;
 import io.github.sawors.tiboise.items.utility.coppercompass.PlayerMarkerCommand;
 import io.github.sawors.tiboise.post.LetterCommand;
 import io.github.sawors.tiboise.post.PostLetterBox;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.bukkit.Bukkit;
@@ -71,7 +68,7 @@ public final class Tiboise extends JavaPlugin {
     // versions and patchnote
     private static final String version = "1.2";
     // discord
-    private static JDA jdaInstance = null;
+    //private static JDA jdaInstance = null;
     // resource pack
     private static File resourceDirectory = null;
     //
@@ -114,18 +111,18 @@ public final class Tiboise extends JavaPlugin {
         // DISCORD BOT
         if(configfile != null){
             YamlConfiguration configuration = YamlConfiguration.loadConfiguration(configfile);
-            final String token = configuration.getString("token");
-            if(token != null){
-                jdaInstance = JDABuilder.createDefault(token)
-                        .enableIntents(Set.of(
-                                GatewayIntent.DIRECT_MESSAGES
-                        ))
-                        .setActivity(Activity.playing("Tiboise 1.19.4"))
-                .build();
-                logAdmin("Discord bot enabled !");
-            } else {
-                Bukkit.getLogger().log(Level.WARNING,"[Tiboise] Discord features disabled, please add your bot token to config.yml in the field token:\"\"");
-            }
+//            final String token = configuration.getString("token");
+//            if(token != null){
+//                jdaInstance = JDABuilder.createDefault(token)
+//                        .enableIntents(Set.of(
+//                                GatewayIntent.DIRECT_MESSAGES
+//                        ))
+//                        .setActivity(Activity.playing("Tiboise 1.19.4"))
+//                .build();
+//                logAdmin("Discord bot enabled !");
+//            } else {
+//                Bukkit.getLogger().log(Level.WARNING,"[Tiboise] Discord features disabled, please add your bot token to config.yml in the field token:\"\"");
+//            }
             
             // FFMPEG
             final String pathToFfmpeg = configuration.getString("path-to-ffmpeg");
@@ -203,6 +200,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(server.getPluginCommand("sit")).setExecutor(new SitCommand());
         Objects.requireNonNull(server.getPluginCommand("mp")).setExecutor(new AdminMessageCommand());
         Objects.requireNonNull(server.getPluginCommand("pack")).setExecutor(new PackCommand());
+        Objects.requireNonNull(server.getPluginCommand("disc")).setExecutor(new DiscCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setTabCompleter(maincommand);
@@ -317,9 +315,9 @@ public final class Tiboise extends JavaPlugin {
         return version;
     }
     
-    static JDA getJdaInstance(){
-        return jdaInstance;
-    }
+//    static JDA getJdaInstance(){
+//        return jdaInstance;
+//    }
     
     
     

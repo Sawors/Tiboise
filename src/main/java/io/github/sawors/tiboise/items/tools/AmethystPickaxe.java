@@ -4,7 +4,6 @@ import io.github.sawors.tiboise.items.DurabilityItem;
 import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
@@ -12,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -77,12 +75,12 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
             }
             drops.addAll(newDrops);
             
-            
+            //handItem.damage(1,p);
             
         }
     }
     
-    @EventHandler
+    /*@EventHandler
     public static void doSilkTouchReplacement2(BlockBreakEvent event){
         Player p = event.getPlayer();
         Block b = event.getBlock();
@@ -93,5 +91,5 @@ public class AmethystPickaxe extends TiboiseItem implements DurabilityItem, List
             fakeSilkTouch.addEnchantment(Enchantment.SILK_TOUCH,1);
             b.breakNaturally(fakeSilkTouch,false);
         }
-    }
+    }*/
 }

@@ -537,6 +537,10 @@ public abstract class TiboiseItem {
         return new NamespacedKey(Tiboise.getPlugin(),getId());
     }
     
+    public static Set<String> getRegisteredId(){
+        return Set.copyOf(itemmap.keySet());
+    }
+    
     /**
      *
      * @param item the ItemStack to get the data from

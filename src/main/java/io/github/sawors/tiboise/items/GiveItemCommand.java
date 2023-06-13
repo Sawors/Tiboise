@@ -4,14 +4,17 @@ import io.github.sawors.tiboise.items.discs.MusicDisc;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class GiveItemCommand implements CommandExecutor {
+public class GiveItemCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if(args.length >= 1 && sender instanceof Player p){
@@ -42,6 +45,15 @@ public class GiveItemCommand implements CommandExecutor {
             return true;
         }
         return false;
+    }
+    
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if(args.length <= 1){
+            return new ArrayList<>(TiboiseItem.getRegisteredId());
+        } else {
+            return null;
+        }
     }
 }
 
