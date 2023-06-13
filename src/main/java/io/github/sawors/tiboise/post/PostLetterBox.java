@@ -458,21 +458,30 @@ public class PostLetterBox implements Listener {
                                             final PostTransitPackage savePackage = new PostTransitPackage(letterId, sentEnvelopes.toArray(new ItemStack[]{}),destination, LocalDateTime.now(),distance);
                                             savePackage.save();
                                             travellingLetters.put(letterId,savePackage);
+                                            
+                                            Bukkit.getServer().getPluginManager().callEvent(new PostSendEvent(p,savePackage,supporting));
+                                            
                                             new BukkitRunnable(){
                                                 @Override
                                                 public void run() {
                                                     // deliver letters
                                                     final Block refreshedTarget = to.getBlock();
                                                     final Block refreshedSource = from.getBlock();
+                                                    boolean sentBack = false;
+                                                    boolean delivered = false;
                                                     if(allowedContainer.contains(refreshedTarget.getType()) && refreshedTarget.getState() instanceof Container c2){
                                                         for(ItemStack overflow : c2.getInventory().addItem(savePackage.content).values()){
                                                             c2.getWorld().dropItemNaturally(destination.getSign(),overflow);
                                                         }
+                                                        delivered = true;
                                                     } else if(allowedContainer.contains(refreshedSource.getType()) && refreshedSource.getState() instanceof Container c2){
                                                         for(ItemStack overflow : c2.getInventory().addItem(savePackage.content).values()){
                                                             c2.getWorld().dropItemNaturally(destination.getSign(),overflow);
                                                         }
+                                                        sentBack = true;
+                                                        delivered = true;
                                                     }
+                                                    Bukkit.getServer().getPluginManager().callEvent(new PostReceiveEvent(refreshedTarget,savePackage,savePackage.destination,sentBack,delivered));
                                                     travellingLetters.remove(savePackage.packageId);
                                                 }
                                             }.runTaskLater(Tiboise.getPlugin(),Math.max(40,tickTravelTime));
@@ -516,6 +525,9 @@ public class PostLetterBox implements Listener {
                                             for(ItemStack overflow : container.getInventory().addItem(pack.content).values()){
                                                 pack.destination.getSign().getWorld().dropItem(pack.destination.getSign(),overflow);
                                             }
+                                            Bukkit.getServer().getPluginManager().callEvent(new PostReceiveEvent(destinationBlock,pack,pack.destination,false,true));
+                                        } else {
+                                            Bukkit.getServer().getPluginManager().callEvent(new PostReceiveEvent(destinationBlock,pack,pack.destination,false,false));
                                         }
                                     }
                                 }.runTaskLater(Tiboise.getPlugin(),Math.max(deliverTime,1));

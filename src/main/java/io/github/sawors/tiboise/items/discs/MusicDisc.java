@@ -140,15 +140,24 @@ public class MusicDisc extends TiboiseItem implements Listener {
                     
                     String title = "Unknown";
                     String author = "Unknown";
+                    // by default the duration is above the max duration, so an unknown video will be aborted
+                    double duration = 32.0;
                     
                     if(data.isJsonObject() && data instanceof JsonObject obj){
                         author = obj.get("channel").toString().replace("\"","");
                         title = cleanupVideoTitle(obj.get("title").toString().replace("\"",""),author);
+                        duration = Double.parseDouble(obj.get("duration").toString().replace("\"",""))/60f;
+                        logAdmin(duration);
                     }
                     FileUtils.deleteDirectory(metadataDump);
                     
                     MusicDisc disc = new MusicDisc(author,title);
                     int discId = disc.getTitleHash();
+                    
+                    if(duration > 15.0){
+                        logAdmin("Disc "+discId+" could not be created, duration to long ("+duration+"mn while max is 15)");
+                        return;
+                    }
                     
                     File musicStorageDirectory = new File(LocalResourcesManager.getMusicStorageDirectory().getPath()+File.separator+discId);
                     
@@ -213,7 +222,15 @@ public class MusicDisc extends TiboiseItem implements Listener {
                     log.delete();
                     
                     // creating a file which name is the title to improve readability
-                    new File(musicStorageDirectory.getPath()+File.separator+disc.getTitle()).createNewFile();
+                    StringBuilder cleanTitle = new StringBuilder();
+                    for(char c : disc.getTitle().toCharArray()){
+                        if(Character.isLetterOrDigit(c)){
+                            cleanTitle.append(c);
+                        } else if(c == ' '){
+                            cleanTitle.append("_");
+                        }
+                    }
+                    new File(musicStorageDirectory.getPath()+File.separator+cleanTitle).createNewFile();
                     
                     String scanCit = "";
                     String scanModel = "{}";
