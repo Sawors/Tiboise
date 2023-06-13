@@ -101,9 +101,13 @@ public class MusicManager implements Listener, UtilityEntity {
                 final String baseKey = disc.getType().getKey().getKey();
                 final int separatorIndex = disc.getType().getKey().getKey().lastIndexOf("_");
                 
+                // the maximum duration of the rotating animation. The first number is the minutes, the rest () are for the conversion in ticks
+                int checkMusicDuration = 5*60;
+                
                 String musicData = null;
                 if(isTiboiseDisc){
                     musicData = disc.getItemMeta().getPersistentDataContainer().get(MusicDisc.getMusicDataKey(),PersistentDataType.STRING);
+                    checkMusicDuration = Integer.parseInt(Objects.requireNonNullElse(disc.getItemMeta().getPersistentDataContainer().get(MusicDisc.getDurationKey(),PersistentDataType.STRING),"300"));
                 }
                 
                 final NamespacedKey originalKey = new NamespacedKey(disc.getType().getKey().namespace(),baseKey.substring(0,separatorIndex)+"."+baseKey.substring(separatorIndex+1));
@@ -130,25 +134,28 @@ public class MusicManager implements Listener, UtilityEntity {
                     }
                 }.runTaskLater(Tiboise.getPlugin(),2);
                 
-                // the maximum duration of the rotating animation. The first number is the minutes, the rest () are for the conversion in ticks
-                final int MAX_MUSIC_DURATION = 5 *(20*60);
-                
+                final int maxParticleDuration = checkMusicDuration*2;
                 new BukkitRunnable(){
+                    
+                    int timer = maxParticleDuration;
+                    
                     @Override
                     public void run() {
-                        if(display.isValid()){
+                        
+                        if(display.isValid() && timer > 0){
                             display.getWorld().spawnParticle(Particle.NOTE,display.getLocation().add(0,0.2,0),1,.1,.1,.1,Math.random());
+                            timer--;
                         } else {
                             this.cancel();
-                            return;
                         }
                     }
                 }.runTaskTimer(Tiboise.getPlugin(),1,10);
                 
+                final int maxMusicDuration = checkMusicDuration*20;
                 new BukkitRunnable(){
                     
                     
-                    int timer = MAX_MUSIC_DURATION;
+                    int timer = maxMusicDuration;
                     final Location blockloc = b.getLocation().clone();
                     final float step = (40f/(20*DISK_ROTATION_PERIOD));
                     @Override

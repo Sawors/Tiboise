@@ -64,6 +64,7 @@ public class MusicDisc extends TiboiseItem implements Listener {
     String music;
     String author;
     NamespacedKey musicKey;
+    int duration;
     
     public MusicDisc(String musicName){
         this("unknown",musicName);
@@ -78,14 +79,25 @@ public class MusicDisc extends TiboiseItem implements Listener {
         this.music = musicName.toLowerCase(Locale.ROOT);
         this.author = author.toLowerCase(Locale.ROOT);
         this.musicKey = new NamespacedKey(NamespacedKey.MINECRAFT,getKey());
+        this.duration = 3*60;
         setLore(List.of(
                 Component.text(getTitle()).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
         ));
+        
+        if(LocalResourcesManager.getMusicIndexFile() != null){
+            YamlConfiguration index = YamlConfiguration.loadConfiguration(LocalResourcesManager.getMusicIndexFile());
+            ConfigurationSection section = index.getConfigurationSection(String.valueOf(getTitleHash()));
+            if(section != null){
+                this.duration = section.getInt(MusicIndexField.DURATION.toString(),60*5);
+            }
+        }
+        
+        setDisplayName(Component.text("Music Disc").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        
         addData(getMusicDataKey(),musicKey.asString());
         addData(getAuthorKey(),this.author);
         addData(getNameKey(),this.music);
-        
-        setDisplayName(Component.text("Music Disc").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        addData(getDurationKey(), String.valueOf(this.duration));
         
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);
         setMaterial(Material.MUSIC_DISC_11);
@@ -94,6 +106,8 @@ public class MusicDisc extends TiboiseItem implements Listener {
     public MusicDisc(){
         this("cat");
     }
+    
+    
     
     /**
      *
@@ -141,12 +155,12 @@ public class MusicDisc extends TiboiseItem implements Listener {
                     String title = "Unknown";
                     String author = "Unknown";
                     // by default the duration is above the max duration, so an unknown video will be aborted
-                    double duration = 32.0;
+                    int duration = 32*60;
                     
                     if(data.isJsonObject() && data instanceof JsonObject obj){
-                        author = obj.get("channel").toString().replace("\"","");
+                        author = obj.get("channel").toString().replace("\"","").replace("-","");
                         title = cleanupVideoTitle(obj.get("title").toString().replace("\"",""),author);
-                        duration = Double.parseDouble(obj.get("duration").toString().replace("\"",""))/60f;
+                        duration = Integer.parseInt(obj.get("duration").toString().replace("\"",""));
                         logAdmin(duration);
                     }
                     FileUtils.deleteDirectory(metadataDump);
@@ -154,8 +168,8 @@ public class MusicDisc extends TiboiseItem implements Listener {
                     MusicDisc disc = new MusicDisc(author,title);
                     int discId = disc.getTitleHash();
                     
-                    if(duration > 15.0){
-                        logAdmin("Disc "+discId+" could not be created, duration to long ("+duration+"mn while max is 15)");
+                    if(duration > 15.0*60){
+                        logAdmin("Disc "+discId+" could not be created, duration to long ("+(duration/60.0)+"mn while max is 15)");
                         return;
                     }
                     
@@ -269,6 +283,8 @@ public class MusicDisc extends TiboiseItem implements Listener {
                         section.set(MusicIndexField.AUTHOR.toString(),disc.author);
                         section.set(MusicIndexField.NAME.toString(),disc.music);
                         section.set(MusicIndexField.PREBUILT_TITLE.toString(),disc.getTitle());
+                        section.setComments(String.valueOf(discId),List.of("duration of the music, in seconds"));
+                        section.set(MusicIndexField.DURATION.toString(),duration);
                         index.save(LocalResourcesManager.getMusicIndexFile());
                         // load disc index
                         indexedMusics.put(String.valueOf(discId),disc.getTitle());
@@ -317,13 +333,16 @@ public class MusicDisc extends TiboiseItem implements Listener {
     static NamespacedKey getNameKey() {
         return new NamespacedKey(Tiboise.getPlugin(),"music-disc-name");
     }
+    static NamespacedKey getDurationKey() {
+        return new NamespacedKey(Tiboise.getPlugin(),"music-disc-duration");
+    }
     
     String getTitle() {
         return TiboiseUtils.capitalizeFirstLetter((author+" - "+music).toLowerCase(Locale.ROOT));
     }
     
     public enum MusicIndexField {
-        AUTHOR, NAME, PREBUILT_TITLE;
+        AUTHOR, NAME, PREBUILT_TITLE, DURATION;
         
         
         @Override
