@@ -48,7 +48,10 @@ public class DiscCommand implements TabExecutor {
                     Map<String,String> names = MusicDisc.getIndexedMusics();
                     for(String title : names.values()){
                         Pair<String,String> info = MusicDisc.parseTitleString(title);
-                        available.add(new MusicDisc(info.getKey(),info.getValue()).get());
+                        ItemStack item = new MusicDisc(info.getKey(),info.getValue()).get();
+                        if(!available.contains(item)){
+                            available.add(item);
+                        }
                     }
                     
                     Map<Integer,Inventory> listPages = new HashMap<>();
@@ -60,14 +63,14 @@ public class DiscCommand implements TabExecutor {
                         int index = (i+1)%invSize;
                         if(index == 0) page++;
                         // no caching
-                        Inventory content =  Bukkit.createInventory(null,invSize,Component.text("Discs Page "+page+1));
+                        Inventory content =  listPages.getOrDefault(page,Bukkit.createInventory(null,invSize,Component.text("Discs Page "+(page+1))));
                         content.addItem(item);
                         listPages.put(page,content);
                     }
                     
                     int queriedPage = 1;
                     if(args.length >= 2) queriedPage = Integer.parseInt(args[1]);
-                    Inventory inv = listPages.getOrDefault(queriedPage-1, Bukkit.createInventory(null,invSize,Component.text("Discs Page "+page+1)));
+                    Inventory inv = listPages.getOrDefault(queriedPage-1, Bukkit.createInventory(null,invSize,Component.text("Discs Page "+(page+1))));
                     if(sender instanceof Player p){
                         p.openInventory(inv);
                     }
