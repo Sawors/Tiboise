@@ -8,6 +8,10 @@ import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
 import io.github.sawors.tiboise.core.*;
 import io.github.sawors.tiboise.core.commands.*;
+import io.github.sawors.tiboise.core.local.DataPackManager;
+import io.github.sawors.tiboise.core.local.LocalResourcesManager;
+import io.github.sawors.tiboise.core.local.ResourcePackManager;
+import io.github.sawors.tiboise.core.local.WebServerManager;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.economy.trade.TradingStation;
 import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
@@ -178,6 +182,9 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new CropsManager(),this);
         manager.registerEvents(new AnimalsManager(), this);
         manager.registerEvents(new LocalResourcesManager(), this);
+        manager.registerEvents(new ResourcePackManager(), this);
+        manager.registerEvents(new WebServerManager(), this);
+        manager.registerEvents(new DataPackManager(), this);
         manager.registerEvents(new PlayerCompassMarker(), this);
         manager.registerEvents(new ExplorationGeneralFeatures(), this);
         manager.registerEvents(new OfflinePlayerManagement(), this);
@@ -377,22 +384,26 @@ public final class Tiboise extends JavaPlugin {
         }
     }
 
-    public static void logAdmin(Object msg){
+    public static void logAdmin(Object msg) throws IllegalStateException{
         logAdmin(null,msg);
     }
-    public static void logAdmin(@Nullable Object title, Object msg){
-        String pluginname = getPlugin().getName();
-        String inter = "";
-        if(title != null && title.toString().length() > 0){
-            inter = title+" : ";
-        }
-
-        String output = "["+ ChatColor.YELLOW+pluginname+" DEBUG"+ChatColor.WHITE+"-"+ Time.valueOf(LocalTime.now()) + "] "+inter+msg;
-        Bukkit.getLogger().log(Level.INFO, output);
-        for(Player p : Bukkit.getOnlinePlayers()){
-            if(p.isOp()){
-                p.sendMessage(Component.text(output));
+    public static void logAdmin(@Nullable Object title, Object msg) throws IllegalStateException{
+        if(isServerInTestMode()){
+            String pluginname = getPlugin().getName();
+            String inter = "";
+            if(title != null && title.toString().length() > 0){
+                inter = title+" : ";
             }
+            
+            String output = "["+ ChatColor.YELLOW+pluginname+" DEBUG"+ChatColor.WHITE+"-"+ Time.valueOf(LocalTime.now()) + "] "+inter+msg;
+            Bukkit.getLogger().log(Level.INFO, output);
+            for(Player p : Bukkit.getOnlinePlayers()){
+                if(p.isOp()){
+                    p.sendMessage(Component.text(output));
+                }
+            }
+        } else {
+            throw new IllegalStateException("[Tiboise "+version+"]"+" Test logging used in production environment, please warn the devs !");
         }
     }
 

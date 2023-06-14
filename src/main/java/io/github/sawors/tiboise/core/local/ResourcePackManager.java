@@ -1,10 +1,8 @@
-package io.github.sawors.tiboise.core;
+package io.github.sawors.tiboise.core.local;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.HttpHeaders;
-import com.sun.net.httpserver.HttpServer;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.integrations.voicechat.VoiceChatIntegrationPlugin;
@@ -15,7 +13,6 @@ import net.kyori.adventure.text.format.TextColor;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,7 +23,6 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,43 +36,51 @@ import java.util.zip.ZipOutputStream;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
-
-public class LocalResourcesManager implements Listener {
+public class ResourcePackManager implements Listener {
     
-    
-    private static HashSet<UUID> reloadingPlayers = new HashSet<>();
-    private static String packhash = null;
-    // server-side resource management
-    private static File resourceDirectory = null;
-    private static File webServerDirectory = null;
+    private static final HashSet<UUID> reloadingPlayers = new HashSet<>();
     // local packed resource names
-    private static final String packFileName = "TiboiseResourcePack.zip";
-    private static final String hashFileName = "sha1.txt";
+    private static String packFileName = "TiboiseResourcePack.zip";
+    private static String hashFileName = "sha1.txt";
     private final static String packSource = "https://github.com/Sawors/Tiboise/raw/master/resourcepack/Tiboise-1.19.2.zip";
-    private static File localResourcePackDirectory;
     private static File packSourceFile;
+    private static String packHash = null;
     // local assets
     private static File assets;
-    private static File musicStorageDirectory;
     private static File musicIndexFile;
-    // webserver
-    private static String webServerSrc;
-    private static int webServerPort;
-    private static final String resourcePackContext = "/download/"+packFileName;
-    private static final String resourcePackHashContext = "/download/"+hashFileName;
-    
-    final private static Map<String, UUID> nickNamesMap = new HashMap<>(Map.of(
-            "GrosOrteilDePied",UUID.fromString("66e25a14-b468-4cb1-8cde-6cf6054255ba"),
-            "MOLE1283", UUID.fromString("30b80f6f-f0dc-4b4a-96b2-c37b28494b1b"),
-            "WalidBedouin", UUID.fromString("6864eb4a-91d6-4292-8dfb-f398cbd5dc57")
-    ));
-    final private static Map<String, String> realNamesMap = new HashMap<>(Map.of(
-            "GrosOrteilDePied","DiggyDiggyMole",
-            "MOLE1283", "DimitriScgnt",
-            "WalidBedouin", "esprit-absent"
-    ));
     
     
+    @EventHandler(priority = EventPriority.LOW)
+    public static void initialize(PluginEnableEvent event){
+    
+    }
+    
+    @EventHandler
+    public static void reloadPlayerResourcePack(PlayerResourcePackStatusEvent event){
+        final Player p = event.getPlayer();
+        if(reloadingPlayers.contains(p.getUniqueId()) && event.getStatus().equals(PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED)){
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    sendPlayerResourcePack(p);
+                }
+            }.runTaskLater(Tiboise.getPlugin(),20);
+        }
+    }
+    
+    
+    
+    public static void sendPlayerResourcePack(Player p){
+        if(ResourcePackManager.getPackHash() != null){
+            String hash = ResourcePackManager.getPackHash().substring(0,Math.min(40,ResourcePackManager.getPackHash().length()));
+            p.setResourcePack(WebServerManager.getPackSource(), hash,true, Component.text("RPDL"));
+            if(!reloadingPlayers.contains(p.getUniqueId())){
+                reloadingPlayers.add(p.getUniqueId());
+            } else {
+                reloadingPlayers.remove(p.getUniqueId());
+            }
+        }
+    }
     @EventHandler
     public static void checkResourcesOnJoin(PlayerJoinEvent event){
         final Player p = event.getPlayer();
@@ -111,52 +115,6 @@ public class LocalResourcesManager implements Listener {
             }.runTaskLater(Tiboise.getPlugin(),20*3);
         }
         
-    }
-    
-    public static void setNickName(UUID player, String nickname){
-        if(nickNamesMap.containsKey(nickname.replaceAll(" ",""))){
-            throw new IllegalArgumentException("a player already has this nickname");
-        }
-        nickNamesMap.put(nickname.replaceAll(" ",""),player);
-    }
-    
-    public static boolean hasNickName(UUID player){
-        return nickNamesMap.containsValue(player);
-    }
-    
-    public static String getNickName(UUID player){
-        Optional<Map.Entry<String,UUID>> pid = nickNamesMap.entrySet().stream().filter(p -> p.getValue().equals(player)).findFirst();
-        return pid.map(Map.Entry::getKey).orElse(null);
-    }
-    
-    public static UUID getNickNamedPlayer(String nickname){
-        return nickNamesMap.get(nickname);
-    }
-    
-    public static String getRealName(String playerName){
-        if(playerName == null) return null;
-        return realNamesMap.getOrDefault(playerName,playerName);
-    }
-    
-    public static File getResourceDirectory() {
-        return resourceDirectory;
-    }
-    
-    public static File getMusicStorageDirectory() {
-        return musicStorageDirectory;
-    }
-    
-    @EventHandler
-    public static void reloadPlayerResourcePack(PlayerResourcePackStatusEvent event){
-        final Player p = event.getPlayer();
-        if(reloadingPlayers.contains(p.getUniqueId()) && event.getStatus().equals(PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED)){
-            new BukkitRunnable(){
-                @Override
-                public void run() {
-                    sendPlayerResourcePack(p);
-                }
-            }.runTaskLater(Tiboise.getPlugin(),20);
-        }
     }
     
     public static void rebuildResourcePack(){
@@ -214,7 +172,7 @@ public class LocalResourcesManager implements Listener {
                 String subDir = "music_discs";
                 Set<String> loadedMusics = new HashSet<>();
                 for(String indexedMusicId : MusicDisc.getIndexedMusics().keySet()){
-                    File musicDir = new File(getMusicStorageDirectory().getPath()+File.separator+indexedMusicId);
+                    File musicDir = new File(LocalResourcesManager.getMusicStorageDirectory().getPath()+File.separator+indexedMusicId);
                     if(musicDir.exists()){
                         // sound file names are all sound.ogg to allow better compatibility with tools like ffmpeg, some ids might start with a "-" which creates annoying errors to handle
                         File ogg = new File(musicDir.getPath()+File.separator+"sound.ogg");
@@ -246,7 +204,8 @@ public class LocalResourcesManager implements Listener {
                 Map<String,Object> soundTemplate = new HashMap<>();
                 try(InputStream in = Tiboise.getPlugin().getResource("discs/soundElement.json")){
                     soundTemplate = mapper.readValue(in,new TypeReference<HashMap<String, Object>>(){});
-                } catch (JacksonException ignored){}
+                } catch (
+                        JacksonException ignored){}
                 
                 File baseSound = new File(tempDir.getPath()+File.separator+"assets"+File.separator+"minecraft"+File.separator+"sounds.json");
                 
@@ -264,7 +223,7 @@ public class LocalResourcesManager implements Listener {
                     
                     for(String musicId : loadedMusics){
                         Map<String, Object> localMap = new HashMap<>(soundTemplate);
-                        if(localMap.containsKey("sounds")) localMap.put("sounds",List.of("music_discs/"+musicId));
+                        if(localMap.containsKey("sounds")) localMap.put("sounds", List.of("music_discs/"+musicId));
                         merged.put("tiboise.music_disc."+musicId,localMap);
                     }
                 }
@@ -279,7 +238,7 @@ public class LocalResourcesManager implements Listener {
                 e.printStackTrace();
             }
             // zip the merged data and transfer it to the webserver's directory for download
-            File tempZipFile = new File(localResourcePackDirectory.getPath() + File.separator + "tempResourcePack.zip");
+            File tempZipFile = new File(LocalResourcesManager.getLocalResourcePackDirectory().getPath() + File.separator + "tempResourcePack.zip");
             try(
                     FileOutputStream out = new FileOutputStream(tempZipFile);
                     ZipOutputStream outZip = new ZipOutputStream(out);
@@ -298,7 +257,7 @@ public class LocalResourcesManager implements Listener {
             try{
                 if(tempZipFile.exists()){
                     // copy the zipped result to the webserver's directory
-                    File target = new File(webServerDirectory.getPath()+File.separator+packFileName);
+                    File target = new File(LocalResourcesManager.getWebServerDirectory().getPath()+File.separator+packFileName);
                     target.delete();
                     Files.copy(tempZipFile.toPath(),target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     try(InputStream fis = new FileInputStream(target)){
@@ -313,8 +272,8 @@ public class LocalResourcesManager implements Listener {
                         }
                         
                         String hash = Hex.encodeHexString(digest.digest());
-                        packhash = hash;
-                        Files.writeString(Path.of(webServerDirectory.getPath()+File.separator+hashFileName),hash);
+                        packHash = hash;
+                        Files.writeString(Path.of(LocalResourcesManager.getWebServerDirectory().getPath()+File.separator+hashFileName),hash);
                         logAdmin("pack successfully built !");
                     }
                 }
@@ -334,149 +293,13 @@ public class LocalResourcesManager implements Listener {
         }
     }
     
-    public static void sendPlayerResourcePack(Player p){
-        if(getPackHash() != null){
-            String hash = getPackHash().substring(0,Math.min(40,getPackHash().length()));
-            p.setResourcePack(getPackSource(), hash,true,Component.text("RPDL"));
-            if(!reloadingPlayers.contains(p.getUniqueId())){
-                reloadingPlayers.add(p.getUniqueId());
-            } else {
-                reloadingPlayers.remove(p.getUniqueId());
-            }
-        }
-    }
-    
     public static String getPackHash(){
-        return packhash;
-    }
-    
-    public static String getPackSource(){
-        return webServerSrc+":"+webServerPort+resourcePackContext;
-    }
-    
-    public static String getPackHashSource(){
-        return webServerSrc+":"+webServerPort+resourcePackHashContext;
+        return packHash;
     }
     
     public static File getMusicIndexFile() {
         return musicIndexFile;
     }
-    
-    @EventHandler(priority = EventPriority.LOW)
-    public static void initialize(PluginEnableEvent event){
-        if(event.getPlugin().equals(Tiboise.getPlugin())){
-            
-            YamlConfiguration config = Tiboise.getConfigData();
-            webServerSrc = config.getString("webserver-ip","http://mc.sawors.com");
-            if(!webServerSrc.startsWith("http")){
-                webServerSrc = "http://"+webServerSrc;
-            }
-            webServerPort = config.getInt("webserver-port",8123);
-            
-            try{
-                resourceDirectory = new File(Tiboise.getPlugin().getDataFolder().getPath()+File.separator+"resources");
-                resourceDirectory.mkdirs();
-                
-                webServerDirectory = new File(resourceDirectory.getPath()+File.separator+ "webserver");
-                webServerDirectory.mkdirs();
-                
-                
-                localResourcePackDirectory = new File(resourceDirectory.getPath()+File.separator+"resourcepack");
-                localResourcePackDirectory.mkdirs();
-                packSourceFile = new File(localResourcePackDirectory.getPath()+File.separator+"source.zip");
-                
-                assets = new File(localResourcePackDirectory.getPath()+File.separator+"assets");
-                assets.mkdirs();
-                
-                if(musicStorageDirectory == null || !musicStorageDirectory.exists()){
-                    musicStorageDirectory = new File(getResourceDirectory().getPath()+File.separator+"musics");
-                    musicStorageDirectory.mkdirs();
-                }
-                musicIndexFile = new File(getMusicStorageDirectory().getPath()+File.separator+"music_index.yml");
-                if(!musicIndexFile.exists()){
-                    try{
-                        musicIndexFile.createNewFile();
-                    } catch (IOException e){
-                        e.printStackTrace();
-                    }
-                }
-                
-                try{
-                    packSourceFile.createNewFile();
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-                new BukkitRunnable(){
-                    @Override
-                    public void run() {
-                        downloadSourceResourcePack();
-                        rebuildResourcePack();
-                        new BukkitRunnable(){
-                            @Override
-                            public void run() {
-                                File resourcePackBundled = new File(webServerDirectory.getPath()+File.separator+packFileName);
-                                File resourcePackBundledHash = new File(webServerDirectory.getPath()+File.separator+hashFileName);
-                                
-                                if(resourcePackBundled.exists()){
-                                    HttpServer server;
-                                    try {
-                                        server = HttpServer.create(new InetSocketAddress(webServerPort),8);
-                                    } catch (
-                                            IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                    // context for downloading the resource pack
-                                    server.createContext(resourcePackContext, exchange -> {
-                                        try(OutputStream out = exchange.getResponseBody(); InputStream in = new FileInputStream(resourcePackBundled)) {
-                                            exchange.sendResponseHeaders(200, resourcePackBundled.length());
-                                            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename="+packFileName);
-                                            exchange.setAttribute(HttpHeaders.CONTENT_TYPE, "application/zip");
-                                            out.write(in.readAllBytes());
-                                        } catch (IOException exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    });
-                                    // context for downloading the sha1 text file
-                                    server.createContext(resourcePackHashContext, exchange -> {
-                                        try(OutputStream out = exchange.getResponseBody(); InputStream in = new FileInputStream(resourcePackBundledHash)) {
-                                            exchange.sendResponseHeaders(200, resourcePackBundledHash.length());
-                                            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename="+hashFileName);
-                                            exchange.setAttribute(HttpHeaders.CONTENT_TYPE, "text/plain");
-                                            out.write(in.readAllBytes());
-                                        } catch (IOException exception) {
-                                            exception.printStackTrace();
-                                        }
-                                    });
-                                    server.start();
-                                }
-                            }
-                        }.runTask(Tiboise.getPlugin());
-                    }
-                }.runTaskAsynchronously(Tiboise.getPlugin());
-                
-                
-                /*final String fileToCopy = "index.html";
-                try(InputStream in = PlayerResourcesManager.class.getResourceAsStream("io/github/tiboise/resources/webserver/"+fileToCopy)){
-                    
-                    File out = new File(webServerDirectory.getPath()+File.separator+"index.html");
-                    out.createNewFile();
-                    
-                    if(in != null && out.exists()){
-                        Files.copy(in, out.toPath());
-                    }
-                    
-                    
-                    
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }*/
-                // TODO : Implement server-side resourcepack management
-            } catch (SecurityException e){
-                e.printStackTrace();
-            }
-        }
-    }
-    
     
     public static void downloadSourceResourcePack(){
         try (BufferedInputStream in = new BufferedInputStream(new URL(packSource).openStream()); FileOutputStream fileOutputStream = new FileOutputStream(packSourceFile)) {
@@ -490,7 +313,6 @@ public class LocalResourcesManager implements Listener {
             e.printStackTrace();
         }
     }
-    
     
     private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
         if (fileToZip.isHidden()) {
@@ -526,5 +348,45 @@ public class LocalResourcesManager implements Listener {
     
     public static File getAssetDirectory(){
         return assets;
+    }
+    
+    public static File getPackSourceFile() {
+        return packSourceFile;
+    }
+    
+    protected static void setPackSourceFile(File packSourceFile) {
+        ResourcePackManager.packSourceFile = packSourceFile;
+    }
+    
+    protected static void setPackHash(String packHash) {
+        ResourcePackManager.packHash = packHash;
+    }
+    
+    public static File getAssets() {
+        return assets;
+    }
+    
+    protected static void setAssetsDirectory(File assets) {
+        ResourcePackManager.assets = assets;
+    }
+    
+    protected static void setMusicIndexFile(File musicIndexFile) {
+        ResourcePackManager.musicIndexFile = musicIndexFile;
+    }
+    
+    public static String getPackFileName() {
+        return packFileName;
+    }
+    
+    protected static void setPackFileName(String packFileName) {
+        ResourcePackManager.packFileName = packFileName;
+    }
+    
+    public static String getHashFileName() {
+        return hashFileName;
+    }
+    
+    protected static void setHashFileName(String hashFileName) {
+        ResourcePackManager.hashFileName = hashFileName;
     }
 }

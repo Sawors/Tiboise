@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.core.commands;
 
-import io.github.sawors.tiboise.core.LocalResourcesManager;
+import io.github.sawors.tiboise.core.local.ResourcePackManager;
 import io.github.sawors.tiboise.items.discs.MusicDisc;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -40,7 +40,7 @@ public class TTestCommand implements CommandExecutor {
                             if(commandSender instanceof Player player){
                                 player.sendMessage(Component.text("created disc with id : "+disc.getTitleHash()).clickEvent(ClickEvent.suggestCommand("/tgive music_disc "+disc.getTitleHash())));
                             }
-                            LocalResourcesManager.rebuildResourcePack();
+                            ResourcePackManager.rebuildResourcePack();
                         });
                     } catch (MalformedURLException e){
                         e.printStackTrace();

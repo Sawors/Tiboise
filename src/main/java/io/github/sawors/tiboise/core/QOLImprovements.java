@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.core.local.LocalResourcesManager;
 import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import io.papermc.paper.event.player.AsyncChatEvent;

@@ -1,7 +1,7 @@
 package io.github.sawors.tiboise.core.commands;
 
 import io.github.sawors.tiboise.Tiboise;
-import io.github.sawors.tiboise.core.LocalResourcesManager;
+import io.github.sawors.tiboise.core.local.ResourcePackManager;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -53,7 +53,7 @@ public class TAdminCommand implements CommandExecutor {
                                 new BukkitRunnable(){
                                     @Override
                                     public void run() {
-                                        LocalResourcesManager.rebuildResourcePack();
+                                        ResourcePackManager.rebuildResourcePack();
                                     }
                                 }.runTaskAsynchronously(Tiboise.getPlugin());
                             }
@@ -61,8 +61,8 @@ public class TAdminCommand implements CommandExecutor {
                                 new BukkitRunnable(){
                                     @Override
                                     public void run() {
-                                        LocalResourcesManager.downloadSourceResourcePack();
-                                        LocalResourcesManager.rebuildResourcePack();
+                                        ResourcePackManager.downloadSourceResourcePack();
+                                        ResourcePackManager.rebuildResourcePack();
                                     }
                                 }.runTaskAsynchronously(Tiboise.getPlugin());
                             }

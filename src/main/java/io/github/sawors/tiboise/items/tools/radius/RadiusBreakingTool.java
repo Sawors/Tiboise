@@ -14,10 +14,7 @@ import java.util.ArrayList;
 
 public abstract class RadiusBreakingTool extends TiboiseItem {
     
-    ;
     
-    // TODO :
-    //  Add a correct 3D rotation to this method, currently it works but only out of pure luck
     protected static void radiusBreak(RadiusType type, int radius, Block origin, BlockFace minedface, ItemStack tool, double durabilitymultiplier){
         radiusBreak(type,radius,origin,minedface,tool,durabilitymultiplier,null);
     }

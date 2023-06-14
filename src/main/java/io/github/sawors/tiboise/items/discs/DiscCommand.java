@@ -1,6 +1,6 @@
 package io.github.sawors.tiboise.items.discs;
 
-import io.github.sawors.tiboise.core.LocalResourcesManager;
+import io.github.sawors.tiboise.core.local.ResourcePackManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -35,7 +35,7 @@ public class DiscCommand implements TabExecutor {
                         try {
                             MusicDisc.buildFromSource(new URL(url), d -> {
                                 sender.sendMessage(Component.text("Created disc with id : "+d.getTitleHash()).clickEvent(ClickEvent.suggestCommand("/disc give "+d.getTitleHash())).color(NamedTextColor.LIGHT_PURPLE));
-                                LocalResourcesManager.rebuildResourcePack();
+                                ResourcePackManager.rebuildResourcePack();
                             });
                         } catch (MalformedURLException e) {
                             sender.sendMessage(Component.text("The url provided is not a correct url !"));
