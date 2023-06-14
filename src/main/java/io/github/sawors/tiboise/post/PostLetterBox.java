@@ -3,6 +3,7 @@ package io.github.sawors.tiboise.post;
 import com.destroystokyo.paper.event.block.BlockDestroyEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
+import io.github.sawors.tiboise.UtilityBlock;
 import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
@@ -29,6 +30,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -44,7 +46,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-public class PostLetterBox implements Listener {
+public class PostLetterBox implements Listener, UtilityBlock {
     
     private final static String signIdentifier = "- Poste -";
     private final static String senderIdentifier = "- Envoi -";
@@ -71,7 +73,7 @@ public class PostLetterBox implements Listener {
         if(!event.isCancelled() && b.getState() instanceof Sign sign && b.getBlockData() instanceof Directional wallSign){
             final String ownerId = sign.getPersistentDataContainer().get(getOwnerKey(),PersistentDataType.STRING);
             // prevents other people from editing the sign (but not destroying it however)
-            if(ownerId != null && !ownerId.equals(p.getUniqueId().toString())) {
+            if(!event.getPlayer().isOp() && ownerId != null && !ownerId.equals(p.getUniqueId().toString())) {
                 event.setCancelled(true);
                 return;
             }
@@ -95,34 +97,9 @@ public class PostLetterBox implements Listener {
                         final BlockFace face = wallSign.getFacing();
                         final Vector facing = face.getDirection();
                         b.getWorld().spawnParticle(Particle.WAX_ON,b.getLocation().add(.5,.5,.5).add(face.getDirection().multiply(-.30)),6,facing.getZ()/4,.20,facing.getX()/4,.1);
-                        
-                        
-                        /*try {
-                            final File saveFile = new File(b.getWorld().getWorldFolder().getCanonicalFile()+File.separator+"mailboxes"+File.separator+p.getUniqueId()+".yml");
-                            if(!saveFile.exists()){
-                                saveFile.getParentFile().mkdirs();
-                                saveFile.createNewFile();
-                            }
-                            
-                            YamlConfiguration saveData = new YamlConfiguration();
-                            if(saveFile.exists()){
-                                saveData = YamlConfiguration.loadConfiguration(saveFile);
-                            }
-                            
-                            ConfigurationSection houseSection = saveData.createSection(houseName);
-                            
-                            houseSection.set(LetterBoxDataField.SIGN_LOCATION.toString(), serializeLocation(b.getLocation()));
-                            houseSection.set(LetterBoxDataField.CONTAINER_LOCATION.toString(), serializeLocation(container.getLocation()));
-                            houseSection.set(LetterBoxDataField.CONTAINER_TYPE.toString(), container.getType().toString());
-                            
-                            saveData.save(saveFile);
-                            
-                        } catch (
-                                IOException e) {
-                            throw new RuntimeException(e);
-                        }*/
-                        
-                        
+                        if(relative.getState() instanceof PersistentDataHolder holder){
+                            holder.getPersistentDataContainer().set(utilityBlockKey,PersistentDataType.STRING,letterBox.getUtilityIdentifier());
+                        }
                     }
                 }
             }
@@ -131,6 +108,11 @@ public class PostLetterBox implements Listener {
     
     public static String getLetterBoxIdentifier() {
         return signIdentifier;
+    }
+    
+    @Override
+    public String getUtilityIdentifier() {
+        return "letter_box";
     }
     
     enum LetterBoxDataField {
@@ -158,6 +140,18 @@ public class PostLetterBox implements Listener {
     @EventHandler
     public static void checkForBrokenLetterboxDirect(BlockBreakEvent event){
         checkDestroyedBlock(event.getBlock());
+    }
+    
+    @EventHandler
+    public static void preventNotOwnerDestroying(BlockBreakEvent event){
+        if(event.getBlock().getState() instanceof PersistentDataHolder holder){
+            final String ownerId = holder.getPersistentDataContainer().get(getOwnerKey(), PersistentDataType.STRING);
+            // prevents other people from destroying this sign
+            if(!event.getPlayer().isOp() && ownerId != null && !ownerId.equals(event.getPlayer().getUniqueId().toString())) {
+                event.getPlayer().sendActionBar(Component.text("You are not the owner of this letter box").color(NamedTextColor.RED));
+                event.setCancelled(true);
+            }
+        }
     }
     
     private static void checkDestroyedBlock(Block broken){
