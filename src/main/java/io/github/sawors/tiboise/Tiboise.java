@@ -188,12 +188,11 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new OfflinePlayerManagement(), this);
         manager.registerEvents(new FloatingTextUtils(), this);
         manager.registerEvents(new CraftingPatcher(),this);
-        manager.registerEvents(new TradingStation(),this);
         manager.registerEvents(new PostLetterBox(),this);
         manager.registerEvents(new SittingManager(),this);
         manager.registerEvents(new MusicManager(), this);
         manager.registerEvents(new VillagerManager(), this);
-        manager.registerEvents(new TradingStation(), this);
+        manager.registerEvents(new TradingStation(null,null), this);
         manager.registerEvents(new OwnedBlock() {@Override public UUID getOwner() {return null;}}, this);
         
         Objects.requireNonNull(server.getPluginCommand("tgive")).setExecutor(new GiveItemCommand());

@@ -129,10 +129,10 @@ public class PostStamp extends TiboiseItem implements Listener {
                 && b.getState() instanceof Sign sign
                 && sign.lines().size() >= 3
                 && ((TextComponent)sign.line(0)).content().equals(PostLetterBox.getLetterBoxIdentifier())
-                && sign.getPersistentDataContainer().get(PostLetterBox.getOwnerKey(), PersistentDataType.STRING) != null
+                && sign.getPersistentDataContainer().get(PostLetterBox.ownerKey, PersistentDataType.STRING) != null
         ){
                try{
-                   PostLetterBox clicked = new PostLetterBox(UUID.fromString(Objects.requireNonNull(sign.getPersistentDataContainer().get(PostLetterBox.getOwnerKey(), PersistentDataType.STRING))),sign.getBlock());
+                   PostLetterBox clicked = new PostLetterBox(UUID.fromString(Objects.requireNonNull(sign.getPersistentDataContainer().get(PostLetterBox.ownerKey, PersistentDataType.STRING))),sign.getBlock());
                    
                    PostStamp editedStamp = new PostStamp();
                    editedStamp.setVariant(getItemVariant(stampItem));

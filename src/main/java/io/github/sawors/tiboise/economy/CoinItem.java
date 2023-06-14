@@ -1,5 +1,6 @@
 package io.github.sawors.tiboise.economy;
 
+import com.google.common.collect.Lists;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
@@ -303,9 +304,9 @@ public class CoinItem extends TiboiseItem implements Listener {
     public static int evaluateInventoryValue(ItemStack[] inventoryContent){
         int value = 0;
         for(ItemStack item : inventoryContent){
-            if(item != null && item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().get(getCoinValueKey(), PersistentDataType.INTEGER) != null){
+            if(item != null && item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().get(getCoinValueKey(), PersistentDataType.STRING) != null){
                 try{
-                    value += Integer.parseInt(Objects.requireNonNullElse(item.getItemMeta().getPersistentDataContainer().get(getCoinValueKey(), PersistentDataType.STRING),"0"));
+                    value += Integer.parseInt(Objects.requireNonNullElse(item.getItemMeta().getPersistentDataContainer().get(getCoinValueKey(), PersistentDataType.STRING),"0"))*item.getAmount();
                 } catch (NumberFormatException ignored){}
             }
         }
@@ -313,17 +314,17 @@ public class CoinItem extends TiboiseItem implements Listener {
         return value;
     }
     
-    public static ItemStack[] splitValue(int value){
+    public static ItemStack[] splitValue(long value){
         Map<String, Integer> split = new HashMap<>();
-        int remaining = value;
-        while(remaining > 0){
-            for(Map.Entry<String,Integer> entry : coinvalues.entrySet()){
-                int coinValue = entry.getValue();
-                String coinName = entry.getKey();
-                while(remaining > coinValue){
-                    remaining-=coinValue;
-                    split.put(coinName,split.getOrDefault(coinName,0)+coinValue);
-                }
+        long remaining = value;
+        List<Map.Entry<String,Integer>> sortedValues = new ArrayList<>(coinvalues.entrySet());
+        sortedValues.sort(Comparator.comparingInt(Map.Entry::getValue));
+        for(Map.Entry<String,Integer> entry : Lists.reverse(sortedValues)){
+            int coinValue = entry.getValue();
+            String coinName = entry.getKey();
+            while(remaining >= coinValue){
+                remaining-=coinValue;
+                split.put(coinName,split.getOrDefault(coinName,0)+1);
             }
         }
         

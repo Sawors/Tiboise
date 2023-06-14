@@ -68,7 +68,7 @@ public class ResourcePackManager implements Listener {
     public static void sendPlayerResourcePack(Player p){
         if(ResourcePackManager.getPackHash() != null){
             String hash = ResourcePackManager.getPackHash().substring(0,Math.min(40,ResourcePackManager.getPackHash().length()));
-            p.setResourcePack(WebServerManager.getPackSource(), hash,true, Component.text("RPDL"));
+            p.setResourcePack(WebServerManager.getPackSource(), hash,true);
             if(!reloadingPlayers.contains(p.getUniqueId())){
                 reloadingPlayers.add(p.getUniqueId());
             } else {

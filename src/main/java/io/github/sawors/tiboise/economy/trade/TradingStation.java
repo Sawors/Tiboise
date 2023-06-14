@@ -1,5 +1,6 @@
 package io.github.sawors.tiboise.economy.trade;
 
+import com.destroystokyo.paper.MaterialTags;
 import io.github.sawors.tiboise.OwnedBlock;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
@@ -15,11 +16,13 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,6 +35,8 @@ import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
+
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class TradingStation extends OwnedBlock implements Listener, UtilityBlock {
     
@@ -52,10 +57,10 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     private Block container;
     private Block sign;
     
-    public TradingStation(){
+    public TradingStation(UUID owner, Block container){
         this.options = new TradingStationOptions();
         this.storedCoins = 0;
-        this.soldItem = new ItemStack(Material.AIR);
+        this.soldItem = new ItemStack(Material.DIRT);
         this.price = 0;
         this.owner = null;
         this.container = null;
@@ -63,18 +68,34 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     
     @EventHandler(priority = EventPriority.HIGH)
     public static void recogniseTradingStation(SignChangeEvent event){
+        
         final Block b = event.getBlock();
         final Player p = event.getPlayer();
-        if(!event.isCancelled() && b.getState() instanceof Sign sign && b.getBlockData() instanceof Directional wallSign){
+        if(!event.isCancelled() && b.getState() instanceof Sign && b.getBlockData() instanceof Directional wallSign){
+            logAdmin("good");
             if(event.lines().size() >= 1){
+                logAdmin("lines");
                 final Component identifier = event.line(0);
                 if(((TextComponent) Objects.requireNonNull(identifier)).content().equals(tradingStationIdentifier)){
+                    logAdmin("identifier");
                     // sign is recognised as a trading station sign
                     final Block relative = b.getRelative(wallSign.getFacing().getOppositeFace());
-                    if(allowedContainer.contains(relative.getType()) && sign.lines().size() >= 1 && event.line(1) != null && TiboiseUtils.extractContent(sign.line(0)).equals(tradingStationIdentifier)){
+                    logAdmin(relative.getType());
+                    if(allowedContainer.contains(relative.getType()) && event.lines().size() >= 1 && event.line(0) != null && TiboiseUtils.extractContent(Objects.requireNonNull(event.line(0))).equals(tradingStationIdentifier)){
+                        logAdmin("cont");
                         TradingStation station = TradingStation.fromBlock(relative);
+                        p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_WORK_WEAPONSMITH,1,1.25f);
                         if(station != null){
+                            station.setOwner(p.getUniqueId());
+                            station.setContainer(relative);
                             station.save();
+                            if(relative.getState(false) instanceof PersistentDataHolder eeee){
+                                eeee.getPersistentDataContainer().set(getStoredCoinsKey(),PersistentDataType.STRING,"3");
+                                relative.getState(false).update();
+                                logAdmin("holder");
+                                logAdmin(eeee.getPersistentDataContainer().get(getStoredCoinsKey(),PersistentDataType.STRING));
+                            }
+                            logAdmin("save station");
                         }
                     }
                 }
@@ -83,11 +104,12 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     }
     
     @EventHandler
-    public void playerEditStation(PlayerInteractEvent event){
+    public static void playerEditStation(PlayerInteractEvent event){
         Block b = event.getClickedBlock();
         Player p = event.getPlayer();
         if(
-                event.getAction().isRightClick()
+                !event.useInteractedBlock().equals(Event.Result.DENY)
+                && event.getAction().isRightClick()
                 && event.getHand() != null
                 && event.getHand().equals(EquipmentSlot.HAND)
                 && b != null
@@ -97,28 +119,45 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
         ){
             // block b is a trading station !
             TradingStation station = fromBlock(b.getRelative(wallSign.getFacing().getOppositeFace()));
+            logAdmin("station");
             if(station != null){
+                logAdmin("station V");
+                event.setCancelled(true);
+                event.setUseInteractedBlock(Event.Result.DENY);
                 station.setSign(b);
-                if(Objects.equals(event.getPlayer().getUniqueId(),station.getOwner())){
+                ItemStack itemInHand = p.getInventory().getItemInMainHand();
+                if(!itemInHand.getType().isAir() && Objects.equals(event.getPlayer().getUniqueId(),station.getOwner())){
+                    logAdmin("owner");
                     // player interacting is the owner
-                    ItemStack itemInHand = p.getInventory().getItemInMainHand();
                     if(itemInHand.hasItemMeta() && itemInHand.getItemMeta().getPersistentDataContainer().has(CoinItem.getCoinValueKey())){
                         int valueModifier = Integer.parseInt(Objects.requireNonNullElse(itemInHand.getItemMeta().getPersistentDataContainer().get(CoinItem.getCoinValueKey(), PersistentDataType.STRING),"0"));
                         int mode = p.isSneaking() ? -1 : 1;
                         
-                        station.setPrice(Math.min(Math.max(station.getPrice()+(valueModifier*mode),0),itemInHand.getType().getMaxStackSize()));
-                        p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP,.5f,1);
+                        int priceadd = Math.max(station.getPrice()+(valueModifier*mode),0);
+                        logAdmin(priceadd);
+                        station.setPrice(priceadd);
+                        station.save();
+                        p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_WORK_TOOLSMITH,.5f,1.5f);
                     } else {
-                        station.setSoldItem(itemInHand);
+                        if((MaterialTags.DYES.isTagged(itemInHand.getType()) || itemInHand.getType().equals(Material.INK_SAC) || itemInHand.getType().equals(Material.GLOW_INK_SAC)) && !p.isSneaking()){
+                            event.setCancelled(false);
+                            event.setUseInteractedBlock(Event.Result.ALLOW);
+                            logAdmin("dye");
+                        } else {
+                            station.setSoldItem(itemInHand);
+                            station.save();
+                            p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_WORK_TOOLSMITH,.5f,1.25f);
+                        }
                     }
                 } else {
+                    logAdmin("client");
                     // player interacting is not the owner -> buying
                     int purseValue = CoinItem.evaluateInventoryValue(p.getInventory().getContents());
                     int soldPrice = station.getPrice();
                     ItemStack sold = station.getSoldItem();
                     int soldAmount = sold.getAmount();
                     
-                    if(station.getContainer() != null && station.getContainer().getState() instanceof Container containerState){
+                    if(station.getContainer() != null && station.getContainer().getState(false) instanceof Container containerState){
                         int sellableAmount = 0;
                         boolean exactMatch = station.getOptions().isExactMatch();
                         for(ItemStack item : containerState.getSnapshotInventory().getContents()){
@@ -131,6 +170,13 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
                             }
                         }
                         
+                        logAdmin("sellable",sellableAmount);
+                        if(sellableAmount < soldAmount) {
+                            p.sendActionBar(Component.text("This shop has nothing more in stock").color(NamedTextColor.RED));
+                            p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_TRADE,.5f,.75f);
+                            return;
+                        }
+                        
                         int totalPrice = 0;
                         int boughtAmount = 0;
                         if(p.isSneaking()){
@@ -140,24 +186,65 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
                             }
                         } else {
                             boughtAmount = soldAmount;
-                            totalPrice = soldPrice;
+                            if(boughtAmount > 0){
+                                totalPrice = soldPrice;
+                            }
                         }
                         
+                        logAdmin("bought",boughtAmount);
+                        if(boughtAmount == 0) {
+                            p.sendActionBar(Component.text("This shop has nothing more in stock").color(NamedTextColor.RED));
+                            p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_TRADE,.5f,.75f);
+                            return;
+                        }
+                        
+                        logAdmin("purse",purseValue);
+                        
                         if(purseValue < totalPrice){
-                            p.sendActionBar(Component.text("You do not have enough coins to buy this").color(NamedTextColor.GOLD));
+                            p.sendActionBar(Component.text("You do not have enough coins to buy this").color(NamedTextColor.RED));
+                            p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_NO,1,1);
+                            return;
                         } else {
+                            int remainingCoins = purseValue-totalPrice;
+                            int remainingSoldItems = sellableAmount-boughtAmount;
+                            int toTransfer = boughtAmount;
                             // all checks done, player can buy !
-                            for(ItemStack overflow : p.getInventory().addItem(sold.asQuantity(boughtAmount)).values()){
-                                p.getWorld().dropItem(p.getLocation(),overflow);
-                            }
                             
-                            // removing items from shop inventory
-                            for(ItemStack i : containerState.getInventory()){
-                            
+                            // give the player what they bought and removing it from the container
+                            for(ItemStack bought : containerState.getInventory().getContents()){
+                                if(bought != null){
+                                    int bAmount = bought.getAmount();
+                                    int remains = Math.max(0,bAmount-toTransfer);
+                                    int transferred = bAmount-remains;
+                                    toTransfer -= transferred;
+                                    
+                                    logAdmin("transfer",transferred);
+                                    for(ItemStack overflow : p.getInventory().addItem(bought.asQuantity(transferred)).values()){
+                                        p.getWorld().dropItem(p.getLocation(),overflow);
+                                    }
+                                    bought.setAmount(remains);
+                                    if(toTransfer <= 0){
+                                        break;
+                                    }
+                                }
+                                containerState.update();
                             }
                             // removing money from player's inventory
+                            for(ItemStack item : p.getInventory()){
+                                if(item != null && TiboiseItem.getItemId(item).equals(TiboiseItem.getId(CoinItem.class))){
+                                    item.setAmount(0);
+                                }
+                            }
+                            // giving back the remaining money to the player
+                            for(ItemStack item : CoinItem.splitValue(remainingCoins)){
+                                for(ItemStack overflow : p.getInventory().addItem(item).values()){
+                                    p.getWorld().dropItem(p.getLocation(),overflow);
+                                }
+                            }
                             
-                            p.sendActionBar(Component.text("You have bought "+TiboiseUtils.capitalizeFirstLetter(TiboiseItem.getItemId(soldItem).replace("_"," "))+" x"+boughtAmount).color(NamedTextColor.GOLD));
+                            p.sendActionBar(Component.text("You have bought "+TiboiseUtils.capitalizeFirstLetter(TiboiseItem.getItemId(station.getSoldItem()).replace("_"," "))+" x"+boughtAmount+" for "+totalPrice+"c").color(NamedTextColor.GOLD));
+                            p.playSound(p.getLocation(),Sound.ENTITY_ITEM_PICKUP,1,1.1f);
+                            p.playSound(p.getLocation(),Sound.ENTITY_PLAYER_LEVELUP,.5f,1.2f);
                         }
                     }
                 }
@@ -168,7 +255,7 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     public static boolean checkShopValidity(Block shopContainer){
         return allowedContainer.contains(shopContainer.getType())
                 && shopContainer.getState() instanceof PersistentDataHolder holder
-                && Objects.equals(holder.getPersistentDataContainer().get(utilityBlockKey, PersistentDataType.STRING), new TradingStation().getUtilityIdentifier());
+                && Objects.equals(holder.getPersistentDataContainer().get(utilityBlockKey, PersistentDataType.STRING), new TradingStation(null,null).getUtilityIdentifier());
     }
     
     @Override
@@ -176,24 +263,29 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
         return "trading_station";
     }
     
+    /**
+     *
+     * @param block the CONTAINER block to which the shop sign is attached
+     * @return the newly built trading station
+     */
     public static TradingStation fromBlock(Block block){
         Block container = null;
         if(block.getState() instanceof Sign && block.getBlockData() instanceof WallSign wallSign){
+            logAdmin("wallSign");
             if(checkShopValidity(block.getRelative(wallSign.getFacing().getOppositeFace()))){
                 // from sign
                 container = block.getRelative(wallSign.getFacing().getOppositeFace());
             }
         } else if(
                 allowedContainer.contains(block.getType())
-                        && block.getState() instanceof PersistentDataHolder holder
-                        && Objects.equals(holder.getPersistentDataContainer().get(utilityBlockKey,PersistentDataType.STRING),new TradingStation().getUtilityIdentifier())
+                && block.getState() instanceof PersistentDataHolder
         ) {
+            logAdmin("fromCont");
             container = block;
         }
-        
-        if(container instanceof PersistentDataHolder holder){
+        if(container.getState() instanceof PersistentDataHolder holder){
             PersistentDataContainer persistent = holder.getPersistentDataContainer();
-            TradingStation tradingStation = new TradingStation();
+            TradingStation tradingStation = new TradingStation(null,null);
             // owner
             String ownerIdString = persistent.get(ownerKey ,PersistentDataType.STRING);
             if(ownerIdString != null){
@@ -218,15 +310,11 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
                 tradingStation.setSoldItem(sold);
             }
             // price
-            Integer itemPrice = persistent.get(getItemPriceKey(),PersistentDataType.INTEGER);
-            if(itemPrice != null){
-                tradingStation.setPrice(itemPrice);
-            }
+            int itemPrice = Integer.parseInt(persistent.getOrDefault(getItemPriceKey(), PersistentDataType.STRING, "0"));
+            tradingStation.setPrice(itemPrice);
             // stored coins
-            Integer coins = persistent.get(getStoredCoinsKey(),PersistentDataType.INTEGER);
-            if(coins != null){
-                tradingStation.setStoredCoins(coins);
-            }
+            int coins = Integer.parseInt(persistent.getOrDefault(getStoredCoinsKey(), PersistentDataType.STRING, "0"));
+            tradingStation.setStoredCoins(coins);
             
             // container
             tradingStation.setContainer(container);
@@ -237,16 +325,27 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     }
     
     public void save(){
-        cachedStations.put(container.getLocation(),this);
-        if(container.getState() instanceof PersistentDataHolder holder){
+        cachedStations.put(getContainer().getLocation(),this);
+        logAdmin("save1");
+        BlockState state = getContainer().getState(false);
+        if(state instanceof PersistentDataHolder holder){
+            
+            logAdmin(getContainer().getType());
+            
+            logAdmin("save2");
             PersistentDataContainer persistent = holder.getPersistentDataContainer();
             
+            persistent.set(utilityBlockKey,PersistentDataType.STRING, getUtilityIdentifier());
             persistent.set(getOptionsKey(),PersistentDataType.STRING,getOptions().serialize());
             persistent.set(ownerKey,PersistentDataType.STRING,getOwner().toString());
             persistent.set(getItemSoldKey(),PersistentDataType.STRING,new ItemSerializer().serialize(getSoldItem(),0));
-            persistent.set(getItemPriceKey(),PersistentDataType.INTEGER,getPrice());
-            persistent.set(getStoredCoinsKey(),PersistentDataType.INTEGER, getStoredCoins());
+            persistent.set(getItemPriceKey(),PersistentDataType.STRING,String.valueOf(getPrice()));
+            persistent.set(getStoredCoinsKey(),PersistentDataType.STRING,String.valueOf(getStoredCoins()));
+            
+            state.update();
         }
+        setPrice(getPrice());
+        setSoldItem(getSoldItem());
     }
     
     static NamespacedKey getOptionsKey(){
@@ -288,12 +387,14 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     
     protected void setSoldItem(ItemStack soldItem) {
         this.soldItem = soldItem;
-        if(sign != null && sign.getState() instanceof Sign state){
+        if(sign != null && sign.getState(false) instanceof Sign state){
             String itemName = TiboiseUtils.capitalizeFirstLetter(TiboiseItem.getItemId(soldItem).replace("_"," "));
-            if(itemName.length() > 11){
-                itemName = itemName.substring(0,11-3)+"...";
+            int maxLineLength = 13;
+            if(itemName.length() > maxLineLength){
+                itemName = itemName.substring(0,maxLineLength-2)+"...";
             }
             state.line(2,Component.text(itemName+" "+soldItem.getAmount()+"x"));
+            state.update();
         }
     }
     
@@ -303,8 +404,10 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     
     protected void setPrice(int price) {
         this.price = price;
-        if(sign != null && sign.getState() instanceof Sign state){
+        if(sign != null && sign.getState(false) instanceof Sign state){
+            logAdmin("signSet");
             state.line(3,Component.text(price+"c"));
+            state.update();
         }
     }
     
@@ -325,7 +428,7 @@ public class TradingStation extends OwnedBlock implements Listener, UtilityBlock
     }
     
     protected void setSign(Block sign){
-        if(sign instanceof Sign){
+        if(sign.getState() instanceof Sign){
             this.sign = sign;
         }
     }

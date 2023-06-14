@@ -6,22 +6,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import javax.sound.sampled.AudioFormat;
-import java.util.Arrays;
-
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class TTestCommand implements CommandExecutor {
-    
-    private static final AudioFormat FORMAT = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 48000F, 16, 1, 2, 48000F, false);
     
     
     
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if(args.length >= 1){
-            int amount = Integer.parseInt(args[0]);
-            logAdmin("split for "+amount+" : "+ Arrays.toString(CoinItem.splitValue(amount)));
+            long amount = Long.parseLong(args[0]);
+            CoinItem.splitValue(amount);
         }
         return false;
     }

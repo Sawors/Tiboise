@@ -6,13 +6,20 @@ import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
@@ -35,6 +42,15 @@ public class TAdminCommand implements CommandExecutor {
                         ItemStack i = p.getInventory().getItemInMainHand();
                         if(!i.getType().isAir()){
                             logAdmin(TiboiseItem.getPersistentDataPrint(i));
+                        } else if(p.rayTraceBlocks(8) != null){
+                            Block b = Objects.requireNonNull(p.rayTraceBlocks(8)).getHitBlock();
+                            if(b!= null && b.getState() instanceof PersistentDataHolder holder){
+                                logAdmin(b.getType()+" at "+b.getLocation());
+                                PersistentDataContainer container = holder.getPersistentDataContainer();
+                                for(NamespacedKey key : container.getKeys()){
+                                    logAdmin(key+" : "+container.get(key, PersistentDataType.STRING));
+                                }
+                            }
                         }
                     }
                 }

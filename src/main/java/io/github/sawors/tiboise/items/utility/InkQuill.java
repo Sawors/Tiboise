@@ -7,7 +7,9 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -34,9 +36,9 @@ public class InkQuill extends TiboiseItem implements Listener {
         return recipe;
     }
     
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public static void editSigns(PlayerInteractEvent event){
-        if(event.getClickedBlock() != null && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && getItemId(event.getPlayer().getInventory().getItemInMainHand()).equals(getId(InkQuill.class))){
+        if(!event.useInteractedBlock().equals(Event.Result.DENY) && event.getClickedBlock() != null && event.getAction().isRightClick() && event.getHand() != null && event.getHand().equals(EquipmentSlot.HAND) && getItemId(event.getPlayer().getInventory().getItemInMainHand()).equals(getId(InkQuill.class))){
             final Block b = event.getClickedBlock();
             if(b.getState() instanceof Sign sign){
                 event.getPlayer().openSign(sign);

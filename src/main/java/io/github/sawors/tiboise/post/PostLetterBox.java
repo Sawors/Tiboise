@@ -71,7 +71,7 @@ public class PostLetterBox extends OwnedBlock implements Listener, UtilityBlock 
     public static void recogniseLetterBox(SignChangeEvent event){
         final Block b = event.getBlock();
         final Player p = event.getPlayer();
-        if(!event.isCancelled() && b.getState() instanceof Sign sign && b.getBlockData() instanceof Directional wallSign){
+        if(!event.isCancelled() && b.getState(false) instanceof Sign sign && b.getBlockData() instanceof Directional wallSign){
             if(event.lines().size() >= 1){
                 final Component identifier = event.line(0);
                 if(((TextComponent) Objects.requireNonNull(identifier)).content().equals(signIdentifier)){
@@ -86,7 +86,7 @@ public class PostLetterBox extends OwnedBlock implements Listener, UtilityBlock 
                         loadedLetterboxes.put(p.getUniqueId(),locs);
                         sign.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,p.getUniqueId().toString());
                         sign.update();
-                        
+                        p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_WORK_WEAPONSMITH,1,1.25f);
                         event.line(1,Component.text(p.getName()));
                         p.sendActionBar(Component.text("House ").append(Component.text(letterBox.getName()).decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)).append(Component.text(" successfully registered !")).color(NamedTextColor.GOLD));
                         final BlockFace face = wallSign.getFacing();
