@@ -11,7 +11,6 @@ import io.github.sawors.tiboise.core.commands.*;
 import io.github.sawors.tiboise.core.local.DataPackManager;
 import io.github.sawors.tiboise.core.local.LocalResourcesManager;
 import io.github.sawors.tiboise.core.local.ResourcePackManager;
-import io.github.sawors.tiboise.core.local.WebServerManager;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.economy.trade.TradingStation;
 import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
@@ -183,7 +182,6 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new AnimalsManager(), this);
         manager.registerEvents(new LocalResourcesManager(), this);
         manager.registerEvents(new ResourcePackManager(), this);
-        manager.registerEvents(new WebServerManager(), this);
         manager.registerEvents(new DataPackManager(), this);
         manager.registerEvents(new PlayerCompassMarker(), this);
         manager.registerEvents(new ExplorationGeneralFeatures(), this);

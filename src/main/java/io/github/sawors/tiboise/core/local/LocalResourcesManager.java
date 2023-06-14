@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.core.local;
 
 import io.github.sawors.tiboise.Tiboise;
+import io.github.sawors.tiboise.items.discs.MusicDisc;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,6 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
+
 
 public class LocalResourcesManager implements Listener {
     
@@ -25,6 +28,11 @@ public class LocalResourcesManager implements Listener {
     //
     private static String webServerSrc;
     private static int webServerPort;
+    //
+    private static File packSourceFile;
+    // local assets
+    private static File assets;
+    private static File musicIndexFile;
     
     
     final private static Map<String, UUID> nickNamesMap = new HashMap<>(Map.of(
@@ -83,8 +91,9 @@ public class LocalResourcesManager implements Listener {
             if(!webServerSrc.startsWith("http")){
                 webServerSrc = "http://"+webServerSrc;
             }
-            webServerPort = config.getInt("webserver-port",8123);
             
+            webServerPort = config.getInt("webserver-port",8123);
+            logAdmin(webServerPort);
             try{
                 resourceDirectory = new File(Tiboise.getPlugin().getDataFolder().getPath()+File.separator+"resources");
                 resourceDirectory.mkdirs();
@@ -95,19 +104,17 @@ public class LocalResourcesManager implements Listener {
                 
                 localResourcePackDirectory = new File(resourceDirectory.getPath()+File.separator+"resourcepack");
                 localResourcePackDirectory.mkdirs();
-                File packSourceFile = new File(localResourcePackDirectory.getPath()+File.separator+"source.zip");
-                ResourcePackManager.setPackSourceFile(packSourceFile);
+                packSourceFile = new File(localResourcePackDirectory.getPath()+File.separator+"source.zip");
                 
-                File assets = new File(localResourcePackDirectory.getPath()+File.separator+"assets");
+                assets = new File(localResourcePackDirectory.getPath()+File.separator+"assets");
                 assets.mkdirs();
-                ResourcePackManager.setAssetsDirectory(assets);
                 
                 
                 if(musicStorageDirectory == null || !musicStorageDirectory.exists()){
                     musicStorageDirectory = new File(getResourceDirectory().getPath()+File.separator+"musics");
                     musicStorageDirectory.mkdirs();
                 }
-                File musicIndexFile = new File(getMusicStorageDirectory().getPath()+File.separator+"music_index.yml");
+                musicIndexFile = new File(getMusicStorageDirectory().getPath()+File.separator+"music_index.yml");
                 if(!musicIndexFile.exists()){
                     try{
                         musicIndexFile.createNewFile();
@@ -116,13 +123,17 @@ public class LocalResourcesManager implements Listener {
                     }
                 }
                 
-                ResourcePackManager.setMusicIndexFile(musicIndexFile);
-                
                 try{
                     packSourceFile.createNewFile();
                 } catch (IOException e){
                     e.printStackTrace();
                 }
+                
+                MusicDisc.loadMusicIndex();
+                
+                ResourcePackManager.initialize();
+                DataPackManager.initialize();
+                WebServerManager.initialize();
             } catch (SecurityException e){
                 e.printStackTrace();
             }
@@ -157,15 +168,20 @@ public class LocalResourcesManager implements Listener {
         return webServerSrc;
     }
     
-    protected static void setWebServerSrc(String webServerSrc) {
-        LocalResourcesManager.webServerSrc = webServerSrc;
-    }
-    
     protected static int getWebServerPort() {
         return webServerPort;
     }
     
-    protected static void setWebServerPort(int webServerPort) {
-        LocalResourcesManager.webServerPort = webServerPort;
+    public static File getMusicIndexFile() {
+        return musicIndexFile;
     }
+    
+    public static File getAssetDirectory(){
+        return assets;
+    }
+    
+    public static File getPackSourceFile() {
+        return packSourceFile;
+    }
+    
 }

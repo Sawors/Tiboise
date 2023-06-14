@@ -15,11 +15,9 @@ import org.apache.commons.io.FileUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
@@ -43,16 +41,13 @@ public class ResourcePackManager implements Listener {
     private static String packFileName = "TiboiseResourcePack.zip";
     private static String hashFileName = "sha1.txt";
     private final static String packSource = "https://github.com/Sawors/Tiboise/raw/master/resourcepack/Tiboise-1.19.2.zip";
-    private static File packSourceFile;
     private static String packHash = null;
-    // local assets
-    private static File assets;
-    private static File musicIndexFile;
     
-    
-    @EventHandler(priority = EventPriority.LOW)
-    public static void initialize(PluginEnableEvent event){
-    
+    public static void initialize(){
+        logAdmin("Initializing resource pack...");
+        downloadSourceResourcePack();
+        rebuildResourcePack();
+        logAdmin("Resource pack successfully downloaded and built !");
     }
     
     @EventHandler
@@ -118,8 +113,10 @@ public class ResourcePackManager implements Listener {
     }
     
     public static void rebuildResourcePack(){
+        File packSourceFile = LocalResourcesManager.getPackSourceFile();
+        if(packSourceFile == null) return;
         // unzip the downloaded source
-        if(packSourceFile != null && packSourceFile.exists()){
+        if(packSourceFile.exists()){
             File tempDir = new File(packSourceFile.getParentFile().getPath()+File.separator+"temp");
             // decompress pack source
             try(ZipInputStream zis = new ZipInputStream(new FileInputStream(packSourceFile))){
@@ -163,11 +160,11 @@ public class ResourcePackManager implements Listener {
         File tempDir = new File(packSourceFile.getParentFile().getPath()+File.separator+"temp");
         
         // copy the data from local assets to the unzipped source
-        if(tempDir.exists() && assets.exists()){
+        if(tempDir.exists() && LocalResourcesManager.getAssetDirectory().exists()){
             try{
                 // before copying merging the data from sounds.json
                 // transferring downloaded audio from the music storage to the asset directory :
-                File newSound = new File(getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"sounds.json");
+                File newSound = new File(LocalResourcesManager.getAssetDirectory().getPath()+File.separator+"minecraft"+File.separator+"sounds.json");
                 newSound.getParentFile().mkdirs();
                 String subDir = "music_discs";
                 Set<String> loadedMusics = new HashSet<>();
@@ -191,7 +188,7 @@ public class ResourcePackManager implements Listener {
                             FileUtils.copyFileToDirectory(cit,targetCits);
                             FileUtils.copyFileToDirectory(texture,targetTextures);
                             // copying the index to allow users to find back the songs
-                            FileUtils.copyFileToDirectory(getMusicIndexFile(),targetOggs.getParentFile());
+                            FileUtils.copyFileToDirectory(LocalResourcesManager.getMusicIndexFile(),targetOggs.getParentFile());
                             
                             loadedMusics.add(indexedMusicId);
                         }
@@ -228,7 +225,7 @@ public class ResourcePackManager implements Listener {
                     }
                 }
                 
-                FileUtils.copyDirectoryToDirectory(assets,tempDir);
+                FileUtils.copyDirectoryToDirectory(LocalResourcesManager.getAssetDirectory(),tempDir);
                 if(!merged.isEmpty()){
                     try(FileWriter writer = new FileWriter(baseSound)){
                         writer.write(mapper.writeValueAsString(merged));
@@ -297,12 +294,8 @@ public class ResourcePackManager implements Listener {
         return packHash;
     }
     
-    public static File getMusicIndexFile() {
-        return musicIndexFile;
-    }
-    
     public static void downloadSourceResourcePack(){
-        try (BufferedInputStream in = new BufferedInputStream(new URL(packSource).openStream()); FileOutputStream fileOutputStream = new FileOutputStream(packSourceFile)) {
+        try (BufferedInputStream in = new BufferedInputStream(new URL(packSource).openStream()); FileOutputStream fileOutputStream = new FileOutputStream(LocalResourcesManager.getPackSourceFile())) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
@@ -346,32 +339,10 @@ public class ResourcePackManager implements Listener {
         }
     }
     
-    public static File getAssetDirectory(){
-        return assets;
-    }
     
-    public static File getPackSourceFile() {
-        return packSourceFile;
-    }
-    
-    protected static void setPackSourceFile(File packSourceFile) {
-        ResourcePackManager.packSourceFile = packSourceFile;
-    }
     
     protected static void setPackHash(String packHash) {
         ResourcePackManager.packHash = packHash;
-    }
-    
-    public static File getAssets() {
-        return assets;
-    }
-    
-    protected static void setAssetsDirectory(File assets) {
-        ResourcePackManager.assets = assets;
-    }
-    
-    protected static void setMusicIndexFile(File musicIndexFile) {
-        ResourcePackManager.musicIndexFile = musicIndexFile;
     }
     
     public static String getPackFileName() {

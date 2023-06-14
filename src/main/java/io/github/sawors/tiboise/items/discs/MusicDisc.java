@@ -6,7 +6,6 @@ import com.google.gson.JsonParser;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
 import io.github.sawors.tiboise.core.local.LocalResourcesManager;
-import io.github.sawors.tiboise.core.local.ResourcePackManager;
 import io.github.sawors.tiboise.items.ItemTag;
 import io.github.sawors.tiboise.items.TiboiseItem;
 import net.kyori.adventure.text.Component;
@@ -84,8 +83,8 @@ public class MusicDisc extends TiboiseItem implements Listener {
                 Component.text(getTitle()).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
         ));
         
-        if(ResourcePackManager.getMusicIndexFile() != null){
-            YamlConfiguration index = YamlConfiguration.loadConfiguration(ResourcePackManager.getMusicIndexFile());
+        if(LocalResourcesManager.getMusicIndexFile() != null){
+            YamlConfiguration index = YamlConfiguration.loadConfiguration(LocalResourcesManager.getMusicIndexFile());
             ConfigurationSection section = index.getConfigurationSection(String.valueOf(getTitleHash()));
             if(section != null){
                 this.duration = section.getInt(MusicIndexField.DURATION.toString(),60*5);
@@ -278,14 +277,14 @@ public class MusicDisc extends TiboiseItem implements Listener {
 
                     // writing disc id to index
                     try {
-                        YamlConfiguration index = YamlConfiguration.loadConfiguration(ResourcePackManager.getMusicIndexFile());
+                        YamlConfiguration index = YamlConfiguration.loadConfiguration(LocalResourcesManager.getMusicIndexFile());
                         ConfigurationSection section = index.createSection(String.valueOf(discId));
                         section.set(MusicIndexField.AUTHOR.toString(),disc.author);
                         section.set(MusicIndexField.NAME.toString(),disc.music);
                         section.set(MusicIndexField.PREBUILT_TITLE.toString(),disc.getTitle());
                         section.setComments(String.valueOf(discId),List.of("duration of the music, in seconds"));
                         section.set(MusicIndexField.DURATION.toString(),duration);
-                        index.save(ResourcePackManager.getMusicIndexFile());
+                        index.save(LocalResourcesManager.getMusicIndexFile());
                         // load disc index
                         indexedMusics.put(String.valueOf(discId),disc.getTitle());
                         
@@ -386,13 +385,13 @@ public class MusicDisc extends TiboiseItem implements Listener {
         }
     }
     
-    protected static void loadMusicIndex(){
+    public static void loadMusicIndex(){
         try{
-            YamlConfiguration content = YamlConfiguration.loadConfiguration(ResourcePackManager.getMusicIndexFile());
+            YamlConfiguration content = YamlConfiguration.loadConfiguration(LocalResourcesManager.getMusicIndexFile());
             for(String key : content.getKeys(false)){
                 ConfigurationSection section = content.getConfigurationSection(key);
                 if(section != null){
-                    String title = section.getString(MusicIndexField.PREBUILT_TITLE.toString());
+                    String title = section.getString(MusicDisc.MusicIndexField.PREBUILT_TITLE.toString());
                     indexedMusics.put(key,title);
                 }
             }
