@@ -2,6 +2,7 @@ package io.github.sawors.tiboise.core;
 
 import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
+import com.destroystokyo.paper.event.player.PlayerSetSpawnEvent;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
 import io.github.sawors.tiboise.core.local.LocalResourcesManager;
@@ -456,6 +457,46 @@ public class QOLImprovements implements Listener {
                 ref.damage(1,event.getPlayer());
             }
         } catch (NullPointerException ignored){}
+    }
+    
+    private static final Map<UUID,Location> spawnSet = new HashMap<>();
+    
+    @EventHandler
+    public void askForSpawnpointConfirmation(PlayerSetSpawnEvent event){
+        
+        int delay = 5;
+        
+        if(!event.isForced()){
+            Player p = event.getPlayer();
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    p.sendActionBar(Component.text("Do you really want to set your spawn here ?").color(NamedTextColor.YELLOW));
+                }
+            }.runTask(Tiboise.getPlugin());
+            event.setCancelled(true);
+            
+            if(!spawnSet.containsKey(p.getUniqueId())){
+                spawnSet.put(p.getUniqueId(),event.getLocation());
+                p.sendMessage(Component.text("Click here to set your spawn").color(NamedTextColor.GREEN).clickEvent(ClickEvent.callback(f -> {
+                    if(spawnSet.containsKey(p.getUniqueId())){
+                        p.setBedSpawnLocation(event.getLocation(),true);
+                        p.sendMessage(Component.text("Respawn point set"));
+                        spawnSet.remove(p.getUniqueId());
+                    } else {
+                        p.sendMessage(Component.text("Delay expired").color(NamedTextColor.RED));
+                    }
+                })));
+                
+                new BukkitRunnable(){
+                    @Override
+                    public void run() {
+                        spawnSet.remove(p.getUniqueId());
+                        p.sendMessage(Component.text("Delay expired").color(NamedTextColor.RED));
+                    }
+                }.runTaskLater(Tiboise.getPlugin(),delay*20);
+            }
+        }
     }
     
     //
