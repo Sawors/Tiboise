@@ -11,11 +11,13 @@ import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import io.github.sawors.tiboise.Tiboise;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
+import org.bukkit.block.Biome;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -23,6 +25,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class AnimalsManager implements Listener {
     
@@ -203,6 +207,36 @@ public class AnimalsManager implements Listener {
             for(Player p : center.getNearbyEntitiesByType(Player.class,4)){
                 p.sendActionBar(Component.text("There is already to much animals nearby !"));
             }
+        }
+    }
+    
+    @EventHandler
+    public static void blockSpecificBreeding(PlayerInteractEntityEvent event){
+        
+        Entity entity = event.getRightClicked();
+        
+        Set<EntityType> preventBreeding = Set.of(
+        
+        );
+        
+        Map<EntityType, Set<Material>> animalsFood = Map.of(
+                EntityType.MUSHROOM_COW, Set.of(Material.WHEAT)
+        );
+        
+        Map<EntityType, Set<Biome>> biomeSpecificBreeding = Map.of(
+                EntityType.MUSHROOM_COW, Set.of(Biome.MUSHROOM_FIELDS)
+        );
+        
+        EntityType type = entity.getType();
+        ItemStack breedFood = event.getPlayer().getInventory().getItem(event.getHand());
+        logAdmin(type);
+        logAdmin(breedFood.getType());
+        if(preventBreeding.contains(type) && animalsFood.getOrDefault(type, new HashSet<>()).contains(breedFood.getType())){
+            event.setCancelled(true);
+        }
+        
+        if(biomeSpecificBreeding.containsKey(type) && animalsFood.getOrDefault(type, new HashSet<>()).contains(breedFood.getType()) && !biomeSpecificBreeding.get(type).contains(entity.getWorld().getBiome(entity.getLocation()))){
+            event.setCancelled(true);
         }
     }
 }
