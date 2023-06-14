@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -107,7 +108,7 @@ public class MusicManager implements Listener, UtilityEntity {
                 String musicData = null;
                 if(isTiboiseDisc){
                     musicData = disc.getItemMeta().getPersistentDataContainer().get(MusicDisc.getMusicDataKey(),PersistentDataType.STRING);
-                    checkMusicDuration = Integer.parseInt(Objects.requireNonNullElse(disc.getItemMeta().getPersistentDataContainer().get(MusicDisc.getDurationKey(),PersistentDataType.STRING),"300"));
+                    checkMusicDuration = Integer.parseInt(Objects.requireNonNullElse(disc.getItemMeta().getPersistentDataContainer().get(MusicDisc.getDurationKey(),PersistentDataType.STRING),"300"))+1;
                 }
                 
                 final NamespacedKey originalKey = new NamespacedKey(disc.getType().getKey().namespace(),baseKey.substring(0,separatorIndex)+"."+baseKey.substring(separatorIndex+1));
@@ -151,13 +152,22 @@ public class MusicManager implements Listener, UtilityEntity {
                     }
                 }.runTaskTimer(Tiboise.getPlugin(),1,10);
                 
+                // rotations per minute
+                double speed = 1;
+                switch (b.getRelative(BlockFace.DOWN).getType()){
+                    case COPPER_BLOCK -> speed=1.125;
+                    case IRON_BLOCK -> speed=2.25;
+                    case GOLD_BLOCK -> speed=4.5;
+                }
+                
+                final double rpm = speed;
                 final int maxMusicDuration = checkMusicDuration*20;
                 new BukkitRunnable(){
                     
                     
                     int timer = maxMusicDuration;
                     final Location blockloc = b.getLocation().clone();
-                    final float step = (40f/(20*DISK_ROTATION_PERIOD));
+                    final double step = ((rpm*60.0)/(20*DISK_ROTATION_PERIOD));
                     @Override
                     public void run(){
                         
@@ -175,7 +185,7 @@ public class MusicManager implements Listener, UtilityEntity {
                                 this.cancel();
                                 return;
                             }
-                            display.setRotation(display.getLocation().getYaw()+step, 0);
+                            display.setRotation((float) (display.getLocation().getYaw()+step), 0);
                             timer--;
                             
                         }
