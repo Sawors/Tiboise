@@ -1,18 +1,13 @@
 package io.github.sawors.tiboise.core.commands;
 
-import io.github.sawors.tiboise.core.local.ResourcePackManager;
-import io.github.sawors.tiboise.items.discs.MusicDisc;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
+import io.github.sawors.tiboise.economy.CoinItem;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.AudioFormat;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Arrays;
 
 import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
@@ -24,137 +19,10 @@ public class TTestCommand implements CommandExecutor {
     
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        
-        //final VoicechatServerApi api = VoiceChatIntegrationPlugin.getVoicechatServerApi();
-        
-        ////logAdmin(shorts.length);
-        
-        //playLocationalAudio(api,src.toPath(),((Player) commandSender).getLocation().getBlock());
-        
-        if(true){
-            if(args.length > 0){
-                String video = args[0];
-                if(video.length() > 1){
-                    try{
-                        MusicDisc.buildFromSource(new URL(video), disc -> {
-                            if(commandSender instanceof Player player){
-                                player.sendMessage(Component.text("created disc with id : "+disc.getTitleHash()).clickEvent(ClickEvent.suggestCommand("/tgive music_disc "+disc.getTitleHash())));
-                            }
-                            ResourcePackManager.rebuildResourcePack();
-                        });
-                    } catch (MalformedURLException e){
-                        e.printStackTrace();
-                    }
-                }
-                return true;
-            } else {
-                logAdmin(MusicDisc.getIndexedMusics());
-            }
-            
-           
-            
-            
-            /*// download in-memory to OutputStream
-            OutputStream os = new ByteArrayOutputStream();
-            RequestVideoStreamDownload request = new RequestVideoStreamDownload(format, os);
-            Response<Void> response = downloader.downloadVideoStream(request);*/
-            
-            
-            /*if(false){
-                VideoInfo video = response.data(); // will block thread
-                List<AudioFormat> audioFormats = video.audioFormats();
-                audioFormats.forEach(it -> {
-                    System.out.println(it.audioQuality() + " : " + it.url());
-                });
-                
-                
-                
-                
-                
-                
-                
-                File outputDir = Tiboise.getPlugin().getDataFolder();
-                Format format = audioFormats.get(0);
-                File outputFile = new File(outputDir + File.separator + videoId + ".wav");
-// download in-memory to OutputStream
-                
-                try{
-                    outputFile.createNewFile();
-                } catch (IOException e1){
-                    e1.printStackTrace();
-                }
-                try(OutputStream os = new FileOutputStream(outputFile)){
-                    RequestVideoStreamDownload requestVideoStreamDownload = new RequestVideoStreamDownload(format, os);
-                    downloader.downloadVideoStream(requestVideoStreamDownload);
-                    VoicechatServerApi api = VoiceChatIntegrationPlugin.getVoicechatServerApi();
-                    UUID channelId = UUID.randomUUID();
-                    Player p = null;
-                    Location pLoc = p.getLocation();
-                    ServerLevel level = api.fromServerLevel(p.getWorld());
-                    Position position = api.createPosition(pLoc.getX(),pLoc.getY(),pLoc.getZ());
-                    LocationalAudioChannel channel = api.createLocationalAudioChannel(channelId, level, position);
-                    
-                    if(channel != null){
-                        channel.setDistance(8);
-                        //api.getPlayersInRange(level,position,8);
-                        
-                        Tiboise.logAdmin(channel.getLocation().getY());
-                        try(AudioInputStream in = AudioSystem.getAudioInputStream(outputFile)){
-                            byte[] result = in.readAllBytes();
-                            
-                            OpusDecoder decoder = api.createDecoder();
-                            OpusEncoder encoder = api.createEncoder();
-                            short[] sound = new short[4098];
-                            try{
-                                javax.sound.sampled.AudioFormat aformat = in.getFormat();
-                                DataLine.Info info = new DataLine.Info(Clip.class,aformat);
-                                
-                                final AudioPlayer audioPlayer = api.createAudioPlayer(channel,encoder,ByteBuffer.wrap(in.readAllBytes()).asShortBuffer().array());
-                                audioPlayer.startPlaying();
-                                
-                                
-                                Tiboise.logAdmin("start");
-                                new BukkitRunnable(){
-                                    @Override
-                                    public void run() {
-                                        audioPlayer.stopPlaying();
-                                        decoder.close();
-                                        encoder.close();
-                                        Tiboise.logAdmin("stop");
-                                    }
-                                }.runTaskLater(Tiboise.getPlugin(),80);
-                                
-                            }catch (RuntimeException e){
-                                e.printStackTrace();
-                            }
-                            
-                        } catch (
-                                UnsupportedAudioFileException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-            }*/
-            
-    
-            
-    
-            return true;
+        if(args.length >= 1){
+            int amount = Integer.parseInt(args[0]);
+            logAdmin("split for "+amount+" : "+ Arrays.toString(CoinItem.splitValue(amount)));
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         return false;
     }
     

@@ -1,6 +1,7 @@
 package io.github.sawors.tiboise.post;
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent;
+import io.github.sawors.tiboise.OwnedBlock;
 import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.TiboiseUtils;
 import io.github.sawors.tiboise.UtilityBlock;
@@ -46,7 +47,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-public class PostLetterBox implements Listener, UtilityBlock {
+public class PostLetterBox extends OwnedBlock implements Listener, UtilityBlock {
     
     private final static String signIdentifier = "- Poste -";
     private final static String senderIdentifier = "- Envoi -";
@@ -71,12 +72,6 @@ public class PostLetterBox implements Listener, UtilityBlock {
         final Block b = event.getBlock();
         final Player p = event.getPlayer();
         if(!event.isCancelled() && b.getState() instanceof Sign sign && b.getBlockData() instanceof Directional wallSign){
-            final String ownerId = sign.getPersistentDataContainer().get(getOwnerKey(),PersistentDataType.STRING);
-            // prevents other people from editing the sign (but not destroying it however)
-            if(!event.getPlayer().isOp() && ownerId != null && !ownerId.equals(p.getUniqueId().toString())) {
-                event.setCancelled(true);
-                return;
-            }
             if(event.lines().size() >= 1){
                 final Component identifier = event.line(0);
                 if(((TextComponent) Objects.requireNonNull(identifier)).content().equals(signIdentifier)){
@@ -89,7 +84,7 @@ public class PostLetterBox implements Listener, UtilityBlock {
                         Set<PostLetterBox> locs = loadedLetterboxes.getOrDefault(p.getUniqueId(),new HashSet<>());
                         locs.add(letterBox);
                         loadedLetterboxes.put(p.getUniqueId(),locs);
-                        sign.getPersistentDataContainer().set(getOwnerKey(), PersistentDataType.STRING,p.getUniqueId().toString());
+                        sign.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,p.getUniqueId().toString());
                         sign.update();
                         
                         event.line(1,Component.text(p.getName()));
@@ -128,10 +123,6 @@ public class PostLetterBox implements Listener, UtilityBlock {
         }
     }
     
-    protected static NamespacedKey getOwnerKey(){
-        return new NamespacedKey(Tiboise.getPlugin(),"letterbox-owner");
-    }
-    
     @EventHandler
     public static void checkForBrokenLetterboxIndirect(BlockDestroyEvent event){
         checkDestroyedBlock(event.getBlock());
@@ -142,18 +133,6 @@ public class PostLetterBox implements Listener, UtilityBlock {
         checkDestroyedBlock(event.getBlock());
     }
     
-    @EventHandler
-    public static void preventNotOwnerDestroying(BlockBreakEvent event){
-        if(event.getBlock().getState() instanceof PersistentDataHolder holder){
-            final String ownerId = holder.getPersistentDataContainer().get(getOwnerKey(), PersistentDataType.STRING);
-            // prevents other people from destroying this sign
-            if(!event.getPlayer().isOp() && ownerId != null && !ownerId.equals(event.getPlayer().getUniqueId().toString())) {
-                event.getPlayer().sendActionBar(Component.text("You are not the owner of this letter box").color(NamedTextColor.RED));
-                event.setCancelled(true);
-            }
-        }
-    }
-    
     private static void checkDestroyedBlock(Block broken){
         if(broken.getState() instanceof Sign sign){
             List<Component> data = sign.lines();
@@ -161,7 +140,7 @@ public class PostLetterBox implements Listener, UtilityBlock {
                 final String identifier = ((TextComponent) data.get(0)).content();
                 if(!identifier.equals(signIdentifier)) return;
                 try{
-                    final String idText = sign.getPersistentDataContainer().get(getOwnerKey(), PersistentDataType.STRING);
+                    final String idText = sign.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
                     if(idText != null){
                         final UUID id = UUID.fromString(idText);
                         final String houseName = ((TextComponent) data.get(2)).content();

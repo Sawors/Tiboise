@@ -35,4 +35,28 @@ public class TradingStationOptions {
             return null;
         }
     }
+    
+    public boolean isExactMatch() {
+        return exactMatch;
+    }
+    
+    protected void setExactMatch(boolean exactMatch) {
+        this.exactMatch = exactMatch;
+    }
+    
+    public Set<UUID> getAllowedAccess() {
+        return allowedAccess;
+    }
+    
+    protected void setAllowedAccess(Set<UUID> allowedAccess) {
+        this.allowedAccess = allowedAccess;
+    }
+    
+    public boolean isShowDisplay() {
+        return showDisplay;
+    }
+    
+    protected void setShowDisplay(boolean showDisplay) {
+        this.showDisplay = showDisplay;
+    }
 }

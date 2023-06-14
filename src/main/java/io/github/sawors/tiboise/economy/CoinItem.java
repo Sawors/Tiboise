@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.awt.*;
@@ -297,5 +298,39 @@ public class CoinItem extends TiboiseItem implements Listener {
         }
         
         return resultarray;
+    }
+    
+    public static int evaluateInventoryValue(ItemStack[] inventoryContent){
+        int value = 0;
+        for(ItemStack item : inventoryContent){
+            if(item != null && item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().get(getCoinValueKey(), PersistentDataType.INTEGER) != null){
+                try{
+                    value += Integer.parseInt(Objects.requireNonNullElse(item.getItemMeta().getPersistentDataContainer().get(getCoinValueKey(), PersistentDataType.STRING),"0"));
+                } catch (NumberFormatException ignored){}
+            }
+        }
+        
+        return value;
+    }
+    
+    public static ItemStack[] splitValue(int value){
+        Map<String, Integer> split = new HashMap<>();
+        int remaining = value;
+        while(remaining > 0){
+            for(Map.Entry<String,Integer> entry : coinvalues.entrySet()){
+                int coinValue = entry.getValue();
+                String coinName = entry.getKey();
+                while(remaining > coinValue){
+                    remaining-=coinValue;
+                    split.put(coinName,split.getOrDefault(coinName,0)+coinValue);
+                }
+            }
+        }
+        
+        List<ItemStack> output = new ArrayList<>();
+        for(Map.Entry<String, Integer> entry : split.entrySet()){
+            output.add(new CoinItem(entry.getKey()).get().asQuantity(entry.getValue()));
+        }
+        return output.toArray(new ItemStack[0]);
     }
 }
