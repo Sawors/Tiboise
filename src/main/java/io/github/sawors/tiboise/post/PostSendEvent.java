@@ -31,6 +31,6 @@ public class PostSendEvent extends PlayerEvent {
     
     @Override
     public @NotNull HandlerList getHandlers() {
-        return null;
+        return new HandlerList();
     }
 }

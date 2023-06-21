@@ -315,16 +315,29 @@ public class CoinItem extends TiboiseItem implements Listener {
     }
     
     public static ItemStack[] splitValue(long value){
+        return splitValue(value, SplittingMethod.MAX_VALUES);
+    }
+    public static ItemStack[] splitValue(long value, SplittingMethod splittingMethod){
         Map<String, Integer> split = new HashMap<>();
         long remaining = value;
         List<Map.Entry<String,Integer>> sortedValues = new ArrayList<>(coinvalues.entrySet());
         sortedValues.sort(Comparator.comparingInt(Map.Entry::getValue));
-        for(Map.Entry<String,Integer> entry : Lists.reverse(sortedValues)){
-            int coinValue = entry.getValue();
-            String coinName = entry.getKey();
-            while(remaining >= coinValue){
-                remaining-=coinValue;
-                split.put(coinName,split.getOrDefault(coinName,0)+1);
+        switch (splittingMethod){
+            case MAX_VALUES -> {
+                for(Map.Entry<String,Integer> entry : Lists.reverse(sortedValues)){
+                    int coinValue = entry.getValue();
+                    String coinName = entry.getKey();
+                    while(remaining >= coinValue){
+                        remaining-=coinValue;
+                        split.put(coinName,split.getOrDefault(coinName,0)+1);
+                    }
+                }
+            }
+            case MINIMAL_COINS -> {
+            
+            }
+            case MINIMAL_SLOTS -> {
+            
             }
         }
         
@@ -333,5 +346,15 @@ public class CoinItem extends TiboiseItem implements Listener {
             output.add(new CoinItem(entry.getKey()).get().asQuantity(entry.getValue()));
         }
         return output.toArray(new ItemStack[0]);
+    }
+    
+    /**
+     * Specifies which splitting method to use for coin sorting algorithm.
+     * MINIMAL_SLOTS : method made to use the less amount of slots as possible. Useful for transfers
+     * MAX_VALUES : splits the coins according to the coin of highest value that can be created. Useful for storage
+     * MINIMAL_COINS : splits in the less amount of coins possible, which does not always mean the less amount of slots
+     */
+    enum SplittingMethod {
+        MINIMAL_SLOTS, MAX_VALUES, MINIMAL_COINS
     }
 }

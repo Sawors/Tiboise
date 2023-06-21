@@ -18,6 +18,7 @@ import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Bell;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -84,7 +85,8 @@ public class PostLetterBox extends OwnedBlock implements Listener, UtilityBlock 
                         Set<PostLetterBox> locs = loadedLetterboxes.getOrDefault(p.getUniqueId(),new HashSet<>());
                         locs.add(letterBox);
                         loadedLetterboxes.put(p.getUniqueId(),locs);
-                        sign.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,p.getUniqueId().toString());
+                        setOwnership(sign.getBlock(),p.getUniqueId());
+                        setOwnership(relative,p.getUniqueId());
                         sign.update();
                         p.playSound(p.getLocation(),Sound.ENTITY_VILLAGER_WORK_WEAPONSMITH,1,1.25f);
                         event.line(1,Component.text(p.getName()));
@@ -136,16 +138,24 @@ public class PostLetterBox extends OwnedBlock implements Listener, UtilityBlock 
     private static void checkDestroyedBlock(Block broken){
         if(broken.getState() instanceof Sign sign){
             List<Component> data = sign.lines();
-            if(data.size() >= 3){
-                final String identifier = ((TextComponent) data.get(0)).content();
-                if(!identifier.equals(signIdentifier)) return;
+            if(data.size() >= 3 && sign.getPersistentDataContainer().getOrDefault(utilityBlockKey,PersistentDataType.STRING,"").equals(getLetterBoxIdentifier())){
+                // letter box identified
                 try{
                     final String idText = sign.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
                     if(idText != null){
+                        
                         final UUID id = UUID.fromString(idText);
                         final String houseName = ((TextComponent) data.get(2)).content();
                         
-                        final File dataFile = new File(broken.getWorld().getWorldFolder().getCanonicalFile() + File.separator + "mailboxes" + File.separator + id + ".yml");
+                        setOwnership(broken,null);
+                        if(broken.getBlockData() instanceof WallSign ws){
+                            Block relative = broken.getRelative(ws.getFacing().getOppositeFace());
+                            if(allowedContainer.contains(relative.getType()) && relative.getState() instanceof PersistentDataHolder holder && holder.getPersistentDataContainer().getOrDefault(utilityBlockKey,PersistentDataType.STRING,"").equals(getLetterBoxIdentifier())){
+                                setOwnership(relative,null);
+                            }
+                        }
+                        
+                        final File dataFile = new File(broken.getWorld().getWorldFolder().getCanonicalFile() + File.separator + "letterboxes" + File.separator + id + ".yml");
                         if(dataFile.exists()){
                             YamlConfiguration config = YamlConfiguration.loadConfiguration(dataFile);
                             if(config.isConfigurationSection(houseName)){
@@ -184,7 +194,7 @@ public class PostLetterBox extends OwnedBlock implements Listener, UtilityBlock 
     protected static void loadPlayerLetterboxes(UUID playerId, World world){
         if(!loadedLetterboxes.containsKey(playerId) || loadedLetterboxes.get(playerId).size() == 0){
             try{
-                final File data = new File(world.getWorldFolder().getCanonicalFile() + File.separator + "mailboxes" + File.separator + playerId + ".yml");
+                final File data = new File(world.getWorldFolder().getCanonicalFile() + File.separator + "letterboxes" + File.separator + playerId + ".yml");
                 if(data.exists()){
                     YamlConfiguration config = YamlConfiguration.loadConfiguration(data);
                     HashSet<PostLetterBox> boxes = new HashSet<>();
@@ -303,18 +313,14 @@ public class PostLetterBox extends OwnedBlock implements Listener, UtilityBlock 
     
     protected void save(){
         try {
-            final File saveFile = new File(sign.getWorld().getWorldFolder().getCanonicalFile()+File.separator+"mailboxes"+File.separator+owner+".yml");
+            final File saveFile = new File(sign.getWorld().getWorldFolder().getCanonicalFile()+File.separator+"letterboxes"+File.separator+owner+".yml");
+            
             if(!saveFile.exists()){
                 saveFile.getParentFile().mkdirs();
                 saveFile.createNewFile();
             }
             
-            
-            YamlConfiguration saveData = new YamlConfiguration();
-            if(saveFile.exists()){
-                saveData = YamlConfiguration.loadConfiguration(saveFile);
-            }
-            
+            YamlConfiguration saveData = YamlConfiguration.loadConfiguration(saveFile);
             ConfigurationSection houseSection = saveData.createSection(name);
             
             houseSection.set(LetterBoxDataField.SIGN_LOCATION.toString(), serializeLocation(sign));

@@ -16,11 +16,16 @@ public class WebServerManager implements Listener {
     // webserver
     private static final String resourcePackContext = "/download/"+ResourcePackManager.getPackFileName();
     private static final String resourcePackHashContext = "/download/"+ResourcePackManager.getHashFileName();
+    private static final String modPackFileName = "TiboiseProfile.zip";
+    private static final String modPackContext = "/download/"+modPackFileName;
+    private static File modpackFile;
     
     protected static void initialize(){
         
         File resourcePackBundled = new File(LocalResourcesManager.getWebServerDirectory().getPath()+File.separator+ResourcePackManager.getPackFileName());
         File resourcePackBundledHash = new File(LocalResourcesManager.getWebServerDirectory().getPath()+File.separator+ResourcePackManager.getHashFileName());
+        
+        modpackFile = new File(LocalResourcesManager.getWebServerDirectory().getPath()+File.separator+modPackFileName);
         
         if(resourcePackBundled.exists()){
             new BukkitRunnable(){
@@ -55,6 +60,18 @@ public class WebServerManager implements Listener {
                             exception.printStackTrace();
                         }
                     });
+                    if(modpackFile != null && modpackFile.exists()){
+                        server.createContext(modPackContext, exchange -> {
+                            try(OutputStream out = exchange.getResponseBody(); InputStream in = new FileInputStream(modpackFile)) {
+                                exchange.sendResponseHeaders(200, modpackFile.length());
+                                exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename="+modPackFileName);
+                                exchange.setAttribute(HttpHeaders.CONTENT_TYPE, "application/zip");
+                                out.write(in.readAllBytes());
+                            } catch (IOException exception) {
+                                exception.printStackTrace();
+                            }
+                        });
+                    }
                     server.start();
                     logAdmin("Webserver started on port : "+LocalResourcesManager.getWebServerPort());
                 }
@@ -63,10 +80,12 @@ public class WebServerManager implements Listener {
     }
     
     public static String getPackSource(){
-        return LocalResourcesManager.getWebServerSrc()+":"+LocalResourcesManager.getWebServerPort()+resourcePackContext;
+        //return LocalResourcesManager.getWebServerSrc()+":"+LocalResourcesManager.getWebServerPort()+resourcePackContext;
+        return "http://mc.sawors.com:8123"+resourcePackContext;
     }
     
     public static String getPackHashSource(){
-        return LocalResourcesManager.getWebServerSrc()+":"+LocalResourcesManager.getWebServerPort()+resourcePackHashContext;
+        //return LocalResourcesManager.getWebServerSrc()+":"+LocalResourcesManager.getWebServerPort()+resourcePackHashContext;
+        return "http://mc.sawors.com:8123"+resourcePackHashContext;
     }
 }

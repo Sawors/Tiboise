@@ -38,6 +38,6 @@ public class PostReceiveEvent extends BlockEvent {
     
     @Override
     public @NotNull HandlerList getHandlers() {
-        return null;
+        return new HandlerList();
     }
 }

@@ -1,10 +1,18 @@
 package io.github.sawors.tiboise.core.commands;
 
+import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.economy.CoinItem;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+
+import static io.github.sawors.tiboise.Tiboise.logAdmin;
 
 public class TTestCommand implements CommandExecutor {
     
@@ -12,9 +20,29 @@ public class TTestCommand implements CommandExecutor {
     
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        if(args.length >= 1){
-            long amount = Long.parseLong(args[0]);
-            CoinItem.splitValue(amount);
+        if(commandSender instanceof Player player && args.length>=1){
+            ItemStack[] coins = CoinItem.splitValue(Integer.parseInt(args[0]));
+            logAdmin(coins);
+            logAdmin(coins.length);
+            player.getInventory().addItem(coins);
+        } else {
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    int maxSlot = 0;
+                    int maxSlotsValue = 1;
+                    for(int i = 1; i<746573; i++){
+                        int amount = Arrays.stream(CoinItem.splitValue(i)).mapToInt(c -> (int) Math.ceil(c.getAmount()/64.0)).reduce(Integer::sum).orElse(0);
+                        if(amount > maxSlot){
+                            maxSlot = amount;
+                            maxSlotsValue = i;
+                            logAdmin("new max  found while splitting "+i+" : "+amount+" slots");
+                        }
+                        
+                    }
+                    logAdmin("max used slots : "+maxSlot+" slots for "+maxSlotsValue+"c");
+                }
+            }.runTaskAsynchronously(Tiboise.getPlugin());
         }
         return false;
     }

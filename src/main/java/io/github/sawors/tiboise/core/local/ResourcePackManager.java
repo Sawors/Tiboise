@@ -52,6 +52,7 @@ public class ResourcePackManager implements Listener {
     
     @EventHandler
     public static void reloadPlayerResourcePack(PlayerResourcePackStatusEvent event){
+        logAdmin(event.getStatus());
         final Player p = event.getPlayer();
         if(reloadingPlayers.contains(p.getUniqueId()) && event.getStatus().equals(PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED)){
             new BukkitRunnable(){

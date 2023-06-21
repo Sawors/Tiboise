@@ -42,6 +42,9 @@ commands:
   disc:
     usage: /disc [create,list,give]
     permission: tiboise.disc
+  shop:
+    usage: /shop is the main command to edit shops settings
+    permission: tiboise.shop
 softdepend:
   - voicechat
 depend:
@@ -61,5 +64,7 @@ permissions:
     description: Allows you to use admin commands
     default: op
   tiboise.disc:
-    description: Allows you to use admin commands
+    description: Allows you to use discs commands
     default: op
+  tiboise.shop:
+    description: Allows you to use shops commands

@@ -6,6 +6,7 @@ import de.maxhenkel.voicechat.api.BukkitVoicechatService;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import io.github.sawors.tiboise.agriculture.AnimalsManager;
 import io.github.sawors.tiboise.agriculture.CropsManager;
+import io.github.sawors.tiboise.agriculture.SeasonManager;
 import io.github.sawors.tiboise.core.*;
 import io.github.sawors.tiboise.core.commands.*;
 import io.github.sawors.tiboise.core.local.DataPackManager;
@@ -13,6 +14,7 @@ import io.github.sawors.tiboise.core.local.LocalResourcesManager;
 import io.github.sawors.tiboise.core.local.ResourcePackManager;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.economy.trade.TradingStation;
+import io.github.sawors.tiboise.economy.trade.TradingStationCommand;
 import io.github.sawors.tiboise.exploration.ExplorationGeneralFeatures;
 import io.github.sawors.tiboise.integrations.bungee.BungeeListener;
 import io.github.sawors.tiboise.integrations.bungee.KidnapCommand;
@@ -194,6 +196,7 @@ public final class Tiboise extends JavaPlugin {
         manager.registerEvents(new VillagerManager(), this);
         manager.registerEvents(new TradingStation(null,null), this);
         manager.registerEvents(new OwnedBlock() {@Override public UUID getOwner() {return null;}}, this);
+        manager.registerEvents(new SeasonManager(), this);
         
         Objects.requireNonNull(server.getPluginCommand("tgive")).setExecutor(new GiveItemCommand());
         Objects.requireNonNull(server.getPluginCommand("tid")).setExecutor(new GetIdCommand());
@@ -207,6 +210,7 @@ public final class Tiboise extends JavaPlugin {
         Objects.requireNonNull(server.getPluginCommand("mp")).setExecutor(new AdminMessageCommand());
         Objects.requireNonNull(server.getPluginCommand("pack")).setExecutor(new PackCommand());
         Objects.requireNonNull(server.getPluginCommand("disc")).setExecutor(new DiscCommand());
+        Objects.requireNonNull(server.getPluginCommand("shop")).setExecutor(new TradingStationCommand());
         TiboiseMainCommand maincommand = new TiboiseMainCommand();
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setExecutor(maincommand);
         Objects.requireNonNull(server.getPluginCommand("tiboise")).setTabCompleter(maincommand);
