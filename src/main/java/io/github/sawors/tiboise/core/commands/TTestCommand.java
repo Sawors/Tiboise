@@ -22,8 +22,6 @@ public class TTestCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if(commandSender instanceof Player player && args.length>=1){
             ItemStack[] coins = CoinItem.splitValue(Integer.parseInt(args[0]));
-            logAdmin(coins);
-            logAdmin(coins.length);
             player.getInventory().addItem(coins);
         } else {
             new BukkitRunnable(){

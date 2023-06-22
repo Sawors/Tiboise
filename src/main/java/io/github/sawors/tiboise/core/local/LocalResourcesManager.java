@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 
 public class LocalResourcesManager implements Listener {
     
@@ -93,7 +91,6 @@ public class LocalResourcesManager implements Listener {
             }
             
             webServerPort = config.getInt("webserver-port",8123);
-            logAdmin(webServerPort);
             try{
                 resourceDirectory = new File(Tiboise.getPlugin().getDataFolder().getPath()+File.separator+"resources");
                 resourceDirectory.mkdirs();

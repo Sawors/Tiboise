@@ -26,8 +26,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import static io.github.sawors.tiboise.Tiboise.logAdmin;
-
 public class AnimalsManager implements Listener {
     
     private static Set<UUID> packetEntityUUID = new HashSet<>();
@@ -229,8 +227,6 @@ public class AnimalsManager implements Listener {
         
         EntityType type = entity.getType();
         ItemStack breedFood = event.getPlayer().getInventory().getItem(event.getHand());
-        logAdmin(type);
-        logAdmin(breedFood.getType());
         if(preventBreeding.contains(type) && animalsFood.getOrDefault(type, new HashSet<>()).contains(breedFood.getType())){
             event.setCancelled(true);
         }

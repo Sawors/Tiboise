@@ -43,7 +43,6 @@ public class CoinItem extends TiboiseItem implements Listener {
         // generate conversion crafts
         List<String> sortedCoins = new ArrayList<>(coinvalues.keySet());
         sortedCoins.sort(Comparator.comparingInt(c -> coinvalues.get(c)));
-        logAdmin(sortedCoins);
         for(int i = 0; i<sortedCoins.size(); i++){
             final String actual = sortedCoins.get(i);
             final int actualValue = coinvalues.get(actual);
