@@ -35,7 +35,7 @@ public class CottonBoots extends TiboiseItem implements Listener {
     public void preventFallDamage(EntityDamageEvent event){
         Entity e = event.getEntity();
         if(event.getCause().equals(EntityDamageEvent.DamageCause.FALL) && e instanceof LivingEntity living && living.getEquipment() != null && living.getEquipment().getBoots() != null && getItemId(living.getEquipment().getBoots()).equals(getId(CottonBoots.class))){
-            living.getEquipment().getBoots().damage((int) event.getFinalDamage(),living);
+            living.getEquipment().getBoots().damage(event.getFinalDamage() >= 2 ? 2 : 0,living);
             event.setDamage(0);
         }
     }
