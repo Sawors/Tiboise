@@ -306,6 +306,11 @@ public class QOLImprovements implements Listener {
                             .addIngredient(1, Material.CALCITE)
             );
             
+            vanillabonusrecipes.add(
+                    new ShapelessRecipe(new NamespacedKey(Tiboise.getPlugin(),"decraft_prismarine"), new ItemStack(Material.PRISMARINE_SHARD).asQuantity(4))
+                            .addIngredient(1, Material.PRISMARINE)
+            );
+            
             // MAKE GOLD ITEM ENCHANTED BY DEFAULT
             List<Material> goldtoedit = List.of(Material.GOLDEN_HOE, Material.GOLDEN_PICKAXE, Material.GOLDEN_SHOVEL, Material.GOLDEN_AXE, Material.GOLDEN_SWORD);
             for (Material mat : goldtoedit){
