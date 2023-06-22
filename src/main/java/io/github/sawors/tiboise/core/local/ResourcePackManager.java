@@ -90,17 +90,15 @@ public class ResourcePackManager implements Listener {
             );
         }
         // manually excluding myself in order to work quicker
-        if(true){
+        if(!isTestMode){
             new BukkitRunnable(){
                 @Override
                 public void run() {
                     sendPlayerResourcePack(event.getPlayer());
                     final VoicechatConnection co = VoiceChatIntegrationPlugin.getVoicechatServerApi().getConnectionOf(p.getUniqueId()) ;
-                    logAdmin("conn",co.isConnected());
-                    logAdmin("installed",co.isInstalled());
                     if(co == null || !co.isInstalled()){
                         p.sendMessage(Component.text(ChatColor.DARK_RED+"You do not seem to have the simple voice chat mod installed. Please click ")
-                                .append(Component.text(ChatColor.RED+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"http://tiboise.net/TiboiseBonusModpack.zip")))
+                                .append(Component.text(ChatColor.RED+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://tiboise.net/TiboiseBonusModpack.zip")))
                                 .append(Component.text(ChatColor.DARK_RED+" in order to install the server recommended modpack, or "))
                                 .append(Component.text(ChatColor.RED+"here").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://modrinth.com/plugin/simple-voice-chat")))
                                 .append(Component.text(ChatColor.DARK_RED+" if you want the mod alone."))
