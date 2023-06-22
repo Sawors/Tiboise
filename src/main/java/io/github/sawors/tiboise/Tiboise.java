@@ -399,22 +399,21 @@ public final class Tiboise extends JavaPlugin {
         logAdmin(null,msg);
     }
     public static void logAdmin(@Nullable Object title, Object msg) throws IllegalStateException{
-        if(isServerInTestMode()){
-            String pluginname = getPlugin().getName();
-            String inter = "";
-            if(title != null && title.toString().length() > 0){
-                inter = title+" : ";
+        if(!isServerInTestMode()){
+            Bukkit.getLogger().log(Level.WARNING,"***\n***\n***[Tiboise "+version+"]"+" Test logging used in production environment, please warn the devs !***\n***\n***");
+        }
+        String pluginname = getPlugin().getName();
+        String inter = "";
+        if(title != null && title.toString().length() > 0){
+            inter = title+" : ";
+        }
+        
+        String output = "["+ ChatColor.YELLOW+pluginname+" DEBUG"+ChatColor.WHITE+"-"+ Time.valueOf(LocalTime.now()) + "] "+inter+msg;
+        Bukkit.getLogger().log(Level.INFO, output);
+        for(Player p : Bukkit.getOnlinePlayers()){
+            if(p.isOp()){
+                p.sendMessage(Component.text(output));
             }
-            
-            String output = "["+ ChatColor.YELLOW+pluginname+" DEBUG"+ChatColor.WHITE+"-"+ Time.valueOf(LocalTime.now()) + "] "+inter+msg;
-            Bukkit.getLogger().log(Level.INFO, output);
-            for(Player p : Bukkit.getOnlinePlayers()){
-                if(p.isOp()){
-                    p.sendMessage(Component.text(output));
-                }
-            }
-        } else {
-            throw new IllegalStateException("[Tiboise "+version+"]"+" Test logging used in production environment, please warn the devs !");
         }
     }
     

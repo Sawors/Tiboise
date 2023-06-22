@@ -90,19 +90,20 @@ public class ResourcePackManager implements Listener {
             );
         }
         // manually excluding myself in order to work quicker
-        if(!isTestMode){
+        if(true){
             new BukkitRunnable(){
                 @Override
                 public void run() {
                     sendPlayerResourcePack(event.getPlayer());
-                    
                     final VoicechatConnection co = VoiceChatIntegrationPlugin.getVoicechatServerApi().getConnectionOf(p.getUniqueId()) ;
-                    if(co == null || co.isDisabled()){
-                        p.sendMessage(Component.text(ChatColor.RED+"You do not seem to have the simple voice chat mod installed. Please click ")
-                                .append(Component.text(ChatColor.GOLD+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"http://tiboise.net/TiboiseBonusModpack.zip")))
-                                .append(Component.text(ChatColor.RED+" in order to install the server recommended modpack, or "))
-                                .append(Component.text(ChatColor.GOLD+"here").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://modrinth.com/plugin/simple-voice-chat")))
-                                .append(Component.text(ChatColor.RED+" if you want the mod alone."))
+                    logAdmin("conn",co.isConnected());
+                    logAdmin("installed",co.isInstalled());
+                    if(co == null || !co.isInstalled()){
+                        p.sendMessage(Component.text(ChatColor.DARK_RED+"You do not seem to have the simple voice chat mod installed. Please click ")
+                                .append(Component.text(ChatColor.RED+""+ChatColor.UNDERLINE+"HERE").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"http://tiboise.net/TiboiseBonusModpack.zip")))
+                                .append(Component.text(ChatColor.DARK_RED+" in order to install the server recommended modpack, or "))
+                                .append(Component.text(ChatColor.RED+"here").clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL,"https://modrinth.com/plugin/simple-voice-chat")))
+                                .append(Component.text(ChatColor.DARK_RED+" if you want the mod alone."))
                         );
                     }
                     
