@@ -5,6 +5,7 @@ import io.github.sawors.tiboise.Tiboise;
 import io.github.sawors.tiboise.core.ItemVariant;
 import io.github.sawors.tiboise.economy.CoinItem;
 import io.github.sawors.tiboise.integrations.voicechat.PortableRadio;
+import io.github.sawors.tiboise.items.armor.CottonBoots;
 import io.github.sawors.tiboise.items.armor.scuba.DivingBoots;
 import io.github.sawors.tiboise.items.armor.scuba.DivingChestplate;
 import io.github.sawors.tiboise.items.armor.scuba.DivingHelmet;
@@ -87,6 +88,7 @@ public abstract class TiboiseItem {
         registerItem(new MusicDisc());
         registerItem(new PostPackage());
         registerItem(new TransparentItemFrame());
+        registerItem(new CottonBoots());
         // TODO : <1.3>
         registerItem(new LockItem());
         registerItem(new KeyItem());
