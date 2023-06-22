@@ -45,10 +45,9 @@ commands:
   shop:
     usage: /shop is the main command to edit shops settings
     permission: tiboise.shop
-softdepend:
-  - voicechat
 depend:
   - ProtocolLib
+  - voicechat
 
 permissions:
   tiboise.kidnap:
