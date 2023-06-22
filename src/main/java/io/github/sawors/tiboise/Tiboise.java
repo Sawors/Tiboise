@@ -51,11 +51,12 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class Tiboise extends JavaPlugin {
     private static File configfile = null;
     private static JavaPlugin instance = null;
-    private static boolean testmode = false;
+    private static boolean testMode = false;
     private static Team t;
     // modules
     private static List<String> enabledmodules = new ArrayList<>();
@@ -74,8 +75,8 @@ public final class Tiboise extends JavaPlugin {
     private static final String version = "1.2";
     // discord
     //private static JDA jdaInstance = null;
-    // resource pack
-    private static File resourceDirectory = null;
+    // map link
+    private static String mapUrl = null;
     //
     private static File ffmpegInstallation = null;
     //
@@ -113,7 +114,6 @@ public final class Tiboise extends JavaPlugin {
     
         logAdmin( "BungeeCord features enabled !");
         
-        // DISCORD BOT
         if(configfile != null){
             YamlConfiguration configuration = YamlConfiguration.loadConfiguration(configfile);
 //            final String token = configuration.getString("token");
@@ -128,9 +128,17 @@ public final class Tiboise extends JavaPlugin {
 //            } else {
 //                Bukkit.getLogger().log(Level.WARNING,"[Tiboise] Discord features disabled, please add your bot token to config.yml in the field token:\"\"");
 //            }
-            
+            Logger logger = Bukkit.getLogger();
+            // map
+            mapUrl = configuration.getString("map-url");
+            if(mapUrl == null){
+                logger.log(Level.WARNING,"Map url not defined in the config, please fill in if you want to use a web map (map-url=\"\")");
+            }
             // FFMPEG
             final String pathToFfmpeg = configuration.getString("path-to-ffmpeg");
+            if(pathToFfmpeg == null){
+                logger.log(Level.WARNING,"Path to ffmpeg not defined in the config, please fill in if you want to use ffmpeg related features (music discs) (path-to-ffmpeg=\"\")");
+            }
             if(pathToFfmpeg != null && pathToFfmpeg.length() > 1){
                 ffmpegInstallation = new File(pathToFfmpeg);
                 try{
@@ -146,15 +154,15 @@ public final class Tiboise extends JavaPlugin {
             }
             // YTDLP
             final String pathToYtdlp = configuration.getString("path-to-ytdlp");
-            logAdmin("path",pathToYtdlp);
+            if(pathToYtdlp == null){
+                logger.log(Level.WARNING,"Path to ytdlp not defined in the config, please fill in if you want to use ytdlp related features (music discs) (path-to-ytdlp=\"\")");
+            }
             if(pathToYtdlp != null && pathToYtdlp.length() > 1){
                 ytdlpInstallation = new File(pathToYtdlp);
                 try{
-                    logAdmin(new HashSet<>(Arrays.asList(Objects.requireNonNull(ytdlpInstallation.list()))));
                     if(
                             new HashSet<>(Arrays.asList(Objects.requireNonNull(ytdlpInstallation.list()))).stream().noneMatch(s -> s.startsWith("yt-dlp"))
                     ){
-                        logAdmin("fail");
                         ytdlpInstallation = null;
                     }
                 } catch (NullPointerException e){
@@ -366,7 +374,7 @@ public final class Tiboise extends JavaPlugin {
     private static void loadConfigOptions(){
         YamlConfiguration configdata = YamlConfiguration.loadConfiguration(configfile);
         ConfigurationSection modules = configdata.getConfigurationSection("modules");
-        testmode = configdata.getBoolean("test-mode");
+        testMode = configdata.getBoolean("test-mode");
         if(modules != null){
             for(String module : modules.getKeys(false)){
                 ConfigurationSection modsec = modules.getConfigurationSection(module);
@@ -409,8 +417,11 @@ public final class Tiboise extends JavaPlugin {
             throw new IllegalStateException("[Tiboise "+version+"]"+" Test logging used in production environment, please warn the devs !");
         }
     }
-
-
+    
+    public static String getMapUrl() {
+        return mapUrl;
+    }
+    
     public static String getComponentContent(Component component){
         StringBuilder out = new StringBuilder();
         String in = component.toString();
@@ -493,11 +504,11 @@ public final class Tiboise extends JavaPlugin {
     }
     
     public static boolean isServerInTestMode(){
-        return testmode;
+        return testMode;
     }
     
     public static void setTestMode(boolean testMode){
-        testmode = testMode;
+        Tiboise.testMode = testMode;
         try{
             YamlConfiguration config = YamlConfiguration.loadConfiguration(configfile);
             config.set(ConfigFields.TEST_MODE.getFieldName(),testMode);

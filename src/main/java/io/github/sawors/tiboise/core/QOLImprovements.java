@@ -643,28 +643,26 @@ public class QOLImprovements implements Listener {
     public static void welcomeMessage(PlayerJoinEvent event){
         final Player p = event.getPlayer();
         Component message = Component.text("");
-        message = message
-                .append(
-                        Component.text("Hello, welcome to Tiboise! You can have access to a world map using ")
-                                .color(NamedTextColor.GOLD)
-                )
-                .append(
-                        Component.text("this link")
-                                .color(NamedTextColor.GREEN)
-                                .decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)
-                                .hoverEvent(Component.text("> click to go to the website <").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE))
-                                .clickEvent(ClickEvent.openUrl("http://mc.sawors.com:8080"))
-                )
-                .append(
-                        Component.text(".")
-                                .color(NamedTextColor.GOLD)
-                )
-                .append(
+        String mapUrl = Tiboise.getMapUrl();
+        if(mapUrl != null){
+            message = message.append(
+                    Component.text("Hello, welcome to Tiboise! You can have access to a world map using ")
+                            .color(NamedTextColor.GOLD)
+                    )
+                    .append(
+                            Component.text("this link")
+                                    .color(NamedTextColor.GREEN)
+                                    .decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)
+                                    .hoverEvent(Component.text("> click to go to the website <").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE))
+                                    .clickEvent(ClickEvent.openUrl(Tiboise.getMapUrl()))
+                    ).append(Component.text(".").color(NamedTextColor.GOLD));
+        }
+        String version = Tiboise.getVersion();
+        message = message.append(
                         Component.text("\nThe server is currently running Tiboise version "+Tiboise.getVersion()).color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
                                 .hoverEvent(Component.text("> click to read the patchnote <").color(NamedTextColor.GRAY).decoration(TextDecoration.BOLD, TextDecoration.State.TRUE))
-                                .clickEvent(ClickEvent.openUrl("https://github.com/Sawors/Tiboise/blob/master/patchnotes/"+Tiboise.getVersion()+".md"))
-                )
-        ;
+                                .clickEvent(ClickEvent.openUrl("https://github.com/Sawors/Tiboise/releases/tag/v"+(version.indexOf(".") != version.lastIndexOf(".") ? version : version+".0")))
+                );
         p.sendMessage(message);
     }
     
