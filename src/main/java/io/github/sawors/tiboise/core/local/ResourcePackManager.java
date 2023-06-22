@@ -60,7 +60,7 @@ public class ResourcePackManager implements Listener {
                 public void run() {
                     sendPlayerResourcePack(p);
                 }
-            }.runTaskLater(Tiboise.getPlugin(),20);
+            }.runTaskLater(Tiboise.getPlugin(),10);
         }
     }
     

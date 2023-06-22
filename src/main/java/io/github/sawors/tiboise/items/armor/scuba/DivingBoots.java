@@ -34,7 +34,7 @@ import java.util.UUID;
 public class DivingBoots extends TiboiseItem implements Listener, DurabilityItem {
     public DivingBoots(){
         setMaterial(Material.CHAINMAIL_BOOTS);
-        setDisplayName(Component.text("Diving Leggings").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        setDisplayName(Component.text("Diving Boots").color(NamedTextColor.DARK_AQUA).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setShortLore("Make you swim faster");
         addTag(ItemTag.PREVENT_BREAKING);
         addTag(ItemTag.PREVENT_USE_IN_CRAFTING);

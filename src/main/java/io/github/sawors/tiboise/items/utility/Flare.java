@@ -45,7 +45,7 @@ public class Flare extends TiboiseItem implements Listener {
         setLore(List.of(
                 Component.text("Useful when lost or when looking for someone").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
         ));
-        setDisplayName(Component.text("Red Flare").color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+        setDisplayName(Component.text("Red Flare").decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         setHelpText("Launch it from ground or shoot it with a crossbow to reveal your position and nearby entities. Only entities having no opaque block above their head will be revealed. Flares shot from a crossbow have a wider radius");
     }
     
