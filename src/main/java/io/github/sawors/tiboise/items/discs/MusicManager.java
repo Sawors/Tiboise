@@ -11,7 +11,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -153,14 +152,7 @@ public class MusicManager implements Listener, UtilityEntity {
                 }.runTaskTimer(Tiboise.getPlugin(),1,10);
                 
                 // rotations per minute
-                double speed = 1;
-                switch (b.getRelative(BlockFace.DOWN).getType()){
-                    case COPPER_BLOCK -> speed=1.125;
-                    case IRON_BLOCK -> speed=2.25;
-                    case GOLD_BLOCK -> speed=4.5;
-                }
-                
-                final double rpm = speed;
+                final double rpm = 4.5;
                 final int maxMusicDuration = checkMusicDuration*20;
                 new BukkitRunnable(){
                     
